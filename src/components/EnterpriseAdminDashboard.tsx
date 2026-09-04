@@ -1050,7 +1050,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
               </div>
             </div>
 
-            {/* COMPLETED WORK — PHOTOGRAPHIC EVIDENCE GALLERY */}
+            {/* COMPLETED WORK - PHOTOGRAPHIC EVIDENCE GALLERY */}
             <div className="bg-white rounded-[28px] p-6 border border-slate-200/90 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2.5">
@@ -1059,7 +1059,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                      <span>Completed Work — Photographic Evidence</span>
+                      <span>Completed Work - Photographic Evidence</span>
                       <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">
                         Verified Proof
                       </span>

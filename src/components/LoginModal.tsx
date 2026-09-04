@@ -14,9 +14,9 @@ interface LoginModalProps {
 export const PRESET_USERS: Record<UserRole, AuthUser> = {
   client: {
     id: 'usr-client',
-    name: 'UPC Administration',
+    name: 'UPCHQ',
     role: 'client',
-    title: 'Client Project Sponsor (UPC Philippines)'
+    title: 'Client Project Sponsor (UPCHQ)'
   },
   installer: {
     id: 'usr-installer',

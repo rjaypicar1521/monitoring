@@ -1,6 +1,6 @@
 import { CCTVProject, CameraEndpoint, TechnicianMember } from '../types';
 
-const STORAGE_KEY = 'cctv_monitoring_projects_v5';
+const STORAGE_KEY = 'cctv_monitoring_projects_v6';
 
 export const DEFAULT_CAMERAS: CameraEndpoint[] = [
   { id: 'CAM-01', name: 'Cashier Dome Camera', zone: 'Ground Floor - Cashier', lens: '2.8mm Wide Angle Dome', ip: '192.168.1.101', port: 'Port 1', status: 'Mounted' },
@@ -11,17 +11,17 @@ export const DEFAULT_CAMERAS: CameraEndpoint[] = [
 
 export const DEFAULT_TECHNICIANS: TechnicianMember[] = [
   { id: 'tech-1', name: 'Rjay Picar', role: 'Lead Systems & CCTV Architect (RMVN Solutions)', status: 'On Duty', assigned: 'CCTV Architecture & Live Monitoring', email: 'rjay@rmvn.com', assignedCameras: ['CAM-01', 'CAM-02', 'CAM-03', 'CAM-04'], zone: 'Ground Floor & Perimeter' },
-  { id: 'tech-2', name: 'UPC Administration', role: 'Client Facility Sponsor & Decision Maker', status: 'On Site', assigned: 'Site Access & Area Clearance', email: 'admin@upcphilippines.org', assignedCameras: ['CAM-01', 'CAM-02'], zone: 'Reception & Main Office' }
+  { id: 'tech-2', name: 'UPCHQ', role: 'Client Facility Sponsor & Decision Maker', status: 'On Site', assigned: 'Site Access & Area Clearance', email: 'admin@upchq.org', assignedCameras: ['CAM-01', 'CAM-02'], zone: 'Reception & Main Office' }
 ];
 
 export const INITIAL_PROJECTS: CCTVProject[] = [
   {
     id: 'proj-cctv-upc',
-    name: 'United Pentecostal Church Philippines Inc. â€” Headquarters',
+    name: 'UPCHQ - CCTV Installation & Monitoring',
     organization: 'RMVN SOLUTIONS - NETWORK & SYSTEMS ARCHITECTS',
     preparedBy: 'Rjay Picar - RMVN',
     goal: 'Project Achievement Report: CCTV Installation Progress & Success Update (50% overall completion, 2 operational cameras verified on monitor).',
-    location: 'United Pentecostal Church Philippines Inc. â€” Headquarters',
+    location: 'UPCHQ - Headquarters',
     startDate: '2026-09-01',
     targetLaunchDate: '2026-09-10',
     teamLead: 'Rjay Picar - RMVN',
@@ -33,7 +33,7 @@ export const INITIAL_PROJECTS: CCTVProject[] = [
     tasks: [
       {
         id: 't-upc-1',
-        title: 'Cashier â€” Dome camera installed, aligned, and working',
+        title: 'Cashier - Dome camera installed, aligned, and working',
         category: 'Camera Mounting',
         status: 'Done',
         owner: 'Rjay Picar',
@@ -42,11 +42,11 @@ export const INITIAL_PROJECTS: CCTVProject[] = [
         verifiedStatus: 'Installed, tested, and working',
         completedDate: '2026-09-03',
         photoEvidence: '/evidence/image1.jpg',
-        photoCaption: 'Cashier 100% â€” Dome camera installed and aligned; feed verified on CCTV monitor'
+        photoCaption: 'Cashier 100% - Dome camera installed and aligned; feed verified on CCTV monitor'
       },
       {
         id: 't-upc-2',
-        title: 'Front Desk â€” Camera installed above reception, tested, and working',
+        title: 'Front Desk - Camera installed above reception, tested, and working',
         category: 'Camera Mounting',
         status: 'Done',
         owner: 'Rjay Picar',
@@ -55,11 +55,11 @@ export const INITIAL_PROJECTS: CCTVProject[] = [
         verifiedStatus: 'Installed, tested, and working',
         completedDate: '2026-09-03',
         photoEvidence: '/evidence/image2.jpg',
-        photoCaption: 'Front Desk 100% â€” Camera installed above reception; feed verified on CCTV monitor'
+        photoCaption: 'Front Desk 100% - Camera installed above reception; feed verified on CCTV monitor'
       },
       {
         id: 't-upc-3',
-        title: 'System Verification â€” Live Monitoring Confirmation on NVR Display',
+        title: 'System Verification - Live Monitoring Confirmation on NVR Display',
         category: 'Testing & Commissioning',
         status: 'Done',
         owner: 'Rjay Picar',
@@ -68,11 +68,11 @@ export const INITIAL_PROJECTS: CCTVProject[] = [
         verifiedStatus: 'Cashier & Front Desk camera feeds confirmed live on CCTV monitor',
         completedDate: '2026-09-03',
         photoEvidence: '/evidence/image3.jpg',
-        photoCaption: 'NVR display, 03 September 2026 â€” Cashier and Front Desk cameras confirmed working on CCTV monitor'
+        photoCaption: 'NVR display, 03 September 2026 - Cashier and Front Desk cameras confirmed working on CCTV monitor'
       },
       {
         id: 't-upc-4',
-        title: 'Backdoor Entrance â€” Camera mounting & testing',
+        title: 'Backdoor Entrance - Camera mounting & testing',
         category: 'Camera Mounting',
         status: 'Blocked',
         owner: 'Rjay Picar',
@@ -81,11 +81,11 @@ export const INITIAL_PROJECTS: CCTVProject[] = [
         verifiedStatus: 'Deferred - temporary sleeping area (On hold)',
         blockerReason: 'Deferred to protect occupant privacy. The area is currently used by workers as a temporary bedroom; installation proceeds once space is cleared.',
         photoEvidence: '/evidence/image4.jpg',
-        photoCaption: 'Backdoor Site Condition â€” Existing cable is prepared at backdoor entrance; camera mounting remains pending'
+        photoCaption: 'Backdoor Site Condition - Existing cable is prepared at backdoor entrance; camera mounting remains pending'
       },
       {
         id: 't-upc-5',
-        title: 'Entrance Door â€” Camera installation, alignment, testing, and monitor verification',
+        title: 'Entrance Door - Camera installation, alignment, testing, and monitor verification',
         category: 'Camera Mounting',
         status: 'In progress',
         owner: 'Rjay Picar',
@@ -96,7 +96,7 @@ export const INITIAL_PROJECTS: CCTVProject[] = [
       },
       {
         id: 't-upc-6',
-        title: 'Access Point Relocation â€” Move AP to existing CCTV LAN cable',
+        title: 'Access Point Relocation - Move AP to existing CCTV LAN cable',
         category: 'Network & Cabling',
         status: 'Not started',
         owner: 'Rjay Picar',
@@ -170,7 +170,7 @@ export const INITIAL_PROJECTS: CCTVProject[] = [
       },
       {
         id: 'note-2',
-        author: 'UPC Administration',
+        author: 'UPCHQ',
         authorRole: 'client',
         content: 'Acknowledged. We will notify RMVN as soon as workers vacate the backdoor temporary quarters.',
         createdAt: 'Sep 4, 8:30 AM'
@@ -193,10 +193,15 @@ export function loadProjects(): CCTVProject[] {
               if (t.name === 'Marcus Vance' || t.id === 'tech-1') {
                 return { ...t, name: 'Rjay Picar' };
               }
+              if (t.name === 'UPC Administration' || t.id === 'tech-2') {
+                return { ...t, name: 'UPCHQ' };
+              }
               return t;
             });
             return {
               ...p,
+              name: p.name.includes('UPCHQ') ? p.name : 'UPCHQ - CCTV Installation & Monitoring',
+              location: p.location.includes('UPCHQ') ? p.location : 'UPCHQ - Headquarters',
               teamLead: p.teamLead === 'Marcus Vance' ? 'Rjay Picar' : (p.teamLead || 'Rjay Picar'),
               cameras: p.cameras && p.cameras.length > 0 ? p.cameras : DEFAULT_CAMERAS,
               technicians: updatedTechs

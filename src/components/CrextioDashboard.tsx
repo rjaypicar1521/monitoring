@@ -947,7 +947,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
             </div>
 
-            {/* COMPLETED WORK — PHOTOGRAPHIC EVIDENCE GALLERY */}
+            {/* COMPLETED WORK - PHOTOGRAPHIC EVIDENCE GALLERY */}
             <div className="bg-white/90 backdrop-blur-sm rounded-[32px] p-6 border border-slate-200/90 shadow-sm space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2.5">
@@ -956,7 +956,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                      <span>Completed Work — Photographic Evidence</span>
+                      <span>Completed Work - Photographic Evidence</span>
                       <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">
                         Physical Proof Attached
                       </span>
@@ -1562,7 +1562,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                   <ul className="list-disc pl-5 space-y-1 text-slate-800">
                     {project.tasks.filter(t => t.status !== 'Done').slice(0, 5).map(t => (
                       <li key={t.id}>
-                        {t.title} — Lead: {t.owner} — Target: {t.targetDate || 'Within 7 days'}
+                        {t.title} - Lead: {t.owner} - Target: {t.targetDate || 'Within 7 days'}
                       </li>
                     ))}
                   </ul>
@@ -1603,7 +1603,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                   <ul className="list-disc pl-5 space-y-1 text-slate-800">
                     {project.decisions.map(d => (
                       <li key={d.id}>
-                        {d.decision} (Due: {d.date} — Owner: {d.decisionMaker})
+                        {d.decision} (Due: {d.date} - Owner: {d.decisionMaker})
                       </li>
                     ))}
                   </ul>

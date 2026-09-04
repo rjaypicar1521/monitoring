@@ -169,7 +169,7 @@ export const ProjectMonitoringView: React.FC<ProjectMonitoringViewProps> = ({ pr
             4) Risks / Blockers
           </div>
           {activeBlockers.length === 0 && activeRisks.length === 0 ? (
-            <p className="text-xs text-slate-400 italic">None — no active blockers or high risks.</p>
+            <p className="text-xs text-slate-400 italic">None - no active blockers or high risks.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {activeBlockers.map(b => (
@@ -265,7 +265,7 @@ export const ProjectMonitoringView: React.FC<ProjectMonitoringViewProps> = ({ pr
               7) Support Needed
             </div>
             {activeBlockers.length === 0 ? (
-              <p className="text-xs text-slate-400 italic">None — team fully supported.</p>
+              <p className="text-xs text-slate-400 italic">None - team fully supported.</p>
             ) : (
               <ul className="space-y-2">
                 {activeBlockers.map(b => (

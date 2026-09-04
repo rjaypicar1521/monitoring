@@ -121,15 +121,15 @@ export function generateUpdateReport(project: CCTVProject): AssistantUpdateRepor
   const blocked = project.tasks.filter(t => t.status === 'Blocked');
 
   completed.forEach(t => {
-    progressBullets.push(`✅ Completed — ${t.title} (Owner: ${t.owner}, Date: ${t.completedDate || '(date not provided)'})`);
+    progressBullets.push(`✅ Completed - ${t.title} (Owner: ${t.owner}, Date: ${t.completedDate || '(date not provided)'})`);
   });
 
   inProgress.forEach(t => {
-    progressBullets.push(`🟦 In progress — ${t.title} (Owner: ${t.owner}, ETA: ${t.targetDate || '(date not provided)'})`);
+    progressBullets.push(`🟦 In progress - ${t.title} (Owner: ${t.owner}, ETA: ${t.targetDate || '(date not provided)'})`);
   });
 
   blocked.forEach(t => {
-    progressBullets.push(`⛔ Blocked — ${t.title} (Blocker: ${t.blockerReason || 'Unspecified dependency'}, Owner: ${t.owner})`);
+    progressBullets.push(`⛔ Blocked - ${t.title} (Blocker: ${t.blockerReason || 'Unspecified dependency'}, Owner: ${t.owner})`);
   });
 
   // Next 7 Days Plan
@@ -177,7 +177,7 @@ export function generateFriendlyWeeklyCheckin(project: CCTVProject): string {
   const blockers = project.blockers.filter(b => !b.resolved);
   const upcomingTasks = project.tasks.filter(t => t.status !== 'Done');
 
-  let md = `### ${project.name} — Weekly Check-in\n\n`;
+  let md = `### ${project.name} - Weekly Check-in\n\n`;
 
   md += `1) AT A GLANCE\n`;
   md += `- Overall status: ${exec.schedule}\n`;
@@ -196,16 +196,16 @@ export function generateFriendlyWeeklyCheckin(project: CCTVProject): string {
   md += `3) WHAT’S STUCK (GENTLY)\n`;
   if (blockers.length > 0) {
     blockers.slice(0, 3).forEach(b => {
-      md += `- ⚠️ ${b.description} — impact: ${b.unblockAction}\n`;
+      md += `- ⚠️ ${b.description} - impact: ${b.unblockAction}\n`;
     });
   } else {
-    md += `- ⚠️ No blockers right now — smooth sailing\n`;
+    md += `- ⚠️ No blockers right now - smooth sailing\n`;
   }
   md += `\n`;
 
   md += `4) NEXT 7 DAYS (CLEAR PLAN)\n`;
   upcomingTasks.slice(0, 5).forEach(t => {
-    md += `- ${t.title} — owner: ${t.owner} — target: ${t.targetDate || 'This week'}\n`;
+    md += `- ${t.title} - owner: ${t.owner} - target: ${t.targetDate || 'This week'}\n`;
   });
   md += `\n`;
 
@@ -270,7 +270,7 @@ export function generateProjectMonitoringUpdate(project: CCTVProject): string {
     md += `None\n\n`;
   } else {
     upcomingTasks.slice(0, 5).forEach(t => {
-      md += `- ${t.title} — Owner: ${t.owner} — Target: ${t.targetDate || 'Within 7 days'}\n`;
+      md += `- ${t.title} - Owner: ${t.owner} - Target: ${t.targetDate || 'Within 7 days'}\n`;
     });
     md += `\n`;
   }
@@ -304,7 +304,7 @@ export function generateProjectMonitoringUpdate(project: CCTVProject): string {
   } else {
     project.tasks.slice(0, 5).forEach(t => {
       const st = t.status === 'Done' ? 'On track' : (t.status === 'Blocked' ? 'Off track' : (t.status === 'In progress' ? 'On track' : 'On track'));
-      md += `- ${t.title} — Target: ${t.targetDate || t.completedDate || 'Target launch'} — Owner: ${t.owner} — Status: ${st}\n`;
+      md += `- ${t.title} - Target: ${t.targetDate || t.completedDate || 'Target launch'} - Owner: ${t.owner} - Status: ${st}\n`;
     });
     md += `\n`;
   }
@@ -312,10 +312,10 @@ export function generateProjectMonitoringUpdate(project: CCTVProject): string {
   // 6) Decisions Needed (if any)
   md += `6) Decisions Needed (if any)\n`;
   if (project.decisions.length === 0) {
-    md += `- Video storage length confirmation — Needed by: Within 5 days — Owner: ${project.teamLead} — Options: 30 days vs 60 days\n\n`;
+    md += `- Video storage length confirmation - Needed by: Within 5 days - Owner: ${project.teamLead} - Options: 30 days vs 60 days\n\n`;
   } else {
     project.decisions.forEach(d => {
-      md += `- ${d.decision} — Needed by: ${d.date} — Owner: ${d.decisionMaker} — Options: ${d.whatChanged}\n`;
+      md += `- ${d.decision} - Needed by: ${d.date} - Owner: ${d.decisionMaker} - Options: ${d.whatChanged}\n`;
     });
     md += `\n`;
   }
@@ -326,7 +326,7 @@ export function generateProjectMonitoringUpdate(project: CCTVProject): string {
     md += `None\n\n`;
   } else {
     activeBlockers.forEach(b => {
-      md += `- From Facility Management / Sponsor: ${b.unblockAction} — By: Immediate\n`;
+      md += `- From Facility Management / Sponsor: ${b.unblockAction} - By: Immediate\n`;
     });
     md += `\n`;
   }
@@ -363,13 +363,13 @@ export function handleAssistantQuery(query: string, project: CCTVProject): strin
     
     let out = `### Critical Path & Immediate Actions\n\n`;
     if (blockers.length > 0) {
-      out += `**P0 — Immediate Unblocker Required:**\n`;
+      out += `**P0 - Immediate Unblocker Required:**\n`;
       blockers.forEach(b => {
         out += `- **${b.description}**: ${b.unblockAction} (Owner: ${b.owner})\n`;
       });
       out += `\n`;
     }
-    out += `**P1 — Active Critical Path Execution:**\n`;
+    out += `**P1 - Active Critical Path Execution:**\n`;
     criticalPathTasks.slice(0, 3).forEach(t => {
       out += `- [${t.category}] **${t.title}** (Owner: ${t.owner}, ETA: ${t.targetDate || '(date not provided)'})\n`;
     });
@@ -441,7 +441,7 @@ export function formatFullReportMarkdown(project: CCTVProject, r: AssistantUpdat
   let md = `## Project Monitoring Report: ${project.name}\n\n`;
 
   md += `### A) EXECUTIVE STATUS\n`;
-  md += `- **Overall:** ${r.executiveStatus.overall} — ${r.executiveStatus.overallReason}\n`;
+  md += `- **Overall:** ${r.executiveStatus.overall} - ${r.executiveStatus.overallReason}\n`;
   md += `- **Schedule:** ${r.executiveStatus.schedule}\n`;
   md += `- **Scope:** ${r.executiveStatus.scope}\n`;
   md += `- **Resourcing:** ${r.executiveStatus.resourcing}\n`;
@@ -485,7 +485,7 @@ export function formatFullReportMarkdown(project: CCTVProject, r: AssistantUpdat
   if (r.decisions.length > 0) {
     md += `### F) DECISION LOG\n`;
     r.decisions.forEach(d => {
-      md += `- **${d.decision}** (Date: ${d.date}, By: ${d.decisionMaker}) — *What changed:* ${d.whatChanged}\n`;
+      md += `- **${d.decision}** (Date: ${d.date}, By: ${d.decisionMaker}) - *What changed:* ${d.whatChanged}\n`;
     });
     md += `\n`;
   }

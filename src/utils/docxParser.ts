@@ -262,7 +262,7 @@ export async function parseDocxReport(file: File | Blob | ArrayBuffer): Promise<
 
     return {
       id: `task-imp-${idx + 1}`,
-      title: `${row.area} — ${row.verifiedStatus}`,
+      title: `${row.area} - ${row.verifiedStatus}`,
       category: row.area.toLowerCase().includes('access point') ? 'Network & Cabling' : 'Camera Mounting',
       status: isDone ? 'Done' : isBlocked ? 'Blocked' : isInProgress ? 'In progress' : 'Not started',
       owner: preparedBy.split(' ')[0] || 'Rjay Picar',
@@ -280,7 +280,7 @@ export async function parseDocxReport(file: File | Blob | ArrayBuffer): Promise<
   // Add system verification task if not already present
   tasks.push({
     id: `task-imp-verify`,
-    title: 'System Verification — Live Monitoring Confirmation on NVR Display',
+    title: 'System Verification - Live Monitoring Confirmation on NVR Display',
     category: 'Testing & Commissioning',
     status: operationalCount >= 2 ? 'Done' : 'In progress',
     owner: preparedBy.split(' ')[0] || 'Rjay Picar',

@@ -451,7 +451,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <div className="w-2 h-2 rounded-full bg-sky-400 mt-1.5 shrink-0" />
                   <div className="space-y-0.5">
                     <div className="text-slate-200">
-                      <strong className="text-white">{log.user}</strong> — {log.action}
+                      <strong className="text-white">{log.user}</strong> - {log.action}
                     </div>
                     <div className="text-[11px] text-slate-500 font-mono">{log.time}</div>
                   </div>

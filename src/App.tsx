@@ -37,7 +37,14 @@ export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<AuthUser>(() => {
     try {
       const saved = localStorage.getItem('cctv_monitoring_user_role_v1');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.role === 'client') {
+          parsed.name = 'UPCHQ';
+          parsed.title = 'Client Project Sponsor (UPCHQ)';
+        }
+        return parsed;
+      }
     } catch {}
     return PRESET_USERS.client;
   });
