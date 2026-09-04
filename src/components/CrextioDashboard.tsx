@@ -36,6 +36,7 @@ import {
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal, LightboxPhoto } from './TaskPhotoEvidenceModal';
 import Velaris from './ui/velaris';
+import { Button as StatefulButton } from './ui/stateful-button';
 
 interface CrextioDashboardProps {
   project: CCTVProject;
@@ -79,9 +80,10 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   const [newNoteText, setNewNoteText] = useState('');
   const projectNotes = project.notes || [];
 
-  const handleSubmitNote = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmitNote = async (e?: React.FormEvent | React.MouseEvent<HTMLButtonElement>) => {
+    if (e && 'preventDefault' in e) e.preventDefault();
     if (!newNoteText.trim() || !onAddNote) return;
+    await new Promise((resolve) => setTimeout(resolve, 400));
     onAddNote(newNoteText.trim(), currentUser.name, 'client');
     setNewNoteText('');
   };
@@ -1114,14 +1116,14 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                   onChange={(e) => setNewNoteText(e.target.value)}
                   className="flex-1 bg-slate-50 border border-slate-200 focus:border-slate-800 focus:bg-white rounded-2xl px-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none transition shadow-2xs"
                 />
-                <button
+                <StatefulButton
                   type="submit"
                   disabled={!newNoteText.trim()}
-                  className="px-5 py-2.5 bg-[#1a1c22] hover:bg-slate-800 disabled:opacity-40 text-white rounded-2xl text-xs font-bold transition shadow-xs cursor-pointer shrink-0 flex items-center gap-1.5"
+                  onClick={handleSubmitNote}
+                  className="min-w-[130px] rounded-2xl bg-[#1a1c22] hover:bg-slate-800 disabled:opacity-40 text-white text-xs font-bold py-2.5 shadow-xs"
                 >
-                  <Send className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Post Note</span>
-                </button>
+                  Send message
+                </StatefulButton>
               </form>
 
               {/* Notes Stream */}

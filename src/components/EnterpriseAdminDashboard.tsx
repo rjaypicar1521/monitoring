@@ -41,6 +41,7 @@ import {
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal } from './TaskPhotoEvidenceModal';
+import { Button as StatefulButton } from './ui/stateful-button';
 
 interface EnterpriseAdminDashboardProps {
   project: CCTVProject;
@@ -178,9 +179,10 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
   const [adminNoteText, setAdminNoteText] = useState('');
   const projectNotes = project.notes || [];
 
-  const handleAdminSubmitNote = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAdminSubmitNote = async (e?: React.FormEvent | React.MouseEvent<HTMLButtonElement>) => {
+    if (e && 'preventDefault' in e) e.preventDefault();
     if (!adminNoteText.trim() || !onAddNote) return;
+    await new Promise((resolve) => setTimeout(resolve, 400));
     onAddNote(adminNoteText.trim(), currentUser.name, 'installer');
     setAdminNoteText('');
     showNotification('Posted directive/note to project');
@@ -1217,14 +1219,14 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                   onChange={(e) => setAdminNoteText(e.target.value)}
                   className="flex-1 bg-slate-50 border border-slate-200 focus:border-slate-800 focus:bg-white rounded-2xl px-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none transition shadow-2xs"
                 />
-                <button
+                <StatefulButton
                   type="submit"
                   disabled={!adminNoteText.trim()}
-                  className="px-5 py-2.5 bg-[#111317] hover:bg-slate-800 disabled:opacity-40 text-white rounded-2xl text-xs font-bold transition shadow-xs cursor-pointer shrink-0 flex items-center gap-1.5"
+                  onClick={handleAdminSubmitNote}
+                  className="min-w-[130px] rounded-2xl bg-[#111317] hover:bg-slate-800 disabled:opacity-40 text-white text-xs font-bold py-2.5 shadow-xs"
                 >
-                  <Send className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Send Note</span>
-                </button>
+                  Send message
+                </StatefulButton>
               </form>
 
               {/* Notes Stream */}
