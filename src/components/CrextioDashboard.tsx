@@ -30,7 +30,8 @@ import {
   MessageSquare,
   Send,
   Trash2,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Lock
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal, LightboxPhoto } from './TaskPhotoEvidenceModal';
@@ -139,10 +140,30 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
             </span>
           </div>
 
-          {/* Pill Navigation Links (NOW FULLY FUNCTIONAL) */}
+          {/* Pill Navigation Links */}
           <nav className="flex items-center gap-1 bg-white/70 backdrop-blur-sm p-1.5 rounded-full border border-slate-200/80 shadow-xs text-xs font-medium overflow-x-auto">
             {(['Dashboard', 'Checklist', 'Cameras', 'Timeline', 'Report'] as const).map((tab) => {
               const isActive = activeNavTab === tab;
+              const isTimeline = tab === 'Timeline';
+
+              if (isTimeline) {
+                return (
+                  <button
+                    key={tab}
+                    type="button"
+                    disabled
+                    title="Timeline schedule is locked for client view"
+                    className="px-3.5 py-1.5 rounded-full whitespace-nowrap text-slate-400 bg-slate-100/70 border border-slate-200/60 flex items-center gap-1.5 cursor-not-allowed opacity-60 text-xs font-medium"
+                  >
+                    <Lock className="w-3 h-3 text-slate-400" />
+                    <span>Timeline</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-600">
+                      Locked
+                    </span>
+                  </button>
+                );
+              }
+
               return (
                 <button
                   key={tab}
@@ -641,13 +662,13 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
                   {/* Circular Launch Countdown Clock */}
                   <div 
-                    onClick={() => setActiveNavTab('Timeline')}
-                    className="bg-white/90 backdrop-blur-sm rounded-[26px] p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between cursor-pointer group"
+                    className="bg-white/90 backdrop-blur-sm rounded-[26px] p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-slate-900">Launch Clock</span>
-                      <div className="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-slate-900 group-hover:text-white transition flex items-center justify-center text-slate-700">
-                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      <div className="flex items-center gap-1 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/80" title="Schedule locked by engineering">
+                        <Lock className="w-2.5 h-2.5 text-slate-400" />
+                        <span>Locked</span>
                       </div>
                     </div>
 
@@ -699,19 +720,9 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-center gap-2 pt-1">
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setTimerPlaying(!timerPlaying);
-                        }}
-                        className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center text-xs transition cursor-pointer"
-                      >
-                        {timerPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3 ml-0.5" />}
-                      </button>
-                      <span className="text-[11px] font-semibold text-slate-600">
-                        Target: Sep 25
-                      </span>
+                    <div className="flex items-center justify-center gap-1.5 pt-1 text-[11px] font-semibold text-slate-600">
+                      <Clock className="w-3.5 h-3.5 text-amber-500" />
+                      <span>Target: {project.targetLaunchDate || 'Sep 25'}</span>
                     </div>
                   </div>
 
@@ -719,8 +730,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
                 {/* Calendar & Weekly Sync Schedule */}
                 <div 
-                  onClick={() => setActiveNavTab('Timeline')}
-                  className="bg-white/90 backdrop-blur-sm rounded-[28px] p-5 border border-slate-200/80 shadow-xs space-y-3 cursor-pointer group hover:border-slate-300 transition"
+                  className="bg-white/90 backdrop-blur-sm rounded-[28px] p-5 border border-slate-200/80 shadow-xs space-y-3"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-slate-400 font-semibold">August</span>
@@ -1339,6 +1349,29 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
         {/* TAB 4: TIMELINE & CALENDAR SCHEDULE */}
         {activeNavTab === 'Timeline' && (
           <div className="space-y-5 animate-in fade-in">
+            {/* Locked Schedule Banner */}
+            <div className="bg-slate-900 text-white p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs border border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-slate-800 text-amber-400 flex items-center justify-center shrink-0">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="font-bold text-sm flex items-center gap-2">
+                    <span>Timeline & Handover Roadmap Locked</span>
+                    <span className="text-[10px] font-mono font-bold bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full">
+                      Read Only
+                    </span>
+                  </div>
+                  <div className="text-xs text-slate-300">
+                    Milestone schedule and completion dates are locked and managed by the Lead CCTV Installer.
+                  </div>
+                </div>
+              </div>
+              <div className="text-xs text-slate-400 font-mono shrink-0">
+                Target: {project.targetLaunchDate || 'September 25, 2026'}
+              </div>
+            </div>
+
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div>
                 <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
