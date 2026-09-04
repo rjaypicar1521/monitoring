@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CCTVProject, ExecutiveStatus, AuthUser, TaskStatus } from '../types';
+import { CCTVProject, ExecutiveStatus, AuthUser, TaskStatus, CCTVTask } from '../types';
 import { 
   Camera, 
   CheckCircle2, 
@@ -31,9 +31,11 @@ import {
   RotateCcw,
   MessageSquare,
   Send,
-  Trash2
+  Trash2,
+  Image as ImageIcon
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
+import { TaskPhotoEvidenceModal, PhotoLightboxModal, LightboxPhoto } from './TaskPhotoEvidenceModal';
 
 interface CrextioDashboardProps {
   project: CCTVProject;
@@ -46,6 +48,7 @@ interface CrextioDashboardProps {
   onToggleRole: () => void;
   onAddNote?: (content: string, author: string, authorRole: 'client' | 'installer') => void;
   onDeleteNote?: (noteId: string) => void;
+  onCompleteTaskWithEvidence?: (taskId: string, photoEvidence: string, photoCaption: string) => void;
 }
 
 export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
@@ -58,11 +61,14 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   copied,
   onToggleRole,
   onAddNote,
-  onDeleteNote
+  onDeleteNote,
+  onCompleteTaskWithEvidence
 }) => {
   const [activeNavTab, setActiveNavTab] = useState<'Dashboard' | 'Checklist' | 'Cameras' | 'Timeline' | 'Report'>('Dashboard');
   const [expandedSection, setExpandedSection] = useState<'devices' | 'specs' | 'wiring' | null>('devices');
   const [timerPlaying, setTimerPlaying] = useState(false);
+  const [evidenceTask, setEvidenceTask] = useState<CCTVTask | null>(null);
+  const [lightboxPhoto, setLightboxPhoto] = useState<LightboxPhoto | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [cameraSearch, setCameraSearch] = useState('');
@@ -897,12 +903,39 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                               >
                                 Unblock
                               </button>
-                            ) : (
-                              <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                                isDone ? 'border-amber-400 bg-amber-400/20 text-amber-400' : 'border-slate-700'
-                              }`}>
-                                {isDone && <Check className="w-2.5 h-2.5" />}
+                            ) : isDone ? (
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {task.photoEvidence && (
+                                  <button
+                                    onClick={() => setLightboxPhoto({
+                                      url: task.photoEvidence!,
+                                      title: task.title,
+                                      caption: task.photoCaption,
+                                      area: task.area
+                                    })}
+                                    className="px-2 py-0.5 rounded-full bg-amber-400/20 hover:bg-amber-400 hover:text-slate-900 text-amber-300 text-[10px] font-bold flex items-center gap-1 transition cursor-pointer border border-amber-400/40"
+                                    title="View Photo Evidence"
+                                  >
+                                    <Camera className="w-3 h-3" />
+                                    <span>Proof</span>
+                                  </button>
+                                )}
+                                <div className="w-4 h-4 rounded-full border border-amber-400 bg-amber-400/20 text-amber-400 flex items-center justify-center">
+                                  <Check className="w-2.5 h-2.5" />
+                                </div>
                               </div>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  if (onCompleteTaskWithEvidence) {
+                                    setEvidenceTask(task);
+                                  }
+                                }}
+                                className="w-5 h-5 rounded-full border border-slate-600 hover:border-amber-400 hover:bg-amber-400/20 flex items-center justify-center shrink-0 transition cursor-pointer"
+                                title="Complete task (Requires photo evidence)"
+                              >
+                                <Check className="w-3 h-3 text-slate-500 hover:text-amber-400 opacity-0 hover:opacity-100" />
+                              </button>
                             )}
                           </div>
                         );
@@ -920,6 +953,139 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
               </div>
 
+            </div>
+
+            {/* COMPLETED WORK — PHOTOGRAPHIC EVIDENCE GALLERY */}
+            <div className="bg-white/90 backdrop-blur-sm rounded-[32px] p-6 border border-slate-200/90 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center font-bold">
+                    <Camera className="w-4 h-4 text-amber-700" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                      <span>Completed Work — Photographic Evidence</span>
+                      <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">
+                        Physical Proof Attached
+                      </span>
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      Physical inspection photos from the official installation report for {project.name}. Click any photo to inspect high-resolution evidence.
+                    </p>
+                  </div>
+                </div>
+
+                <span className="text-xs font-mono font-bold text-slate-500">
+                  {project.tasks.filter(t => t.photoEvidence).length} Verified Area{project.tasks.filter(t => t.photoEvidence).length === 1 ? '' : 's'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Photo 1: Cashier */}
+                <div
+                  onClick={() => setLightboxPhoto({
+                    url: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=1200&q=80',
+                    title: 'Cashier Area (100%)',
+                    caption: 'Dome camera aligned and video feed verified on CCTV monitor',
+                    area: 'Cashier'
+                  })}
+                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
+                >
+                  <div className="relative h-36 overflow-hidden">
+                    <img
+                      src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=600&q=80"
+                      alt="Cashier Dome Camera"
+                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
+                    />
+                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white font-mono font-bold text-[10px]">
+                      Cashier 100%
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white space-y-1">
+                    <div className="font-bold text-xs text-slate-900">Dome camera aligned</div>
+                    <div className="text-[11px] text-slate-500">Installed, tested, and working</div>
+                  </div>
+                </div>
+
+                {/* Photo 2: Front Desk */}
+                <div
+                  onClick={() => setLightboxPhoto({
+                    url: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=1200&q=80',
+                    title: 'Front Desk Reception (100%)',
+                    caption: 'Camera above reception signage aligned and tested',
+                    area: 'Front Desk'
+                  })}
+                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
+                >
+                  <div className="relative h-36 overflow-hidden">
+                    <img
+                      src="https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=600&q=80"
+                      alt="Front Desk Camera"
+                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
+                    />
+                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white font-mono font-bold text-[10px]">
+                      Front Desk 100%
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white space-y-1">
+                    <div className="font-bold text-xs text-slate-900">Camera above reception</div>
+                    <div className="text-[11px] text-slate-500">Installed, tested, and working</div>
+                  </div>
+                </div>
+
+                {/* Photo 3: Backdoor */}
+                <div
+                  onClick={() => setLightboxPhoto({
+                    url: 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=1200&q=80',
+                    title: 'Backdoor Entrance (100%)',
+                    caption: 'Camera mounted at door, queued for monitor verification',
+                    area: 'Backdoor'
+                  })}
+                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
+                >
+                  <div className="relative h-36 overflow-hidden">
+                    <img
+                      src="https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=600&q=80"
+                      alt="Backdoor Camera"
+                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
+                    />
+                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white font-mono font-bold text-[10px]">
+                      Backdoor 100%
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white space-y-1">
+                    <div className="font-bold text-xs text-slate-900">Camera mounted at door</div>
+                    <div className="text-[11px] text-slate-500">Installed, ready for NVR sync</div>
+                  </div>
+                </div>
+
+                {/* Photo 4: NVR Monitor Feeds */}
+                <div
+                  onClick={() => setLightboxPhoto({
+                    url: 'https://images.unsplash.com/photo-1551808525-51a94da548ce?auto=format&fit=crop&w=1200&q=80',
+                    title: 'CCTV Monitor Feeds Verified',
+                    caption: 'Cashier and Front Desk camera feeds confirmed live on CCTV monitor (03 Sept 2026)',
+                    area: 'NVR Station'
+                  })}
+                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
+                >
+                  <div className="relative h-36 overflow-hidden">
+                    <img
+                      src="https://images.unsplash.com/photo-1551808525-51a94da548ce?auto=format&fit=crop&w=600&q=80"
+                      alt="CCTV Monitor Feed"
+                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
+                    />
+                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-mono font-bold text-[10px] flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-pulse" />
+                      Live Feeds
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white space-y-1">
+                    <div className="font-bold text-xs text-slate-900">NVR Multi-View Display</div>
+                    <div className="text-[11px] text-emerald-600 font-semibold">Verified Live Feeds</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* SHARED SITE DIRECTIVES & NOTES CARD (SYNCED WITH ADMIN CONSOLE) */}
@@ -1074,6 +1240,12 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                         <div className="text-xs text-slate-500 mt-0.5">
                           Assigned Lead: <strong>{t.owner}</strong> • Target Handover Date: <strong>{t.targetDate || 'Sep 25'}</strong>
                         </div>
+                        {t.photoCaption && isDone && (
+                          <div className="text-xs text-emerald-700 mt-1 font-medium bg-emerald-50 p-1.5 rounded-lg border border-emerald-200 flex items-center gap-1.5">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span>Evidence: {t.photoCaption}</span>
+                          </div>
+                        )}
                         {t.blockerReason && (
                           <div className="text-xs text-rose-600 mt-1 font-medium bg-rose-50 p-1.5 rounded-lg border border-rose-200">
                             Reason: {t.blockerReason}
@@ -1083,6 +1255,35 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                      {isDone && t.photoEvidence && (
+                        <button
+                          type="button"
+                          onClick={() => setLightboxPhoto({
+                            url: t.photoEvidence!,
+                            title: t.title,
+                            caption: t.photoCaption,
+                            area: t.area
+                          })}
+                          className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 rounded-full text-xs font-bold transition cursor-pointer shadow-xs"
+                          title="View Photographic Evidence"
+                        >
+                          <Camera className="w-3.5 h-3.5 text-amber-700" />
+                          <span>View Photo Proof</span>
+                        </button>
+                      )}
+
+                      {!isDone && onCompleteTaskWithEvidence && (
+                        <button
+                          type="button"
+                          onClick={() => setEvidenceTask(t)}
+                          className="flex items-center gap-1.5 px-3 py-1 bg-[#1a1c22] hover:bg-slate-800 text-amber-300 rounded-full text-xs font-bold transition cursor-pointer shadow-xs"
+                          title="Complete Task with Photo Evidence"
+                        >
+                          <Camera className="w-3.5 h-3.5" />
+                          <span>Complete (Attach Photo)</span>
+                        </button>
+                      )}
+
                       <span className={`text-xs px-3 py-1 rounded-full font-bold ${
                         isDone ? 'bg-emerald-100 text-emerald-800' : isBlocked ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700'
                       }`}>
@@ -1407,6 +1608,27 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               </div>
             </div>
           </div>
+        )}
+
+        {/* Task Photo Evidence Requirement Modal */}
+        {evidenceTask && onCompleteTaskWithEvidence && (
+          <TaskPhotoEvidenceModal
+            task={evidenceTask}
+            isOpen={!!evidenceTask}
+            onClose={() => setEvidenceTask(null)}
+            onConfirm={(taskId, photoEvidence, photoCaption) => {
+              onCompleteTaskWithEvidence(taskId, photoEvidence, photoCaption);
+              setEvidenceTask(null);
+            }}
+          />
+        )}
+
+        {/* Full-Screen Photo Lightbox Modal */}
+        {lightboxPhoto && (
+          <PhotoLightboxModal
+            photo={lightboxPhoto}
+            onClose={() => setLightboxPhoto(null)}
+          />
         )}
 
       </div>

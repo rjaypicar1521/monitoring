@@ -38,6 +38,7 @@ import {
   Send
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
+import { TaskPhotoEvidenceModal, PhotoLightboxModal } from './TaskPhotoEvidenceModal';
 
 interface EnterpriseAdminDashboardProps {
   project: CCTVProject;
@@ -45,7 +46,8 @@ interface EnterpriseAdminDashboardProps {
   currentUser: AuthUser;
   onResolveBlocker: (id: string) => void;
   onUpdateCameraCount: (installed: number, total: number) => void;
-  onUpdateTaskStatus: (taskId: string, newStatus: TaskStatus, blockerReason?: string) => void;
+  onUpdateTaskStatus: (taskId: string, newStatus: TaskStatus, blockerReason?: string, photoEvidence?: string, photoCaption?: string) => void;
+  onCompleteTaskWithEvidence?: (taskId: string, photoEvidence: string, photoCaption?: string) => void;
   onAddTask: (task: CCTVTask) => void;
   onDeleteTask?: (taskId: string) => void;
   onAddCamera: (camera: CameraEndpoint) => void;
@@ -73,6 +75,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
   onResolveBlocker,
   onUpdateCameraCount,
   onUpdateTaskStatus,
+  onCompleteTaskWithEvidence,
   onAddTask,
   onDeleteTask,
   onAddCamera,
@@ -149,6 +152,9 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
     setAdminNoteText('');
     showNotification('Posted directive/note to project');
   };
+
+  const [evidenceTask, setEvidenceTask] = useState<CCTVTask | null>(null);
+  const [lightboxPhoto, setLightboxPhoto] = useState<{ url: string; title: string; caption?: string; area?: string } | null>(null);
 
   const [currentPassInput, setCurrentPassInput] = useState('');
   const [newPassInput, setNewPassInput] = useState('');
@@ -810,10 +816,17 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                         <div key={task.id} className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50 border border-slate-100 gap-2">
                           <div className="flex items-center gap-2.5 min-w-0">
                             <button
-                              onClick={() => onUpdateTaskStatus(task.id, isDone ? 'In progress' : 'Done')}
+                              onClick={() => {
+                                if (isDone) {
+                                  onUpdateTaskStatus(task.id, 'In progress');
+                                } else {
+                                  setEvidenceTask(task);
+                                }
+                              }}
                               className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition cursor-pointer ${
                                 isDone ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 hover:border-slate-400'
                               }`}
+                              title={isDone ? 'Mark as In Progress' : 'Complete task with Photo Evidence'}
                             >
                               {isDone && <Check className="w-3 h-3" />}
                             </button>
@@ -909,33 +922,165 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
               </div>
             </div>
 
-            {/* ROW 3: 3 HIGH-CONTRAST DARK ZONE CAPSULES */}
+            {/* ROW 3: REPORTED AREA STATUS CAPSULES */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-[#111317] text-white rounded-[24px] p-5 shadow-lg flex items-center justify-between">
                 <div className="space-y-1">
-                  <div className="text-[10px] font-mono uppercase text-cyan-400 font-bold">Zone 1</div>
-                  <div className="font-bold text-sm">Floor 1 (Lobby & Entry)</div>
-                  <div className="text-xs text-slate-400 font-mono">6 Cameras • Online 100%</div>
+                  <div className="text-[10px] font-mono uppercase text-cyan-400 font-bold">Area 1 & 2</div>
+                  <div className="font-bold text-sm">Cashier & Front Desk</div>
+                  <div className="text-xs text-slate-400 font-mono">2 Cameras • Live Verified 100%</div>
                 </div>
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
               </div>
 
               <div className="bg-[#111317] text-white rounded-[24px] p-5 shadow-lg flex items-center justify-between">
                 <div className="space-y-1">
-                  <div className="text-[10px] font-mono uppercase text-cyan-400 font-bold">Zone 2</div>
-                  <div className="font-bold text-sm">Floor 2 (Offices & Labs)</div>
-                  <div className="text-xs text-slate-400 font-mono">6 Cameras • Online 100%</div>
+                  <div className="text-[10px] font-mono uppercase text-cyan-400 font-bold">Area 3</div>
+                  <div className="font-bold text-sm">Backdoor Entrance</div>
+                  <div className="text-xs text-slate-400 font-mono">1 Camera • Mounted & Ready</div>
                 </div>
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
               </div>
 
               <div className="bg-[#111317] text-white rounded-[24px] p-5 shadow-lg flex items-center justify-between">
                 <div className="space-y-1">
-                  <div className="text-[10px] font-mono uppercase text-amber-400 font-bold">Zone 3</div>
-                  <div className="font-bold text-sm">Exterior Perimeter & Gates</div>
-                  <div className="text-xs text-slate-400 font-mono">12 Cameras • Waiting Breaker</div>
+                  <div className="text-[10px] font-mono uppercase text-amber-400 font-bold">Area 4 & 5</div>
+                  <div className="font-bold text-sm">Entrance Door & AP Relocation</div>
+                  <div className="text-xs text-slate-400 font-mono">Rough-in 50% • AP Pending</div>
                 </div>
                 <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+              </div>
+            </div>
+
+            {/* COMPLETED WORK — PHOTOGRAPHIC EVIDENCE GALLERY */}
+            <div className="bg-white rounded-[28px] p-6 border border-slate-200/90 shadow-2xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center font-bold">
+                    <Camera className="w-4 h-4 text-amber-700" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                      <span>Completed Work — Photographic Evidence</span>
+                      <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">
+                        Verified Proof
+                      </span>
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      Physical inspection photos from the official RMVN Solutions installation report. Click to zoom.
+                    </p>
+                  </div>
+                </div>
+
+                <span className="text-xs font-mono font-bold text-slate-500">
+                  3 Areas Complete • 1 Rough-In
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Photo 1: Cashier */}
+                <div
+                  onClick={() => setLightboxPhoto({
+                    url: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=1200&q=80',
+                    title: 'Cashier Area (100%)',
+                    caption: 'Dome camera aligned and video feed verified on CCTV monitor',
+                    area: 'Cashier'
+                  })}
+                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
+                >
+                  <div className="relative h-36 overflow-hidden">
+                    <img
+                      src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=600&q=80"
+                      alt="Cashier Dome Camera"
+                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
+                    />
+                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white font-mono font-bold text-[10px]">
+                      Cashier 100%
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white space-y-1">
+                    <div className="font-bold text-xs text-slate-900">Dome camera aligned</div>
+                    <div className="text-[11px] text-slate-500">Installed, tested, and working</div>
+                  </div>
+                </div>
+
+                {/* Photo 2: Front Desk */}
+                <div
+                  onClick={() => setLightboxPhoto({
+                    url: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=1200&q=80',
+                    title: 'Front Desk Reception (100%)',
+                    caption: 'Camera above reception signage aligned and tested',
+                    area: 'Front Desk'
+                  })}
+                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
+                >
+                  <div className="relative h-36 overflow-hidden">
+                    <img
+                      src="https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=600&q=80"
+                      alt="Front Desk Camera"
+                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
+                    />
+                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white font-mono font-bold text-[10px]">
+                      Front Desk 100%
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white space-y-1">
+                    <div className="font-bold text-xs text-slate-900">Camera above reception</div>
+                    <div className="text-[11px] text-slate-500">Installed, tested, and working</div>
+                  </div>
+                </div>
+
+                {/* Photo 3: Backdoor */}
+                <div
+                  onClick={() => setLightboxPhoto({
+                    url: 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=1200&q=80',
+                    title: 'Backdoor Entrance (100%)',
+                    caption: 'Camera mounted at door, queued for monitor verification',
+                    area: 'Backdoor'
+                  })}
+                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
+                >
+                  <div className="relative h-36 overflow-hidden">
+                    <img
+                      src="https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=600&q=80"
+                      alt="Backdoor Camera"
+                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
+                    />
+                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white font-mono font-bold text-[10px]">
+                      Backdoor 100%
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white space-y-1">
+                    <div className="font-bold text-xs text-slate-900">Camera mounted at door</div>
+                    <div className="text-[11px] text-slate-500">Installed and mounted — completed</div>
+                  </div>
+                </div>
+
+                {/* Photo 4: Live NVR Display */}
+                <div
+                  onClick={() => setLightboxPhoto({
+                    url: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=1200&q=80',
+                    title: 'Live Monitoring Confirmation (NVR Display)',
+                    caption: 'Cashier and Front Desk camera feeds verified live on CCTV monitor',
+                    area: 'NVR Display'
+                  })}
+                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
+                >
+                  <div className="relative h-36 overflow-hidden">
+                    <img
+                      src="https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=600&q=80"
+                      alt="NVR Monitor Display"
+                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
+                    />
+                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-emerald-500 text-white font-mono font-bold text-[10px]">
+                      Feeds Confirmed Live
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white space-y-1">
+                    <div className="font-bold text-xs text-slate-900">Live Monitoring Confirmation</div>
+                    <div className="text-[11px] text-slate-500">NVR display, 03 September 2026</div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1129,6 +1274,43 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                                   {task.title}
                                 </div>
 
+                                {/* Photographic Evidence Thumbnail or Upload Button */}
+                                {task.photoEvidence ? (
+                                  <div 
+                                    onClick={() => setLightboxPhoto({ 
+                                      url: task.photoEvidence!, 
+                                      title: task.title, 
+                                      caption: task.photoCaption, 
+                                      area: task.area 
+                                    })}
+                                    className="rounded-xl overflow-hidden border border-slate-200 group/img relative cursor-pointer h-24 bg-slate-900 shadow-2xs hover:border-amber-400 transition"
+                                  >
+                                    <img 
+                                      src={task.photoEvidence} 
+                                      alt={task.title} 
+                                      className="w-full h-full object-cover group-hover/img:scale-105 transition duration-300" 
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-between p-2">
+                                      <span className="text-[10px] text-white font-semibold truncate flex items-center gap-1">
+                                        <Camera className="w-3 h-3 text-amber-300 shrink-0" />
+                                        <span className="truncate">{task.photoCaption || 'Photo verified'}</span>
+                                      </span>
+                                      <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-[9px] font-bold text-white shrink-0">
+                                        Proof
+                                      </span>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => setEvidenceTask(task)}
+                                    className="w-full py-1.5 px-2 rounded-xl border border-dashed border-slate-300 hover:border-amber-500 bg-slate-50 hover:bg-amber-50/50 text-[10px] text-slate-600 hover:text-slate-900 font-semibold flex items-center justify-center gap-1 transition cursor-pointer"
+                                  >
+                                    <Camera className="w-3 h-3 text-amber-600" />
+                                    <span>Attach Evidence</span>
+                                  </button>
+                                )}
+
                                 {task.blockerReason && (
                                   <div className="p-2 rounded-xl bg-rose-100/70 border border-rose-200 text-[11px] text-rose-800 leading-tight">
                                     ⚠️ <strong>Blocker:</strong> {task.blockerReason}
@@ -1174,9 +1356,16 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                                     )}
                                     {task.status !== 'Done' && (
                                       <button
-                                        onClick={() => onUpdateTaskStatus(task.id, 'Done')}
-                                        className="p-1 rounded bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[10px] font-bold"
-                                        title="Mark Done"
+                                        onClick={() => {
+                                          if (task.photoEvidence) {
+                                            onUpdateTaskStatus(task.id, 'Done');
+                                            showNotification(`Task "${task.title}" marked completed!`);
+                                          } else {
+                                            setEvidenceTask(task);
+                                          }
+                                        }}
+                                        className="p-1 rounded bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[10px] font-bold cursor-pointer"
+                                        title="Mark Done (Requires Photo Evidence)"
                                       >
                                         <Check className="w-3 h-3" />
                                       </button>
@@ -2222,6 +2411,27 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
             </div>
           </div>
         )}
+
+        {/* PHOTO EVIDENCE MODAL */}
+        <TaskPhotoEvidenceModal
+          task={evidenceTask}
+          isOpen={!!evidenceTask}
+          onClose={() => setEvidenceTask(null)}
+          onConfirm={(taskId, photoEvidence, photoCaption) => {
+            if (onCompleteTaskWithEvidence) {
+              onCompleteTaskWithEvidence(taskId, photoEvidence, photoCaption);
+            } else {
+              onUpdateTaskStatus(taskId, 'Done', undefined, photoEvidence, photoCaption);
+            }
+            showNotification('Task completed with photographic evidence!');
+          }}
+        />
+
+        {/* PHOTO LIGHTBOX MODAL */}
+        <PhotoLightboxModal
+          photo={lightboxPhoto}
+          onClose={() => setLightboxPhoto(null)}
+        />
 
       </main>
     </div>

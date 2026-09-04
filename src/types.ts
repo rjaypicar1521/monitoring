@@ -17,6 +17,11 @@ export interface CCTVTask {
   targetDate?: string;
   completedDate?: string;
   blockerReason?: string;
+  photoEvidence?: string;
+  photoCaption?: string;
+  area?: string;
+  progressPercent?: number;
+  verifiedStatus?: string;
 }
 
 export interface RiskItem {
@@ -79,6 +84,9 @@ export interface CCTVProject {
   name: string;
   goal: string;
   location: string;
+  organization?: string;
+  preparedBy?: string;
+  overallCompletion?: number;
   targetLaunchDate: string;
   startDate: string;
   teamLead: string;

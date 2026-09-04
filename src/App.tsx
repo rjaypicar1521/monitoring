@@ -120,7 +120,13 @@ export const App: React.FC = () => {
     );
   };
 
-  const handleUpdateTaskStatus = (taskId: string, newStatus: TaskStatus, blockerReason?: string) => {
+  const handleUpdateTaskStatus = (
+    taskId: string, 
+    newStatus: TaskStatus, 
+    blockerReason?: string,
+    photoEvidence?: string,
+    photoCaption?: string
+  ) => {
     setProjects((prev) =>
       prev.map((p) => {
         if (p.id !== currentProject.id) return p;
@@ -130,7 +136,10 @@ export const App: React.FC = () => {
             ...t,
             status: newStatus,
             completedDate: newStatus === 'Done' ? new Date().toISOString().split('T')[0] : undefined,
-            blockerReason: newStatus === 'Blocked' ? blockerReason : undefined
+            blockerReason: newStatus === 'Blocked' ? blockerReason : undefined,
+            photoEvidence: photoEvidence !== undefined ? photoEvidence : t.photoEvidence,
+            photoCaption: photoCaption !== undefined ? photoCaption : t.photoCaption,
+            progressPercent: newStatus === 'Done' ? 100 : newStatus === 'In progress' ? 50 : 0
           };
         });
 
@@ -156,6 +165,14 @@ export const App: React.FC = () => {
         };
       })
     );
+  };
+
+  const handleCompleteTaskWithEvidence = (
+    taskId: string,
+    photoEvidence: string,
+    photoCaption?: string
+  ) => {
+    handleUpdateTaskStatus(taskId, 'Done', undefined, photoEvidence, photoCaption);
   };
 
   const handleResolveBlocker = (blockerId: string) => {
@@ -393,6 +410,7 @@ export const App: React.FC = () => {
           onToggleRole={handleToggleRole}
           onAddNote={handleAddNote}
           onDeleteNote={handleDeleteNote}
+          onCompleteTaskWithEvidence={handleCompleteTaskWithEvidence}
         />
       ) : (
         /* REDESIGNED ADMIN DASHBOARD: Clean Enterprise SaaS with Interactive Kanban, Camera Fleet & Team Management */
@@ -403,6 +421,7 @@ export const App: React.FC = () => {
           onResolveBlocker={handleResolveBlocker}
           onUpdateCameraCount={handleUpdateCameraCount}
           onUpdateTaskStatus={handleUpdateTaskStatus}
+          onCompleteTaskWithEvidence={handleCompleteTaskWithEvidence}
           onAddTask={handleAddTask}
           onDeleteTask={handleDeleteTask}
           onAddCamera={handleAddCamera}

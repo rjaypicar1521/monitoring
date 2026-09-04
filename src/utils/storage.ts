@@ -1,158 +1,146 @@
 import { CCTVProject, CameraEndpoint, TechnicianMember } from '../types';
 
-const STORAGE_KEY = 'cctv_monitoring_projects_v1';
+const STORAGE_KEY = 'cctv_monitoring_projects_v3';
 
 export const DEFAULT_CAMERAS: CameraEndpoint[] = [
-  { id: 'CAM-01', name: 'Main Lobby Entrance', zone: 'Floor 1', lens: '2.8mm Wide Angle', ip: '192.168.20.101', port: 'Port 1', status: 'Mounted' },
-  { id: 'CAM-02', name: 'Reception Desk & Counter', zone: 'Floor 1', lens: '4.0mm Standard', ip: '192.168.20.102', port: 'Port 2', status: 'Mounted' },
-  { id: 'CAM-03', name: 'North Hallway A (Offices)', zone: 'Floor 1', lens: '2.8mm Wide Angle', ip: '192.168.20.103', port: 'Port 3', status: 'Mounted' },
-  { id: 'CAM-04', name: 'South Hallway B (Restrooms)', zone: 'Floor 1', lens: '2.8mm Wide Angle', ip: '192.168.20.104', port: 'Port 4', status: 'Mounted' },
-  { id: 'CAM-05', name: 'Elevator Bank 1', zone: 'Floor 1', lens: '2.8mm Wide Angle', ip: '192.168.20.105', port: 'Port 5', status: 'Mounted' },
-  { id: 'CAM-06', name: 'Emergency Exit Stairwell A', zone: 'Floor 1', lens: '2.8mm Wide Angle', ip: '192.168.20.106', port: 'Port 6', status: 'Mounted' },
-  { id: 'CAM-07', name: '2nd Floor West Corridor', zone: 'Floor 2', lens: '2.8mm Wide Angle', ip: '192.168.20.107', port: 'Port 7', status: 'Mounted' },
-  { id: 'CAM-08', name: '2nd Floor East Corridor', zone: 'Floor 2', lens: '2.8mm Wide Angle', ip: '192.168.20.108', port: 'Port 8', status: 'Mounted' },
-  { id: 'CAM-09', name: 'Staff Breakroom & Kitchen', zone: 'Floor 2', lens: '2.8mm Wide Angle', ip: '192.168.20.109', port: 'Port 9', status: 'Mounted' },
-  { id: 'CAM-10', name: 'Conference Room 201', zone: 'Floor 2', lens: '4.0mm Standard', ip: '192.168.20.110', port: 'Port 10', status: 'Mounted' },
-  { id: 'CAM-11', name: 'Server & IT Telecom Closet', zone: 'Basement', lens: '4.0mm Standard', ip: '192.168.20.111', port: 'Port 11', status: 'Mounted' },
-  { id: 'CAM-12', name: 'Loading Dock Interior Bay', zone: 'Ground', lens: '6.0mm Telephoto', ip: '192.168.20.112', port: 'Port 12', status: 'Mounted' },
-  { id: 'CAM-13', name: 'Main Parking Lot North Gate', zone: 'Exterior', lens: '6.0mm Telephoto', ip: '192.168.20.113', port: 'Port 13', status: 'Pending Power' },
-  { id: 'CAM-14', name: 'Main Parking Lot South Gate', zone: 'Exterior', lens: '6.0mm Telephoto', ip: '192.168.20.114', port: 'Port 14', status: 'Pending Power' },
-  { id: 'CAM-15', name: 'Building East Perimeter Alley', zone: 'Exterior', lens: '4.0mm Standard', ip: '192.168.20.115', port: 'Port 15', status: 'Pending Power' },
-  { id: 'CAM-16', name: 'Building West Perimeter Wall', zone: 'Exterior', lens: '4.0mm Standard', ip: '192.168.20.116', port: 'Port 16', status: 'Pending Power' },
-  { id: 'CAM-17', name: 'Rear Delivery Ramp', zone: 'Exterior', lens: '6.0mm Telephoto', ip: '192.168.20.117', port: 'Port 17', status: 'Pending Power' },
-  { id: 'CAM-18', name: 'Visitor Entry Barrier Gate', zone: 'Exterior', lens: '4.0mm Standard', ip: '192.168.20.118', port: 'Port 18', status: 'Pending Power' },
-  { id: 'CAM-19', name: 'Waste Disposal Enclosure', zone: 'Exterior', lens: '2.8mm Wide Angle', ip: '192.168.20.119', port: 'Port 19', status: 'Pending Power' },
-  { id: 'CAM-20', name: 'Rooftop HVAC & Solar Array', zone: 'Rooftop', lens: '4.0mm Standard', ip: '192.168.20.120', port: 'Port 20', status: 'Pending Power' },
-  { id: 'CAM-21', name: 'Basement Mechanical Room', zone: 'Basement', lens: '2.8mm Wide Angle', ip: '192.168.20.121', port: 'Port 21', status: 'Pending Power' },
-  { id: 'CAM-22', name: 'Courtyard Seating Area', zone: 'Exterior', lens: '2.8mm Wide Angle', ip: '192.168.20.122', port: 'Port 22', status: 'Pending Power' },
-  { id: 'CAM-23', name: 'Emergency Exit Corridor East', zone: 'Floor 1', lens: '2.8mm Wide Angle', ip: '192.168.20.123', port: 'Port 23', status: 'Pending Power' },
-  { id: 'CAM-24', name: 'Executive Suite Entry', zone: 'Floor 2', lens: '4.0mm Standard', ip: '192.168.20.124', port: 'Port 24', status: 'Pending Power' }
+  { id: 'CAM-01', name: 'Cashier Dome Camera', zone: 'Ground Floor - Cashier', lens: '2.8mm Wide Angle Dome', ip: '192.168.1.101', port: 'Port 1', status: 'Mounted' },
+  { id: 'CAM-02', name: 'Front Desk Reception Camera', zone: 'Ground Floor - Reception & Lobby', lens: '4.0mm Standard Dome', ip: '192.168.1.102', port: 'Port 2', status: 'Mounted' },
+  { id: 'CAM-03', name: 'Backdoor Entrance Camera', zone: 'Perimeter - Service & Backdoor', lens: '3.6mm Outdoor Bullet', ip: '192.168.1.103', port: 'Port 3', status: 'Mounted' },
+  { id: 'CAM-04', name: 'Entrance Door Camera', zone: 'Perimeter - Main Entrance Double Doors', lens: '4.0mm Outdoor Bullet', ip: '192.168.1.104', port: 'Port 4', status: 'Pending Power' }
 ];
 
 export const DEFAULT_TECHNICIANS: TechnicianMember[] = [
-  { id: 'tech-1', name: 'Marcus Vance', role: 'Lead CCTV Technician & Admin', status: 'On Site', assigned: 'NVR & Server Rack', email: 'marcus@rmvn.com' },
-  { id: 'tech-2', name: 'Alex Kim', role: 'Field Electrician & Cabling Specialist', status: 'On Site', assigned: 'Exterior Breaker Hookup', email: 'alex.k@rmvn.com' },
-  { id: 'tech-3', name: 'Dave Miller', role: 'Mounting & Angle Calibration Tech', status: 'On Site', assigned: 'Hallway Cams 01–12', email: 'dave.m@rmvn.com' },
-  { id: 'tech-4', name: 'Elena Rostova', role: 'Network Telemetry & PoE Engineer', status: 'Remote', assigned: 'Switch Config & VLAN 20', email: 'elena.r@rmvn.com' },
-  { id: 'tech-5', name: 'Alex Morgan', role: 'Client Facility Sponsor', status: 'Remote', assigned: 'Decisions & Access Badges', email: 'alex.morgan@client.org' }
+  { id: 'tech-1', name: 'Rjay Picar', role: 'Lead Systems Architect & Installer (RMVN)', status: 'On Site', assigned: 'NVR & Camera Alignment', email: 'rjay@rmvn.com' },
+  { id: 'tech-2', name: 'Starnook', role: 'Site Operations & Field Coordinator (RMVN)', status: 'On Site', assigned: 'Entrance Door & AP Relocation', email: 'starnook@rmvn.com' },
+  { id: 'tech-3', name: 'Engr. David Santos', role: 'Building Electrician & Power Specialist', status: 'On Site', assigned: 'Entrance Junction Box Power', email: 'electrician@upc.org' },
+  { id: 'tech-4', name: 'Elena Rostova', role: 'Network Telemetry & PoE Engineer', status: 'Remote', assigned: 'PoE Injectors & VLAN Switch', email: 'elena.r@rmvn.com' },
+  { id: 'tech-5', name: 'UPC Administration', role: 'Client Facility Sponsor', status: 'On Site', assigned: 'Project Turnover & Access', email: 'admin@upcphilippines.org' }
 ];
 
 export const INITIAL_PROJECTS: CCTVProject[] = [
   {
-    id: 'proj-cctv-rmvn',
-    name: 'RMVN Project - CCTV Installation',
-    goal: 'Install complete security camera coverage with clear picture and 60 days of saved recording history.',
-    location: 'RMVN Main Facility & Grounds',
-    startDate: '2026-08-25',
-    targetLaunchDate: '2026-09-25',
-    teamLead: 'Marcus & Alex (Lead Techs)',
-    updateCadence: 'Weekly',
+    id: 'proj-cctv-upc',
+    name: 'United Pentecostal Church Philippines Inc. — Headquarters',
+    organization: 'RMVN SOLUTIONS - NETWORK & SYSTEMS ARCHITECTS',
+    preparedBy: 'Rjay Picar - RMVN & Starnook',
+    goal: 'CCTV Installation Progress & Success Update: 3 areas installed & working, 1 rough-in underway, 1 AP relocation pending.',
+    location: 'United Pentecostal Church Philippines Inc. — Headquarters',
+    startDate: '2026-09-01',
+    targetLaunchDate: '2026-09-08',
+    teamLead: 'Rjay Picar - RMVN',
+    updateCadence: 'Daily',
     audience: 'Client',
-    totalCameras: 24,
-    installedCameras: 12,
+    totalCameras: 4,
+    installedCameras: 3,
+    overallCompletion: 80,
     tasks: [
       {
-        id: 't-rmvn-1',
-        title: 'Walkthrough of building to confirm best camera spots',
-        category: 'Site Survey',
-        status: 'Done',
-        owner: 'Project Lead',
-        completedDate: '2026-08-28'
-      },
-      {
-        id: 't-rmvn-2',
-        title: 'Run neat wiring through main hallways and ceilings',
-        category: 'Network & Cabling',
-        status: 'Done',
-        owner: 'Field Tech',
-        completedDate: '2026-09-01'
-      },
-      {
-        id: 't-rmvn-3',
-        title: 'Mount and aim first 12 indoor cameras',
+        id: 't-upc-1',
+        title: 'Cashier — Dome camera aligned, tested, and working',
         category: 'Camera Mounting',
         status: 'Done',
-        owner: 'Lead Installer',
-        completedDate: '2026-09-02'
+        owner: 'Rjay Picar',
+        area: 'Cashier',
+        progressPercent: 100,
+        verifiedStatus: 'Installed, tested, and working',
+        completedDate: '2026-09-03',
+        photoEvidence: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=800&q=80',
+        photoCaption: 'Cashier 100% — Dome camera aligned & feed verified on CCTV monitor'
       },
       {
-        id: 't-rmvn-4',
-        title: 'Mount remaining 12 cameras indoors and outside',
+        id: 't-upc-2',
+        title: 'Front Desk — Camera above reception installed, tested, and working',
         category: 'Camera Mounting',
-        status: 'In progress',
-        owner: 'Lead Installer',
-        targetDate: '2026-09-08'
+        status: 'Done',
+        owner: 'Rjay Picar',
+        area: 'Front Desk',
+        progressPercent: 100,
+        verifiedStatus: 'Installed, tested, and working',
+        completedDate: '2026-09-03',
+        photoEvidence: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80',
+        photoCaption: 'Front Desk 100% — Camera above reception signage aligned'
       },
       {
-        id: 't-rmvn-5',
-        title: 'Connect electrical power for outside cameras',
+        id: 't-upc-3',
+        title: 'Backdoor Entrance — Camera installed and mounted',
+        category: 'Camera Mounting',
+        status: 'Done',
+        owner: 'Rjay Picar',
+        area: 'Backdoor Entrance',
+        progressPercent: 100,
+        verifiedStatus: 'Installed and mounted — completed',
+        completedDate: '2026-09-04',
+        photoEvidence: 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=800&q=80',
+        photoCaption: 'Backdoor 100% — Camera mounted at door'
+      },
+      {
+        id: 't-upc-4',
+        title: 'Entrance Door — Junction box installed & electrical line rough-in',
         category: 'Network & Cabling',
-        status: 'Blocked',
-        owner: 'Site Coordinator',
-        blockerReason: 'Waiting on building electrician to approve outside power connection.'
-      },
-      {
-        id: 't-rmvn-6',
-        title: 'Set up central video recording box and hard drives',
-        category: 'NVR & Server Setup',
         status: 'In progress',
-        owner: 'Equipment Lead',
-        targetDate: '2026-09-09'
+        owner: 'Starnook',
+        area: 'Entrance Door',
+        progressPercent: 50,
+        verifiedStatus: 'Junction box installed — electrical rough-in ongoing',
+        targetDate: '2026-09-06',
+        blockerReason: 'Waiting on electrical line energisation to entrance door junction box before camera mounting.',
+        photoEvidence: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=800&q=80',
+        photoCaption: 'Entrance Door 50% — Junction box mounted above entrance door; electrical line installation in progress'
       },
       {
-        id: 't-rmvn-7',
-        title: 'Test video screen and signal on all installed cameras',
+        id: 't-upc-5',
+        title: 'Access Point Relocation — Move AP to existing CCTV LAN cable',
+        category: 'Network & Cabling',
+        status: 'Not started',
+        owner: 'Starnook',
+        area: 'Access Point Relocation',
+        progressPercent: 0,
+        verifiedStatus: 'Move AP to the existing CCTV LAN cable',
+        targetDate: '2026-09-07'
+      },
+      {
+        id: 't-upc-6',
+        title: 'System Verification — Live Monitoring Confirmation on NVR Display',
         category: 'Testing & Commissioning',
-        status: 'Not started',
-        owner: 'Field Tech',
-        targetDate: '2026-09-12'
-      },
-      {
-        id: 't-rmvn-8',
-        title: 'Adjust viewing angles and train your staff on the app',
-        category: 'Client Handover',
-        status: 'Not started',
-        owner: 'Project Lead',
-        targetDate: '2026-09-15'
+        status: 'In progress',
+        owner: 'Rjay Picar',
+        area: 'NVR Display & Central Monitor',
+        progressPercent: 75,
+        verifiedStatus: 'Camera feeds confirmed live (Cashier and Front Desk verified)',
+        targetDate: '2026-09-05',
+        photoEvidence: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=800&q=80',
+        photoCaption: 'Live Monitoring Confirmation — Cashier and Front Desk feeds confirmed live on CCTV monitor'
       }
     ],
     risks: [
       {
-        id: 'r-rmvn-1',
-        description: 'Outside power hookup delay could push final testing back a few days.',
+        id: 'r-upc-1',
+        description: 'Entrance Door electrical line rough-in delay may postpone final camera alignment & turnover.',
         impact: 'med',
-        likelihood: 'med',
-        signal: 'Waiting on building maintenance to schedule the electrician.',
-        mitigation: 'Coordinate directly with facility manager for priority electrician visit.',
-        owner: 'Site Coordinator',
-        dueDate: '2026-09-07'
+        likelihood: 'low',
+        signal: 'Junction box mounted; power connection awaiting electrician hookup.',
+        mitigation: 'Coordinate directly with UPC facility manager for electrician priority.',
+        owner: 'Starnook',
+        dueDate: '2026-09-06'
       }
     ],
     blockers: [
       {
-        id: 'b-rmvn-1',
-        description: 'Waiting on building electrician for outside power hookup.',
-        owner: 'Site Coordinator',
-        since: '2026-09-01',
-        unblockAction: 'Building electrician sign-off needed to connect power.',
-        resolved: false
-      },
-      {
-        id: 'b-rmvn-2',
-        description: 'Security entry badges needed for two team members.',
-        owner: 'Lead Installer',
-        since: '2026-09-02',
-        unblockAction: 'Security office badge approval needed.',
+        id: 'b-upc-1',
+        description: 'Waiting on electrical line energisation to entrance door junction box to complete camera mounting & alignment.',
+        owner: 'Starnook / Building Electrician',
+        since: '2026-09-03',
+        unblockAction: 'Complete electrical line to entrance door junction box and energise power.',
         resolved: false
       }
     ],
     decisions: [
       {
-        id: 'd-rmvn-1',
-        decision: 'Chose 60 days of saved video recordings instead of 30 days.',
-        date: '2026-08-30',
-        decisionMaker: 'Project Sponsor & Lead Tech',
-        whatChanged: 'Added larger storage hard drives to recording box.'
+        id: 'd-upc-1',
+        decision: 'Confirmed live feeds for Cashier & Front Desk; Backdoor camera queued next for monitor verification.',
+        date: '2026-09-03',
+        decisionMaker: 'Rjay Picar (RMVN) & UPC Administration',
+        whatChanged: 'Verified clear wide-angle coverage over cashier and front desk reception counter.'
       }
     ],
     cameras: DEFAULT_CAMERAS,
@@ -160,17 +148,17 @@ export const INITIAL_PROJECTS: CCTVProject[] = [
     notes: [
       {
         id: 'note-1',
-        author: 'Sarah Chen (Client Sponsor)',
-        authorRole: 'client',
-        content: 'Please ensure camera #4 is angled towards the visitor parking gates for optimal vehicle coverage.',
-        createdAt: 'Sep 2, 2:15 PM'
+        author: 'Rjay Picar - RMVN',
+        authorRole: 'installer',
+        content: 'Camera feeds confirmed live on CCTV monitor for Cashier and Front Desk. Backdoor Entrance camera is installed and mounted and is next for monitor verification.',
+        createdAt: 'Sep 3, 4:30 PM'
       },
       {
         id: 'note-2',
-        author: 'Dave Miller (Lead Installer)',
-        authorRole: 'installer',
-        content: 'Confirmed. Bracket readjusted on Zone 1 and field of view validated on live test monitor.',
-        createdAt: 'Sep 3, 10:40 AM'
+        author: 'United Pentecostal Church Philippines Inc.',
+        authorRole: 'client',
+        content: 'Report received. Please ensure the Access Point PoE injectors are clearly traced and labeled before relocation to prevent network downtime.',
+        createdAt: 'Sep 4, 9:15 AM'
       }
     ]
   },
