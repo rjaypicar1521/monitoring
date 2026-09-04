@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal, LightboxPhoto } from './TaskPhotoEvidenceModal';
+import Velaris from './ui/velaris';
 
 interface CrextioDashboardProps {
   project: CCTVProject;
@@ -363,135 +364,154 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
         {/* TAB 1: MAIN DASHBOARD (CREXTIO 3-COLUMN LAYOUT) */}
         {activeNavTab === 'Dashboard' && (
           <div className="space-y-6 lg:space-y-8 animate-in fade-in">
-            {/* Hero Greeting & Status Capsule Row */}
-            <section className="relative z-10 space-y-4">
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div>
-                  <h1 className="text-3xl sm:text-4xl font-bold text-[#1a1c22] tracking-tight">
-                    Welcome in, {currentUser.name}
-                  </h1>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
-                    {project.name} • {project.location}
-                  </p>
-                </div>
-
-                {/* 3 Metric Counters matching Crextio top-right */}
-                <div className="flex items-center gap-6 sm:gap-8 bg-white/70 backdrop-blur-sm px-6 py-3 rounded-2xl border border-slate-200/80 shadow-xs">
-                  <div 
-                    onClick={() => setActiveNavTab('Cameras')}
-                    className="flex items-center gap-2.5 cursor-pointer group"
-                  >
-                    <div className="text-2xl sm:text-3xl font-bold text-[#1a1c22] font-mono group-hover:text-amber-600 transition">
-                      {project.totalCameras}
-                    </div>
-                    <div className="text-[11px] font-semibold text-slate-500 leading-tight">
-                      Total<br />Cameras
-                    </div>
-                  </div>
-
-                  <div className="h-7 w-px bg-slate-200" />
-
-                  <div 
-                    onClick={() => setActiveNavTab('Cameras')}
-                    className="flex items-center gap-2.5 cursor-pointer group"
-                  >
-                    <div className="text-2xl sm:text-3xl font-bold text-[#1a1c22] font-mono group-hover:text-emerald-600 transition">
-                      {project.installedCameras}
-                    </div>
-                    <div className="text-[11px] font-semibold text-slate-500 leading-tight">
-                      Mounted<br />Ready
-                    </div>
-                  </div>
-
-                  <div className="h-7 w-px bg-slate-200" />
-
-                  <div 
-                    onClick={() => setActiveNavTab('Checklist')}
-                    className="flex items-center gap-2.5 cursor-pointer group"
-                  >
-                    <div className="text-2xl sm:text-3xl font-bold text-amber-600 font-mono group-hover:scale-105 transition">
-                      {activeBlockers.length}
-                    </div>
-                    <div className="text-[11px] font-semibold text-slate-500 leading-tight">
-                      Action<br />Pending
-                    </div>
-                  </div>
-                </div>
+            {/* Hero Greeting & Status Capsule Row with Ambient Velaris Background */}
+            <section className="relative z-10 rounded-3xl overflow-hidden border border-slate-800/80 shadow-md bg-[#0b0f19]">
+              {/* Velaris Living Gradient Shader */}
+              <div className="absolute inset-0 w-full h-full pointer-events-none opacity-85">
+                <Velaris
+                  height="100%"
+                  colors={["#f59e0b", "#10b981", "#059669", "#0f172a"]}
+                  bg="#0b0f19"
+                  grain={0.25}
+                  speed={1.2}
+                  className="w-full h-full"
+                />
               </div>
 
-              {/* Gentle Live Alert Banner if blockers exist */}
-              {activeBlockers.length > 0 && (
-                <div className="bg-amber-50 border border-amber-200/90 rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs shadow-2xs animate-in fade-in">
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
-                    <div>
-                      <span className="font-bold text-amber-950">Action Needed: </span>
-                      <span className="text-amber-900">{activeBlockers[0].description}</span>
-                      <span className="text-amber-700 ml-1">({activeBlockers[0].unblockAction})</span>
+              {/* Foreground Content Container */}
+              <div className="relative z-10 p-5 sm:p-7 space-y-4 bg-gradient-to-b from-black/40 via-black/25 to-black/65 backdrop-blur-[1px]">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-amber-300 mb-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>Live Site Telemetry</span>
+                    </div>
+                    <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+                      Welcome in, {currentUser.name}
+                    </h1>
+                    <p className="text-xs sm:text-sm text-slate-200 mt-1 font-medium">
+                      {project.name} • {project.location}
+                    </p>
+                  </div>
+
+                  {/* 3 Metric Counters matching Crextio top-right */}
+                  <div className="flex items-center gap-6 sm:gap-8 bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/15 shadow-md">
+                    <div 
+                      onClick={() => setActiveNavTab('Cameras')}
+                      className="flex items-center gap-2.5 cursor-pointer group"
+                    >
+                      <div className="text-2xl sm:text-3xl font-bold text-white font-mono group-hover:text-amber-300 transition">
+                        {project.totalCameras}
+                      </div>
+                      <div className="text-[11px] font-semibold text-slate-300 leading-tight">
+                        Total<br />Cameras
+                      </div>
+                    </div>
+
+                    <div className="h-7 w-px bg-white/20" />
+
+                    <div 
+                      onClick={() => setActiveNavTab('Cameras')}
+                      className="flex items-center gap-2.5 cursor-pointer group"
+                    >
+                      <div className="text-2xl sm:text-3xl font-bold text-emerald-400 font-mono group-hover:scale-105 transition">
+                        {project.installedCameras}
+                      </div>
+                      <div className="text-[11px] font-semibold text-slate-300 leading-tight">
+                        Mounted<br />Ready
+                      </div>
+                    </div>
+
+                    <div className="h-7 w-px bg-white/20" />
+
+                    <div 
+                      onClick={() => setActiveNavTab('Checklist')}
+                      className="flex items-center gap-2.5 cursor-pointer group"
+                    >
+                      <div className="text-2xl sm:text-3xl font-bold text-amber-400 font-mono group-hover:scale-105 transition">
+                        {activeBlockers.length}
+                      </div>
+                      <div className="text-[11px] font-semibold text-slate-300 leading-tight">
+                        Action<br />Pending
+                      </div>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setActiveNavTab('Checklist')}
-                    className="text-[11px] font-bold text-amber-900 hover:text-amber-950 underline shrink-0 cursor-pointer self-start sm:self-auto"
-                  >
-                    View {activeBlockers.length} Item{activeBlockers.length > 1 ? 's' : ''} →
-                  </button>
-                </div>
-              )}
-
-              {/* Visual Installation Progress Bar */}
-              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-3.5 border border-slate-300/80 shadow-xs space-y-2.5">
-                <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="font-bold text-slate-900 text-sm">Installation Progress</span>
-                    <span className="text-[11px] font-medium text-slate-500">
-                      ({project.installedCameras} of {project.totalCameras} Endpoints Mounted)
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2.5 font-mono text-xs">
-                    <span className="font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                      {percentComplete}% Mounted
-                    </span>
-                    <span className="text-slate-500 text-[11px]">
-                      Handover: <strong className="text-slate-800">{project.targetLaunchDate || '2026-09-12'}</strong>
-                    </span>
-                  </div>
                 </div>
 
-                {/* Main Visual Progress Track & Bar */}
-                <div className="relative w-full bg-slate-200/80 rounded-full h-3.5 overflow-hidden border border-slate-300/80 shadow-inner">
-                  <div 
-                    className="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-emerald-500 rounded-full transition-all duration-700 relative shadow-xs"
-                    style={{ width: `${Math.max(percentComplete, 4)}%` }}
-                  >
-                    <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                {/* Gentle Live Alert Banner if blockers exist */}
+                {activeBlockers.length > 0 && (
+                  <div className="bg-amber-500/20 border border-amber-400/40 rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs shadow-2xs backdrop-blur-md text-white animate-in fade-in">
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                      <div>
+                        <span className="font-bold text-amber-300">Action Needed: </span>
+                        <span className="text-white">{activeBlockers[0].description}</span>
+                        <span className="text-amber-200 ml-1">({activeBlockers[0].unblockAction})</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setActiveNavTab('Checklist')}
+                      className="text-[11px] font-bold text-amber-300 hover:text-white underline shrink-0 cursor-pointer self-start sm:self-auto"
+                    >
+                      View {activeBlockers.length} Item{activeBlockers.length > 1 ? 's' : ''} →
+                    </button>
                   </div>
-                </div>
+                )}
 
-                {/* Progress Stages Footnotes */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-0.5 text-[11px]">
-                  <div className="flex items-center gap-1.5 text-slate-600">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Wiring: <strong className="text-slate-900">100%</strong></span>
+                {/* Visual Installation Progress Bar */}
+                <div className="bg-slate-900/80 backdrop-blur-md rounded-2xl p-3.5 border border-white/15 shadow-xs space-y-2.5 text-white">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="font-bold text-white text-sm">Installation Progress</span>
+                      <span className="text-[11px] font-medium text-slate-300">
+                        ({project.installedCameras} of {project.totalCameras} Endpoints Mounted)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2.5 font-mono text-xs">
+                      <span className="font-bold bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                        {percentComplete}% Mounted
+                      </span>
+                      <span className="text-slate-300 text-[11px]">
+                        Handover: <strong className="text-white">{project.targetLaunchDate || '2026-09-12'}</strong>
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 text-slate-600">
-                    <Camera className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
-                    <span>Mounted: <strong className="text-slate-900">{project.installedCameras}/{project.totalCameras}</strong></span>
+
+                  {/* Main Visual Progress Track & Bar */}
+                  <div className="relative w-full bg-slate-800/80 rounded-full h-3.5 overflow-hidden border border-white/10 shadow-inner">
+                    <div 
+                      className="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-emerald-500 rounded-full transition-all duration-700 relative shadow-xs"
+                      style={{ width: `${Math.max(percentComplete, 4)}%` }}
+                    >
+                      <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 text-slate-600 truncate">
-                    <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${activeBlockers.length > 0 ? 'text-amber-500' : 'text-emerald-600'}`} />
-                    <span className="truncate">
-                      {activeBlockers.length > 0 ? (
-                        <span className="text-amber-700 font-semibold">{activeBlockers.length} Pending Blocker</span>
-                      ) : (
-                        <span className="text-emerald-700 font-semibold">Hardware Nominal</span>
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-slate-600 sm:justify-end">
-                    <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>{taskPercent}% Tasks Done</span>
+
+                  {/* Progress Stages Footnotes */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-0.5 text-[11px]">
+                    <div className="flex items-center gap-1.5 text-slate-300">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <span>Wiring: <strong className="text-white">100%</strong></span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-slate-300">
+                      <Camera className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                      <span>Mounted: <strong className="text-white">{project.installedCameras}/{project.totalCameras}</strong></span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-slate-300 truncate">
+                      <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${activeBlockers.length > 0 ? 'text-amber-400' : 'text-emerald-400'}`} />
+                      <span className="truncate">
+                        {activeBlockers.length > 0 ? (
+                          <span className="text-amber-300 font-semibold">{activeBlockers.length} Pending Blocker</span>
+                        ) : (
+                          <span className="text-emerald-300 font-semibold">Hardware Nominal</span>
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-slate-300 sm:justify-end">
+                      <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span>{taskPercent}% Tasks Done</span>
+                    </div>
                   </div>
                 </div>
               </div>
