@@ -37,7 +37,8 @@ import {
   MessageSquare,
   Send,
   FileText,
-  MapPin
+  MapPin,
+  Menu
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal } from './TaskPhotoEvidenceModal';
@@ -107,6 +108,9 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
   const [activeTab, setActiveTab] = useState<'Dashboard' | 'Cameras' | 'Board' | 'Team' | 'Settings'>('Dashboard');
   const [showAdminNotifications, setShowAdminNotifications] = useState(false);
   const [kanbanStageFilter, setKanbanStageFilter] = useState<'All' | 'In progress' | 'Done' | 'Blocked'>('All');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [mobileKanbanStage, setMobileKanbanStage] = useState<TaskStatus>('In progress');
   
   // Modals
   const [showQuickCreateMenu, setShowQuickCreateMenu] = useState(false);
@@ -471,8 +475,8 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
         </div>
       )}
 
-      {/* FIGMA SIDEBAR NAVIGATION */}
-      <aside className="w-full md:w-64 bg-white border-r border-slate-200/90 flex flex-col justify-between p-5 shrink-0 z-30 shadow-xs">
+      {/* FIGMA SIDEBAR NAVIGATION (DESKTOP) */}
+      <aside className="hidden md:flex md:w-64 bg-white border-r border-slate-200/90 flex-col justify-between p-5 shrink-0 z-30 shadow-xs h-screen sticky top-0 overflow-y-auto">
         <div className="space-y-6">
           {/* Brand Header */}
           <div className="flex items-center justify-between">
@@ -616,12 +620,265 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
         </div>
       </aside>
 
+      {/* MOBILE TOP BAR (visible only on <md) */}
+      <header className="md:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-3.5 py-2.5 flex items-center justify-between shadow-xs">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-1.5 -ml-1 rounded-xl text-slate-700 hover:bg-slate-100 cursor-pointer"
+            aria-label="Open Navigation Menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <BrandLogo size="xs" />
+          <span className="font-black text-xs text-slate-900 tracking-tight uppercase">RMVN CCTV</span>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+            className={`p-2 rounded-xl text-slate-600 hover:bg-slate-100 cursor-pointer ${mobileSearchOpen ? 'bg-slate-100 text-slate-900' : ''}`}
+            title="Search"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+
+          {/* Mobile Notification Bell */}
+          <div className="relative">
+            <button
+              onClick={() => setShowAdminNotifications(prev => !prev)}
+              className="p-2 rounded-xl text-slate-700 hover:bg-slate-100 relative cursor-pointer"
+              title={`${activeBlockers.length} Active Blockers`}
+            >
+              <Bell className="w-4 h-4" />
+              {activeBlockers.length > 0 && (
+                <span className="w-2 h-2 rounded-full bg-amber-500 absolute top-1.5 right-1.5 ring-2 ring-white animate-pulse" />
+              )}
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={onToggleRole}
+            className="p-1.5 rounded-full bg-[#111317] text-amber-300 font-bold text-[10px] size-7 flex items-center justify-center cursor-pointer ml-1"
+            title="Switch View"
+          >
+            {currentUser.name.charAt(0)}
+          </button>
+        </div>
+      </header>
+
+      {/* MOBILE SLIDE-OVER DRAWER */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-50 flex">
+          <div 
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-in fade-in"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <aside className="relative w-72 max-w-[85vw] bg-white h-full shadow-2xl p-5 z-10 animate-in slide-in-from-left duration-200 flex flex-col justify-between overflow-y-auto">
+            <div className="space-y-6">
+              {/* Brand Header & Close Button */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <BrandLogo size="sm" />
+                  <div>
+                    <div className="font-black text-sm text-slate-900 tracking-tight leading-none">RMVN CCTV</div>
+                    <div className="text-[10px] text-slate-400 font-mono mt-0.5">Admin Ops Suite</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Main Nav Links */}
+              <div className="space-y-1">
+                <div className="text-[10px] uppercase font-bold text-slate-400 px-3 pb-1 tracking-wider">Overview</div>
+                <button
+                  onClick={() => {
+                    setActiveTab('Dashboard');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
+                    activeTab === 'Dashboard' 
+                      ? 'bg-[#111317] text-white shadow-md' 
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span>Dashboard</span>
+                  </div>
+                  {activeBlockers.length > 0 && (
+                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                  )}
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveTab('Cameras');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
+                    activeTab === 'Cameras' 
+                      ? 'bg-[#111317] text-white shadow-md' 
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Camera className="w-4 h-4" />
+                    <span>Camera Fleet</span>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                    {cameraList.length}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveTab('Board');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
+                    activeTab === 'Board' 
+                      ? 'bg-[#111317] text-white shadow-md' 
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <CheckSquare className="w-4 h-4" />
+                    <span>Kanban Board</span>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                    {project.tasks.length}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveTab('Team');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
+                    activeTab === 'Team' 
+                      ? 'bg-[#111317] text-white shadow-md' 
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Users className="w-4 h-4" />
+                    <span>Field Team</span>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                    {technicianList.length}
+                  </span>
+                </button>
+              </div>
+
+              <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                <div className="text-[10px] uppercase font-bold text-slate-400 px-3 pb-1 tracking-wider">System</div>
+                <button
+                  onClick={() => {
+                    setActiveTab('Settings');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
+                    activeTab === 'Settings' 
+                      ? 'bg-[#111317] text-white shadow-md' 
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  <Sliders className="w-4 h-4" />
+                  <span>Project Settings</span>
+                </button>
+
+                {onOpenImportModal && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onOpenImportModal();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer text-amber-900 bg-amber-50 hover:bg-amber-100 border-2 border-amber-300 shadow-2xs"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <FileText className="w-4 h-4 text-amber-600" />
+                      <span>Import DOCX Report</span>
+                    </div>
+                    <span className="text-[9px] font-mono font-black px-1.5 py-0.5 rounded bg-amber-200 text-amber-900 border border-amber-300">
+                      Word
+                    </span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Bottom of Mobile Drawer */}
+            <div className="space-y-3 pt-4 border-t border-slate-100">
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/70 flex items-center justify-between">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-[#111317] text-amber-300 font-bold text-xs flex items-center justify-center shrink-0">
+                    {currentUser.name.charAt(0)}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-bold text-xs text-slate-900 truncate">{currentUser.name}</div>
+                    <div className="text-[10px] text-slate-500 capitalize">{currentUser.role}</div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  onToggleRole();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full py-2.5 px-3.5 rounded-2xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold flex items-center justify-between shadow-2xs transition cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <User className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Switch to Client View</span>
+                </span>
+                <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {/* MOBILE SEARCH BAR TOGGLE DROPDOWN */}
+      {mobileSearchOpen && (
+        <div className="md:hidden px-4 py-2.5 bg-slate-50 border-b border-slate-200 animate-in slide-in-from-top duration-150 flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+            <input
+              type="text"
+              placeholder="Filter cameras or tasks..."
+              value={cameraSearch}
+              onChange={(e) => setCameraSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 rounded-xl text-xs bg-white border border-slate-200 focus:outline-none focus:border-slate-800 text-slate-800"
+              autoFocus
+            />
+          </div>
+          <button
+            onClick={() => setMobileSearchOpen(false)}
+            className="p-2 text-slate-400 hover:text-slate-600 text-xs font-bold"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto p-3.5 sm:p-6 lg:p-8 space-y-6">
         {/* Top Header Bar */}
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
+        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200/80 pb-4">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               Hi, {currentUser.name.split(' ')[0]}!
             </h1>
             <p className="text-xs text-slate-500 mt-0.5 font-medium">
@@ -629,16 +886,16 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5 relative">
-            {/* Search Input */}
-            <div className="relative">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 relative">
+            {/* Search Input (Hidden on extra small mobile, accessible via mobile top bar) */}
+            <div className="relative hidden sm:block">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
               <input
                 type="text"
                 placeholder="Filter cameras or tasks..."
                 value={cameraSearch}
                 onChange={(e) => setCameraSearch(e.target.value)}
-                className="pl-9 pr-4 py-2 rounded-full text-xs bg-white border border-slate-200 focus:outline-none focus:border-slate-800 text-slate-800 placeholder-slate-400 w-52 shadow-2xs"
+                className="pl-9 pr-4 py-2 rounded-full text-xs bg-white border border-slate-200 focus:outline-none focus:border-slate-800 text-slate-800 placeholder-slate-400 w-44 lg:w-52 shadow-2xs"
               />
             </div>
 
@@ -1397,17 +1654,43 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
               onFilterClick={(status) => setKanbanStageFilter(status)}
             />
 
-            {/* 4 Kanban Columns */}
+            {/* MOBILE KANBAN STAGE SEGMENTED TABS (<md) */}
+            <div className="md:hidden flex items-center gap-1.5 p-1 bg-slate-200/80 rounded-2xl overflow-x-auto shadow-inner no-scrollbar">
+              {columns.map((col) => {
+                const count = project.tasks.filter(t => t.status === col.status).length;
+                const isActive = mobileKanbanStage === col.status;
+                return (
+                  <button
+                    key={col.status}
+                    type="button"
+                    onClick={() => setMobileKanbanStage(col.status)}
+                    className={`flex-1 min-w-[76px] py-2 px-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                      isActive 
+                        ? 'bg-white text-slate-900 shadow-sm' 
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <span className="truncate">{col.label}</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${isActive ? col.countColor : 'bg-slate-300 text-slate-700'}`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Kanban Columns (Single stage on mobile, 4-col grid on tablet/desktop) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
               {columns.map((col) => {
                 const columnTasks = project.tasks.filter(t => t.status === col.status);
                 const isSelected = kanbanStageFilter !== 'All' && col.status === kanbanStageFilter;
                 const isDimmed = kanbanStageFilter !== 'All' && col.status !== kanbanStageFilter;
+                const isHiddenOnMobile = mobileKanbanStage !== col.status;
 
                 return (
                   <div 
                     key={col.status}
-                    className={`bg-white/80 backdrop-blur-sm rounded-[24px] p-4 border shadow-xs space-y-3 min-h-[460px] flex flex-col justify-between transition-all duration-300 ${
+                    className={`${isHiddenOnMobile ? 'hidden md:flex' : 'flex'} bg-white/80 backdrop-blur-sm rounded-[24px] p-4 border shadow-xs space-y-3 min-h-[460px] flex-col justify-between transition-all duration-300 ${
                       isSelected
                         ? 'border-blue-500 ring-2 ring-blue-400/50 shadow-md scale-[1.01]'
                         : isDimmed

@@ -162,29 +162,76 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   });
 
   return (
-    <div className="min-h-screen bg-[#b0b8c4] p-3 sm:p-6 lg:p-10 font-sans text-slate-800 flex items-center justify-center selection:bg-amber-400 selection:text-slate-900">
-      {/* Outer Rounded Tablet Frame matching template */}
-      <div className="w-full max-w-7xl bg-[#fbf9f2] rounded-[36px] sm:rounded-[44px] shadow-2xl overflow-hidden p-5 sm:p-8 lg:p-10 border border-white/80 relative space-y-6 lg:space-y-8">
+    <div className="min-h-screen bg-[#fbf9f2] sm:bg-[#b0b8c4] p-0 sm:p-6 lg:p-10 font-sans text-slate-800 flex items-center justify-center selection:bg-amber-400 selection:text-slate-900">
+      {/* Outer Rounded Tablet Frame matching template (Edge-to-edge on mobile) */}
+      <div className="w-full max-w-7xl bg-[#fbf9f2] rounded-none sm:rounded-[36px] lg:rounded-[44px] shadow-none sm:shadow-2xl overflow-hidden p-3.5 sm:p-8 lg:p-10 border-0 sm:border border-white/80 relative space-y-5 sm:space-y-6 lg:space-y-8 min-h-screen sm:min-h-0">
         
         {/* Subtle Ambient Warm Yellow / Cream Corner Glows */}
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-amber-100/40 rounded-full blur-3xl pointer-events-none" />
 
         {/* 1. TOP NAVIGATION BAR */}
-        <header className="relative z-20 flex flex-wrap items-center justify-between gap-4">
-          {/* Brand Pill Logo */}
-          <div 
-            onClick={() => setActiveNavTab('Dashboard')}
-            className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-slate-300/70 shadow-xs cursor-pointer hover:bg-white transition"
-          >
-            <BrandLogo size="xs" />
-            <span className="font-black tracking-wider text-sm text-slate-900 uppercase">
-              MONITORING
-            </span>
+        <header className="relative z-20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center justify-between w-full sm:w-auto">
+            {/* Brand Pill Logo */}
+            <div 
+              onClick={() => setActiveNavTab('Dashboard')}
+              className="flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-white/80 backdrop-blur-sm rounded-full border border-slate-300/70 shadow-xs cursor-pointer hover:bg-white transition"
+            >
+              <BrandLogo size="xs" />
+              <span className="font-black tracking-wider text-xs sm:text-sm text-slate-900 uppercase">
+                MONITORING
+              </span>
+            </div>
+
+            {/* Mobile Utility Controls (<sm) */}
+            <div className="flex items-center gap-1.5 sm:hidden">
+              <button
+                onClick={onToggleRole}
+                className="flex items-center gap-1 px-2.5 py-1 bg-white/80 hover:bg-white rounded-full border border-slate-300/70 text-[11px] font-medium text-slate-700 shadow-xs"
+                title="Switch View"
+              >
+                {isInstaller ? (
+                  <>
+                    <Wrench className="w-3 h-3 text-purple-600" />
+                    <span>Admin</span>
+                  </>
+                ) : (
+                  <>
+                    <User className="w-3 h-3 text-amber-600" />
+                    <span>Client</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowNotifications(!showNotifications);
+                  setShowProfileMenu(false);
+                }}
+                className="w-8 h-8 bg-white/80 hover:bg-white rounded-full border border-slate-300/70 flex items-center justify-center text-slate-700 relative shadow-xs"
+                title="View Project Alerts"
+              >
+                <Bell className="w-3.5 h-3.5" />
+                {activeBlockers.length > 0 && (
+                  <span className="w-2 h-2 rounded-full bg-amber-500 absolute top-1 right-1 ring-2 ring-white animate-pulse" />
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowProfileMenu(!showProfileMenu);
+                  setShowNotifications(false);
+                }}
+                className="w-8 h-8 rounded-full bg-[#1a1c22] hover:bg-slate-800 text-amber-300 flex items-center justify-center font-bold text-xs shadow-xs border border-white overflow-hidden"
+              >
+                {currentUser.name.charAt(0)}
+              </button>
+            </div>
           </div>
 
-          {/* Pill Navigation Links */}
-          <nav className="flex items-center gap-1 bg-white/70 backdrop-blur-sm p-1.5 rounded-full border border-slate-200/80 shadow-xs text-xs font-medium overflow-x-auto">
+          {/* Pill Navigation Links (Scrollable on mobile) */}
+          <nav className="flex items-center gap-1 bg-white/70 backdrop-blur-sm p-1 sm:p-1.5 rounded-full border border-slate-200/80 shadow-xs text-xs font-medium overflow-x-auto max-w-full no-scrollbar">
             {(['Dashboard', 'Checklist', 'Cameras', 'Timeline', 'Report'] as const).map((tab) => {
               const isActive = activeNavTab === tab;
               const isTimeline = tab === 'Timeline';
@@ -196,7 +243,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     type="button"
                     disabled
                     title="Timeline schedule is locked for client view"
-                    className="px-3.5 py-1.5 rounded-full whitespace-nowrap text-slate-400 bg-slate-100/70 border border-slate-200/60 flex items-center gap-1.5 cursor-not-allowed opacity-60 text-xs font-medium"
+                    className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full whitespace-nowrap text-slate-400 bg-slate-100/70 border border-slate-200/60 flex items-center gap-1.5 cursor-not-allowed opacity-60 text-xs font-medium"
                   >
                     <Lock className="w-3 h-3 text-slate-400" />
                     <span>Timeline</span>
@@ -215,7 +262,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     setShowNotifications(false);
                     setShowProfileMenu(false);
                   }}
-                  className={`px-4 py-1.5 rounded-full transition cursor-pointer whitespace-nowrap ${
+                  className={`px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full transition cursor-pointer whitespace-nowrap text-xs ${
                     isActive 
                       ? 'bg-[#1a1c22] text-white font-semibold shadow-sm' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
@@ -237,8 +284,8 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
             })}
           </nav>
 
-          {/* Right Utility Controls */}
-          <div className="flex items-center gap-2 relative">
+          {/* Right Utility Controls (Desktop sm: and above) */}
+          <div className="hidden sm:flex items-center gap-2 relative">
             {/* Role Switcher Pill */}
             <button
               onClick={onToggleRole}
@@ -406,7 +453,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                   </div>
 
                   {/* 3 Metric Counters matching Crextio top-right */}
-                  <div className="flex items-center gap-6 sm:gap-8 bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/15 shadow-md">
+                  <div className="flex items-center justify-around sm:justify-start gap-3 sm:gap-8 bg-slate-900/80 backdrop-blur-md px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-2xl border border-white/15 shadow-md w-full sm:w-auto">
                     <div 
                       onClick={() => setActiveNavTab('Cameras')}
                       className="flex items-center gap-2.5 cursor-pointer group"
