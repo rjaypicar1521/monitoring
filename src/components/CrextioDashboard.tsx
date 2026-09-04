@@ -467,36 +467,59 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                 </div>
               )}
 
-              {/* Segmented Progress Capsule Bar matching template */}
-              <div className="space-y-1.5 pt-1">
-                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 px-1">
-                  <span>Installation Phases</span>
-                  <span className="font-mono">{percentComplete}% Overall Pace</span>
+              {/* Visual Installation Progress Bar */}
+              <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-3.5 border border-slate-300/80 shadow-xs space-y-2.5">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="font-bold text-slate-900 text-sm">Installation Progress</span>
+                    <span className="text-[11px] font-medium text-slate-500">
+                      ({project.installedCameras} of {project.totalCameras} Endpoints Mounted)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5 font-mono text-xs">
+                    <span className="font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                      {percentComplete}% Mounted
+                    </span>
+                    <span className="text-slate-500 text-[11px]">
+                      Handover: <strong className="text-slate-800">{project.targetLaunchDate || '2026-09-12'}</strong>
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <div className="bg-[#1e2025] text-white px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-1.5 shadow-xs shrink-0">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                    <span>Mounted {percentComplete}%</span>
+                {/* Main Visual Progress Track & Bar */}
+                <div className="relative w-full bg-slate-200/80 rounded-full h-3.5 overflow-hidden border border-slate-300/80 shadow-inner">
+                  <div 
+                    className="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-emerald-500 rounded-full transition-all duration-700 relative shadow-xs"
+                    style={{ width: `${Math.max(percentComplete, 4)}%` }}
+                  >
+                    <div className="absolute inset-0 bg-white/20 animate-pulse" />
                   </div>
+                </div>
 
-                  <div className="bg-[#fcd34d] text-slate-900 px-4 py-2 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-xs shrink-0">
-                    <span>Wiring 100%</span>
+                {/* Progress Stages Footnotes */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-0.5 text-[11px]">
+                  <div className="flex items-center gap-1.5 text-slate-600">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>Wiring: <strong className="text-slate-900">100%</strong></span>
                   </div>
-
-                  <div className="flex-1 bg-white/70 border border-slate-300 rounded-full h-9 flex items-center px-4 justify-between text-xs text-slate-600 font-medium overflow-hidden">
+                  <div className="flex items-center gap-1.5 text-slate-600">
+                    <Camera className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                    <span>Mounted: <strong className="text-slate-900">{project.installedCameras}/{project.totalCameras}</strong></span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-slate-600 truncate">
+                    <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${activeBlockers.length > 0 ? 'text-amber-500' : 'text-emerald-600'}`} />
                     <span className="truncate">
-                      {activeBlockers.length > 0 ? activeBlockers[0].description : 'All Active Hardware Nominal'}
-                    </span>
-                    <span className={`text-[10px] uppercase font-mono font-bold px-2 py-0.5 rounded-full shrink-0 ml-2 ${
-                      activeBlockers.length > 0 ? 'text-amber-600 bg-amber-100' : 'text-emerald-700 bg-emerald-100'
-                    }`}>
-                      {activeBlockers.length > 0 ? 'Pending' : 'Nominal'}
+                      {activeBlockers.length > 0 ? (
+                        <span className="text-amber-700 font-semibold">{activeBlockers.length} Pending Blocker</span>
+                      ) : (
+                        <span className="text-emerald-700 font-semibold">Hardware Nominal</span>
+                      )}
                     </span>
                   </div>
-
-                  <div className="border border-slate-300 rounded-full px-4 py-2 text-xs font-mono text-slate-700 bg-white/40 shrink-0">
-                    Handover: {project.targetLaunchDate || 'Sep 25'}
+                  <div className="flex items-center gap-1.5 text-slate-600 sm:justify-end">
+                    <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>{taskPercent}% Tasks Done</span>
                   </div>
                 </div>
               </div>
