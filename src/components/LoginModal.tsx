@@ -14,15 +14,15 @@ interface LoginModalProps {
 export const PRESET_USERS: Record<UserRole, AuthUser> = {
   client: {
     id: 'usr-client',
-    name: 'Alex Morgan',
+    name: 'UPC Administration',
     role: 'client',
-    title: 'Client Project Sponsor'
+    title: 'Client Project Sponsor (UPC Philippines)'
   },
   installer: {
     id: 'usr-installer',
-    name: 'Marcus Vance',
+    name: 'Rjay Picar',
     role: 'installer',
-    title: 'Lead Installer & Administrator'
+    title: 'Lead Systems Architect (RMVN Solutions)'
   }
 };
 

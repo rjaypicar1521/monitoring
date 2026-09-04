@@ -173,40 +173,40 @@ export const TaskPhotoEvidenceModal: React.FC<TaskPhotoEvidenceModalProps> = ({
                 type="button"
                 onClick={() =>
                   handlePresetSelect(
-                    'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=800&q=80',
-                    'Dome camera aligned and tested'
+                    '/evidence/image1.jpg',
+                    'Dome camera installed and aligned'
                   )
                 }
                 className="p-1.5 rounded-xl border border-slate-200 hover:border-amber-400 text-left bg-slate-50 hover:bg-amber-50/50 transition cursor-pointer text-[10px]"
               >
-                <span className="font-bold block text-slate-800">Dome Camera</span>
+                <span className="font-bold block text-slate-800">Cashier Dome</span>
                 <span className="text-slate-400 text-[9px]">Aligned & tested</span>
               </button>
               <button
                 type="button"
                 onClick={() =>
                   handlePresetSelect(
-                    'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=800&q=80',
-                    'Bullet camera mounted at entrance'
+                    '/evidence/image2.jpg',
+                    'Front Desk camera installed above reception'
                   )
                 }
                 className="p-1.5 rounded-xl border border-slate-200 hover:border-amber-400 text-left bg-slate-50 hover:bg-amber-50/50 transition cursor-pointer text-[10px]"
               >
-                <span className="font-bold block text-slate-800">Bullet Camera</span>
-                <span className="text-slate-400 text-[9px]">Mounted at doorway</span>
+                <span className="font-bold block text-slate-800">Front Desk</span>
+                <span className="text-slate-400 text-[9px]">Above reception</span>
               </button>
               <button
                 type="button"
                 onClick={() =>
                   handlePresetSelect(
-                    'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=800&q=80',
-                    'Live video feeds confirmed on NVR display'
+                    '/evidence/image3.jpg',
+                    'Live video feeds confirmed on CCTV monitor'
                   )
                 }
                 className="p-1.5 rounded-xl border border-slate-200 hover:border-amber-400 text-left bg-slate-50 hover:bg-amber-50/50 transition cursor-pointer text-[10px]"
               >
                 <span className="font-bold block text-slate-800">NVR Display</span>
-                <span className="text-slate-400 text-[9px]">Feeds live on screen</span>
+                <span className="text-slate-400 text-[9px]">Feeds live on monitor</span>
               </button>
             </div>
           </div>

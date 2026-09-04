@@ -926,29 +926,29 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-[#111317] text-white rounded-[24px] p-5 shadow-lg flex items-center justify-between">
                 <div className="space-y-1">
-                  <div className="text-[10px] font-mono uppercase text-cyan-400 font-bold">Area 1 & 2</div>
+                  <div className="text-[10px] font-mono uppercase text-cyan-400 font-bold">Area 1 & 2 • Complete</div>
                   <div className="font-bold text-sm">Cashier & Front Desk</div>
-                  <div className="text-xs text-slate-400 font-mono">2 Cameras • Live Verified 100%</div>
+                  <div className="text-xs text-slate-400 font-mono">2 Cameras • Feeds Live Verified 100%</div>
                 </div>
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
               </div>
 
               <div className="bg-[#111317] text-white rounded-[24px] p-5 shadow-lg flex items-center justify-between">
                 <div className="space-y-1">
-                  <div className="text-[10px] font-mono uppercase text-cyan-400 font-bold">Area 3</div>
+                  <div className="text-[10px] font-mono uppercase text-amber-400 font-bold">Area 3 • On Hold</div>
                   <div className="font-bold text-sm">Backdoor Entrance</div>
-                  <div className="text-xs text-slate-400 font-mono">1 Camera • Mounted & Ready</div>
-                </div>
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-              </div>
-
-              <div className="bg-[#111317] text-white rounded-[24px] p-5 shadow-lg flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="text-[10px] font-mono uppercase text-amber-400 font-bold">Area 4 & 5</div>
-                  <div className="font-bold text-sm">Entrance Door & AP Relocation</div>
-                  <div className="text-xs text-slate-400 font-mono">Rough-in 50% • AP Pending</div>
+                  <div className="text-xs text-slate-400 font-mono">Deferred for privacy • Cable prepared</div>
                 </div>
                 <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+              </div>
+
+              <div className="bg-[#111317] text-white rounded-[24px] p-5 shadow-lg flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="text-[10px] font-mono uppercase text-slate-400 font-bold">Area 4 & 5 • Pending</div>
+                  <div className="font-bold text-sm">Entrance Door & AP Relocation</div>
+                  <div className="text-xs text-slate-400 font-mono">Camera pending • Trace PoE injectors</div>
+                </div>
+                <div className="w-2.5 h-2.5 rounded-full bg-slate-500" />
               </div>
             </div>
 
@@ -973,7 +973,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 </div>
 
                 <span className="text-xs font-mono font-bold text-slate-500">
-                  3 Areas Complete • 1 Rough-In
+                  2 Operational • 1 Deferred • 2 Pending
                 </span>
               </div>
 
@@ -981,16 +981,16 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 {/* Photo 1: Cashier */}
                 <div
                   onClick={() => setLightboxPhoto({
-                    url: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=1200&q=80',
-                    title: 'Cashier Area (100%)',
-                    caption: 'Dome camera aligned and video feed verified on CCTV monitor',
+                    url: '/evidence/image1.jpg',
+                    title: 'Cashier Area (100% Complete)',
+                    caption: 'Dome camera installed and aligned; video feed verified on CCTV monitor',
                     area: 'Cashier'
                   })}
                   className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
                 >
                   <div className="relative h-36 overflow-hidden">
                     <img
-                      src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=600&q=80"
+                      src="/evidence/image1.jpg"
                       alt="Cashier Dome Camera"
                       className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
                     />
@@ -999,24 +999,24 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                     </div>
                   </div>
                   <div className="p-3 bg-white space-y-1">
-                    <div className="font-bold text-xs text-slate-900">Dome camera aligned</div>
-                    <div className="text-[11px] text-slate-500">Installed, tested, and working</div>
+                    <div className="font-bold text-xs text-slate-900">Dome camera installed & aligned</div>
+                    <div className="text-[11px] text-emerald-600 font-semibold">Installed, tested, and working</div>
                   </div>
                 </div>
 
                 {/* Photo 2: Front Desk */}
                 <div
                   onClick={() => setLightboxPhoto({
-                    url: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=1200&q=80',
-                    title: 'Front Desk Reception (100%)',
-                    caption: 'Camera above reception signage aligned and tested',
+                    url: '/evidence/image2.jpg',
+                    title: 'Front Desk Reception (100% Complete)',
+                    caption: 'Camera installed above reception signage; video feed verified on CCTV monitor',
                     area: 'Front Desk'
                   })}
                   className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
                 >
                   <div className="relative h-36 overflow-hidden">
                     <img
-                      src="https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=600&q=80"
+                      src="/evidence/image2.jpg"
                       alt="Front Desk Camera"
                       className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
                     />
@@ -1026,59 +1026,60 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                   </div>
                   <div className="p-3 bg-white space-y-1">
                     <div className="font-bold text-xs text-slate-900">Camera above reception</div>
-                    <div className="text-[11px] text-slate-500">Installed, tested, and working</div>
+                    <div className="text-[11px] text-emerald-600 font-semibold">Installed, tested, and working</div>
                   </div>
                 </div>
 
-                {/* Photo 3: Backdoor */}
+                {/* Photo 3: CCTV Monitor Feeds */}
                 <div
                   onClick={() => setLightboxPhoto({
-                    url: 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=1200&q=80',
-                    title: 'Backdoor Entrance (100%)',
-                    caption: 'Camera mounted at door, queued for monitor verification',
+                    url: '/evidence/image3.jpg',
+                    title: 'Live Monitoring Confirmation (NVR Display)',
+                    caption: 'Cashier and Front Desk camera feeds confirmed live on CCTV monitor (03 September 2026)',
+                    area: 'NVR Station'
+                  })}
+                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
+                >
+                  <div className="relative h-36 overflow-hidden">
+                    <img
+                      src="/evidence/image3.jpg"
+                      alt="CCTV Monitor Display"
+                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
+                    />
+                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-mono font-bold text-[10px] flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-pulse" />
+                      Live Feeds
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white space-y-1">
+                    <div className="font-bold text-xs text-slate-900">NVR Multi-View Display</div>
+                    <div className="text-[11px] text-emerald-600 font-semibold">Two Feeds Confirmed Live</div>
+                  </div>
+                </div>
+
+                {/* Photo 4: Backdoor Site Condition */}
+                <div
+                  onClick={() => setLightboxPhoto({
+                    url: '/evidence/image4.jpg',
+                    title: 'Backdoor Site Condition (Deferred)',
+                    caption: 'Existing cable is prepared at backdoor entrance; mounting deferred for occupant privacy',
                     area: 'Backdoor'
                   })}
                   className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
                 >
                   <div className="relative h-36 overflow-hidden">
                     <img
-                      src="https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=600&q=80"
-                      alt="Backdoor Camera"
+                      src="/evidence/image4.jpg"
+                      alt="Backdoor Camera Site Condition"
                       className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
                     />
-                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white font-mono font-bold text-[10px]">
-                      Backdoor 100%
+                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-mono font-bold text-[10px]">
+                      Deferred / On Hold
                     </div>
                   </div>
                   <div className="p-3 bg-white space-y-1">
-                    <div className="font-bold text-xs text-slate-900">Camera mounted at door</div>
-                    <div className="text-[11px] text-slate-500">Installed and mounted — completed</div>
-                  </div>
-                </div>
-
-                {/* Photo 4: Live NVR Display */}
-                <div
-                  onClick={() => setLightboxPhoto({
-                    url: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=1200&q=80',
-                    title: 'Live Monitoring Confirmation (NVR Display)',
-                    caption: 'Cashier and Front Desk camera feeds verified live on CCTV monitor',
-                    area: 'NVR Display'
-                  })}
-                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
-                >
-                  <div className="relative h-36 overflow-hidden">
-                    <img
-                      src="https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=600&q=80"
-                      alt="NVR Monitor Display"
-                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
-                    />
-                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-emerald-500 text-white font-mono font-bold text-[10px]">
-                      Feeds Confirmed Live
-                    </div>
-                  </div>
-                  <div className="p-3 bg-white space-y-1">
-                    <div className="font-bold text-xs text-slate-900">Live Monitoring Confirmation</div>
-                    <div className="text-[11px] text-slate-500">NVR display, 03 September 2026</div>
+                    <div className="font-bold text-xs text-slate-900">Cable prepared at entrance</div>
+                    <div className="text-[11px] text-amber-700 font-semibold">Temporary sleeping quarters</div>
                   </div>
                 </div>
               </div>

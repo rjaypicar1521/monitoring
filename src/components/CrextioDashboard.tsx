@@ -984,16 +984,16 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                 {/* Photo 1: Cashier */}
                 <div
                   onClick={() => setLightboxPhoto({
-                    url: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=1200&q=80',
-                    title: 'Cashier Area (100%)',
-                    caption: 'Dome camera aligned and video feed verified on CCTV monitor',
+                    url: '/evidence/image1.jpg',
+                    title: 'Cashier Area (100% Complete)',
+                    caption: 'Dome camera installed and aligned; video feed verified on CCTV monitor',
                     area: 'Cashier'
                   })}
                   className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
                 >
                   <div className="relative h-36 overflow-hidden">
                     <img
-                      src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=600&q=80"
+                      src="/evidence/image1.jpg"
                       alt="Cashier Dome Camera"
                       className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
                     />
@@ -1002,24 +1002,24 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     </div>
                   </div>
                   <div className="p-3 bg-white space-y-1">
-                    <div className="font-bold text-xs text-slate-900">Dome camera aligned</div>
-                    <div className="text-[11px] text-slate-500">Installed, tested, and working</div>
+                    <div className="font-bold text-xs text-slate-900">Dome camera installed & aligned</div>
+                    <div className="text-[11px] text-emerald-600 font-semibold">Installed, tested, and working</div>
                   </div>
                 </div>
 
                 {/* Photo 2: Front Desk */}
                 <div
                   onClick={() => setLightboxPhoto({
-                    url: 'https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=1200&q=80',
-                    title: 'Front Desk Reception (100%)',
-                    caption: 'Camera above reception signage aligned and tested',
+                    url: '/evidence/image2.jpg',
+                    title: 'Front Desk Reception (100% Complete)',
+                    caption: 'Camera installed above reception signage; video feed verified on CCTV monitor',
                     area: 'Front Desk'
                   })}
                   className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
                 >
                   <div className="relative h-36 overflow-hidden">
                     <img
-                      src="https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=600&q=80"
+                      src="/evidence/image2.jpg"
                       alt="Front Desk Camera"
                       className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
                     />
@@ -1029,49 +1029,23 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                   </div>
                   <div className="p-3 bg-white space-y-1">
                     <div className="font-bold text-xs text-slate-900">Camera above reception</div>
-                    <div className="text-[11px] text-slate-500">Installed, tested, and working</div>
+                    <div className="text-[11px] text-emerald-600 font-semibold">Installed, tested, and working</div>
                   </div>
                 </div>
 
-                {/* Photo 3: Backdoor */}
+                {/* Photo 3: CCTV Monitor Feeds */}
                 <div
                   onClick={() => setLightboxPhoto({
-                    url: 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=1200&q=80',
-                    title: 'Backdoor Entrance (100%)',
-                    caption: 'Camera mounted at door, queued for monitor verification',
-                    area: 'Backdoor'
-                  })}
-                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
-                >
-                  <div className="relative h-36 overflow-hidden">
-                    <img
-                      src="https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=600&q=80"
-                      alt="Backdoor Camera"
-                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
-                    />
-                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white font-mono font-bold text-[10px]">
-                      Backdoor 100%
-                    </div>
-                  </div>
-                  <div className="p-3 bg-white space-y-1">
-                    <div className="font-bold text-xs text-slate-900">Camera mounted at door</div>
-                    <div className="text-[11px] text-slate-500">Installed, ready for NVR sync</div>
-                  </div>
-                </div>
-
-                {/* Photo 4: NVR Monitor Feeds */}
-                <div
-                  onClick={() => setLightboxPhoto({
-                    url: 'https://images.unsplash.com/photo-1551808525-51a94da548ce?auto=format&fit=crop&w=1200&q=80',
-                    title: 'CCTV Monitor Feeds Verified',
-                    caption: 'Cashier and Front Desk camera feeds confirmed live on CCTV monitor (03 Sept 2026)',
+                    url: '/evidence/image3.jpg',
+                    title: 'Live Monitoring Confirmation (NVR Display)',
+                    caption: 'Cashier and Front Desk camera feeds confirmed live on CCTV monitor (03 September 2026)',
                     area: 'NVR Station'
                   })}
                   className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
                 >
                   <div className="relative h-36 overflow-hidden">
                     <img
-                      src="https://images.unsplash.com/photo-1551808525-51a94da548ce?auto=format&fit=crop&w=600&q=80"
+                      src="/evidence/image3.jpg"
                       alt="CCTV Monitor Feed"
                       className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
                     />
@@ -1082,7 +1056,33 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                   </div>
                   <div className="p-3 bg-white space-y-1">
                     <div className="font-bold text-xs text-slate-900">NVR Multi-View Display</div>
-                    <div className="text-[11px] text-emerald-600 font-semibold">Verified Live Feeds</div>
+                    <div className="text-[11px] text-emerald-600 font-semibold">Two Feeds Confirmed Live</div>
+                  </div>
+                </div>
+
+                {/* Photo 4: Backdoor Site Condition */}
+                <div
+                  onClick={() => setLightboxPhoto({
+                    url: '/evidence/image4.jpg',
+                    title: 'Backdoor Site Condition (Deferred)',
+                    caption: 'Existing cable is prepared at backdoor entrance; mounting deferred for occupant privacy',
+                    area: 'Backdoor'
+                  })}
+                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
+                >
+                  <div className="relative h-36 overflow-hidden">
+                    <img
+                      src="/evidence/image4.jpg"
+                      alt="Backdoor Camera Site Condition"
+                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
+                    />
+                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-mono font-bold text-[10px]">
+                      Deferred / On Hold
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white space-y-1">
+                    <div className="font-bold text-xs text-slate-900">Cable prepared at entrance</div>
+                    <div className="text-[11px] text-amber-700 font-semibold">Temporary sleeping quarters</div>
                   </div>
                 </div>
               </div>
