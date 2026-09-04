@@ -1,6 +1,6 @@
-﻿import { CCTVProject, CameraEndpoint, TechnicianMember } from '../types';
+import { CCTVProject, CameraEndpoint, TechnicianMember } from '../types';
 
-const STORAGE_KEY = 'cctv_monitoring_projects_v4';
+const STORAGE_KEY = 'cctv_monitoring_projects_v5';
 
 export const DEFAULT_CAMERAS: CameraEndpoint[] = [
   { id: 'CAM-01', name: 'Cashier Dome Camera', zone: 'Ground Floor - Cashier', lens: '2.8mm Wide Angle Dome', ip: '192.168.1.101', port: 'Port 1', status: 'Mounted' },
@@ -187,11 +187,21 @@ export function loadProjects(): CCTVProject[] {
       if (Array.isArray(parsed) && parsed.length > 0) {
         const validProjects = parsed.filter((p: CCTVProject) => p.id === 'proj-cctv-upc');
         if (validProjects.length > 0) {
-          return validProjects.map((p: CCTVProject) => ({
-            ...p,
-            cameras: p.cameras && p.cameras.length > 0 ? p.cameras : DEFAULT_CAMERAS,
-            technicians: p.technicians && p.technicians.length > 0 ? p.technicians : DEFAULT_TECHNICIANS
-          }));
+          return validProjects.map((p: CCTVProject) => {
+            const currentTechs = p.technicians && p.technicians.length > 0 ? p.technicians : DEFAULT_TECHNICIANS;
+            const updatedTechs = currentTechs.map(t => {
+              if (t.name === 'Marcus Vance' || t.id === 'tech-1') {
+                return { ...t, name: 'Rjay Picar' };
+              }
+              return t;
+            });
+            return {
+              ...p,
+              teamLead: p.teamLead === 'Marcus Vance' ? 'Rjay Picar' : (p.teamLead || 'Rjay Picar'),
+              cameras: p.cameras && p.cameras.length > 0 ? p.cameras : DEFAULT_CAMERAS,
+              technicians: updatedTechs
+            };
+          });
         }
       }
     }

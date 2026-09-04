@@ -124,7 +124,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
 
   // Form States - Blocker
   const [newBlockerDesc, setNewBlockerDesc] = useState('');
-  const [newBlockerOwner, setNewBlockerOwner] = useState('Marcus Vance');
+  const [newBlockerOwner, setNewBlockerOwner] = useState('Rjay Picar');
   const [newBlockerAction, setNewBlockerAction] = useState('');
 
   // Form States - Technician

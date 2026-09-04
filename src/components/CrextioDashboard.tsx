@@ -131,7 +131,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
     : 0;
 
   const leadTech = (project.technicians && project.technicians[0]) || {
-    name: project.teamLead || 'Marcus Vance',
+    name: project.teamLead || 'Rjay Picar',
     role: 'Lead CCTV Installer',
     status: 'On Duty'
   };

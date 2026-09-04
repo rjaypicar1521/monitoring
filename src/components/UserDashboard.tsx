@@ -382,7 +382,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
               {noteSent && (
                 <div className="p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-500/30 text-xs text-emerald-300 flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>Note sent to lead installer (Marcus Vance).</span>
+                  <span>Note sent to lead installer (Rjay Picar).</span>
                 </div>
               )}
             </div>
@@ -418,7 +418,7 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
             <form onSubmit={handleSendNote} className="space-y-3">
               <div>
                 <label className="text-xs text-slate-300 font-medium">To:</label>
-                <div className="text-xs text-slate-400 font-mono mt-0.5">Marcus Vance (Lead Tech & Admin)</div>
+                <div className="text-xs text-slate-400 font-mono mt-0.5">Rjay Picar (Lead Tech & Admin)</div>
               </div>
               <div>
                 <label className="text-xs text-slate-300 font-medium">Your Message / Question:</label>

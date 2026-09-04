@@ -95,7 +95,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // People roster
   const teamMembers = [
-    { name: 'Marcus Vance', role: 'Lead Tech & Administrator', access: 'Admin', email: 'marcus@rmvn-cctv.com', active: true },
+    { name: 'Rjay Picar', role: 'Lead Systems Architect & Admin', access: 'Admin', email: 'rjay@rmvn-cctv.com', active: true },
     { name: 'Alex Kim', role: 'Field Technician (Wiring & Conduit)', access: 'Installer', email: 'alex.k@rmvn-cctv.com', active: true },
     { name: 'Dave Miller', role: 'Field Technician (Camera Mounts)', access: 'Installer', email: 'dave.m@rmvn-cctv.com', active: true },
     { name: 'Elena Rostova', role: 'Network & Recording Engineer', access: 'Installer', email: 'elena.r@rmvn-cctv.com', active: true },
@@ -104,7 +104,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Recent activity logs
   const activityLogs = [
-    { time: 'Today, 2:15 PM', user: 'Marcus Vance', action: 'Verified 12 mounted camera viewing angles' },
+    { time: 'Today, 2:15 PM', user: 'Rjay Picar', action: 'Verified 12 mounted camera viewing angles' },
     { time: 'Yesterday, 4:30 PM', user: 'Alex Kim', action: 'Flagged outside power hookup blocker waiting on electrician' },
     { time: 'Sep 1, 11:00 AM', user: 'Dave Miller', action: 'Marked "Run indoor wiring" complete (100%)' },
     { time: 'Aug 29, 9:15 AM', user: 'Elena Rostova', action: 'Initialized central video recording box hard drives' },

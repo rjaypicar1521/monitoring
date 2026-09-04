@@ -308,7 +308,7 @@ export const UserInputModal: React.FC<UserInputModalProps> = ({
                 <label className="block text-xs font-medium text-slate-300 mb-1">Task Owner</label>
                 <input
                   type="text"
-                  placeholder="e.g. Marcus Vance"
+                  placeholder="e.g. Rjay Picar"
                   value={taskOwner}
                   onChange={(e) => setTaskOwner(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
@@ -414,7 +414,7 @@ export const UserInputModal: React.FC<UserInputModalProps> = ({
                 <label className="block text-xs font-medium text-slate-300 mb-1">Owner</label>
                 <input
                   type="text"
-                  placeholder="Marcus Vance"
+                  placeholder="Rjay Picar"
                   value={riskOwner}
                   onChange={(e) => setRiskOwner(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-sky-500"
