@@ -49,7 +49,6 @@ interface CrextioDashboardProps {
   onAddNote?: (content: string, author: string, authorRole: 'client' | 'installer') => void;
   onDeleteNote?: (noteId: string) => void;
   onCompleteTaskWithEvidence?: (taskId: string, photoEvidence: string, photoCaption: string) => void;
-  onOpenImportModal?: () => void;
 }
 
 export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
@@ -63,8 +62,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   onToggleRole,
   onAddNote,
   onDeleteNote,
-  onCompleteTaskWithEvidence,
-  onOpenImportModal
+  onCompleteTaskWithEvidence
 }) => {
   const [activeNavTab, setActiveNavTab] = useState<'Dashboard' | 'Checklist' | 'Cameras' | 'Timeline' | 'Report'>('Dashboard');
   const [expandedSection, setExpandedSection] = useState<'devices' | 'specs' | 'wiring' | null>('devices');
@@ -227,17 +225,6 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               )}
             </button>
 
-            {/* Import DOCX Pill */}
-            {onOpenImportModal && (
-              <button
-                onClick={onOpenImportModal}
-                className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 bg-white/80 hover:bg-white rounded-full border border-slate-300/70 text-xs font-semibold text-slate-700 shadow-xs transition cursor-pointer"
-                title="Import CCTV project from .docx report"
-              >
-                <FileText className="w-3.5 h-3.5 text-amber-600" />
-                <span>Import DOCX</span>
-              </button>
-            )}
 
             {/* Copy Report Pill */}
             <button
@@ -382,19 +369,6 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     <span className="font-bold text-slate-900 truncate max-w-[120px]">{project.name}</span>
                   </div>
 
-                  {onOpenImportModal && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onOpenImportModal();
-                        setShowProfileMenu(false);
-                      }}
-                      className="w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl text-xs font-bold transition cursor-pointer border border-amber-200"
-                    >
-                      <FileText className="w-3.5 h-3.5 text-amber-700" />
-                      <span>Import Report (.docx)</span>
-                    </button>
-                  )}
                 </div>
 
                 <button
@@ -533,7 +507,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               
               {/* LEFT COLUMN: Profile Card & Accordion Details */}
               <div className="lg:col-span-3 space-y-4 flex flex-col justify-between">
-                <div className="relative rounded-[28px] overflow-hidden bg-slate-900 shadow-md border border-slate-200 group h-72">
+                <div className="relative rounded-[22px] overflow-hidden bg-slate-900 shadow-sm border border-slate-200 group h-36">
                   <img
                     src={facePhoto}
                     alt="Lead Installer"
@@ -541,20 +515,20 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                   />
 
                   {/* Top Action Overlay: Upload Photo / Reset */}
-                  <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5">
+                  <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
                     {facePhoto !== DEFAULT_FACE_PHOTO && (
                       <button
                         type="button"
                         onClick={handleResetPhoto}
-                        className="p-2 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md text-white border border-white/30 shadow-md transition cursor-pointer"
+                        className="p-1 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md text-white border border-white/30 shadow-md transition cursor-pointer"
                         title="Reset to default photo"
                       >
-                        <RotateCcw className="w-3.5 h-3.5" />
+                        <RotateCcw className="w-3 h-3" />
                       </button>
                     )}
-                    <label className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md text-white text-xs font-semibold border border-white/30 cursor-pointer shadow-md transition hover:scale-105">
-                      <Upload className="w-3.5 h-3.5 text-amber-300" />
-                      <span>Upload Photo</span>
+                    <label className="flex items-center gap-1 px-2 py-1 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md text-white text-[10px] font-semibold border border-white/30 cursor-pointer shadow-md transition hover:scale-105">
+                      <Upload className="w-3 h-3 text-amber-300" />
+                      <span>Photo</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -564,17 +538,17 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     </label>
                   </div>
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent flex flex-col justify-end p-5 pointer-events-none">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-3.5 pointer-events-none">
                     <div className="flex items-center justify-between pointer-events-auto">
                       <div>
-                        <h3 className="text-white font-bold text-base leading-tight">
+                        <h3 className="text-white font-bold text-sm leading-tight">
                           {leadTech.name}
                         </h3>
-                        <p className="text-slate-300 text-xs font-medium">
+                        <p className="text-slate-300 text-[11px] font-medium">
                           {leadTech.role}
                         </p>
                       </div>
-                      <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-bold border border-white/30">
+                      <span className="px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-white text-[10px] font-bold border border-white/30">
                         {leadTech.status}
                       </span>
                     </div>

@@ -424,7 +424,6 @@ export const App: React.FC = () => {
           onAddNote={handleAddNote}
           onDeleteNote={handleDeleteNote}
           onCompleteTaskWithEvidence={handleCompleteTaskWithEvidence}
-          onOpenImportModal={() => setShowImportModal(true)}
         />
       ) : (
         /* REDESIGNED ADMIN DASHBOARD: Clean Enterprise SaaS with Interactive Kanban, Camera Fleet & Team Management */
