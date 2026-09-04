@@ -43,6 +43,7 @@ import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal } from './TaskPhotoEvidenceModal';
 import { Button as StatefulButton } from './ui/stateful-button';
 import { NotificationList, NotificationItem } from './ui/notification-list';
+import { KanbanProgress } from './ui/kanban-progress';
 
 interface EnterpriseAdminDashboardProps {
   project: CCTVProject;
@@ -105,6 +106,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
 }) => {
   const [activeTab, setActiveTab] = useState<'Dashboard' | 'Cameras' | 'Board' | 'Team' | 'Settings'>('Dashboard');
   const [showAdminNotifications, setShowAdminNotifications] = useState(false);
+  const [kanbanStageFilter, setKanbanStageFilter] = useState<'All' | 'In progress' | 'Done' | 'Blocked'>('All');
   
   // Modals
   const [showQuickCreateMenu, setShowQuickCreateMenu] = useState(false);
@@ -364,6 +366,8 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
 
   const activeBlockers = project.blockers.filter(b => !b.resolved);
   const doneTasks = project.tasks.filter(t => t.status === 'Done');
+  const inProgressTasks = project.tasks.filter(t => t.status === 'In progress');
+  const blockedTasks = project.tasks.filter(t => t.status === 'Blocked');
 
   const adminNotificationItems: NotificationItem[] = React.useMemo(() => {
     const items: NotificationItem[] = [];
@@ -1384,15 +1388,32 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
               </div>
             </div>
 
+            {/* Ant Design / Sketch Task Progress Summary Overview */}
+            <KanbanProgress
+              totalTasks={project.tasks.length}
+              inProgressTasks={inProgressTasks.length}
+              completedTasks={doneTasks.length}
+              failedTasks={blockedTasks.length}
+              onFilterClick={(status) => setKanbanStageFilter(status)}
+            />
+
             {/* 4 Kanban Columns */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
               {columns.map((col) => {
                 const columnTasks = project.tasks.filter(t => t.status === col.status);
+                const isSelected = kanbanStageFilter !== 'All' && col.status === kanbanStageFilter;
+                const isDimmed = kanbanStageFilter !== 'All' && col.status !== kanbanStageFilter;
 
                 return (
                   <div 
                     key={col.status}
-                    className="bg-white/80 backdrop-blur-sm rounded-[24px] p-4 border border-slate-200/90 shadow-xs space-y-3 min-h-[460px] flex flex-col justify-between"
+                    className={`bg-white/80 backdrop-blur-sm rounded-[24px] p-4 border shadow-xs space-y-3 min-h-[460px] flex flex-col justify-between transition-all duration-300 ${
+                      isSelected
+                        ? 'border-blue-500 ring-2 ring-blue-400/50 shadow-md scale-[1.01]'
+                        : isDimmed
+                        ? 'border-slate-200/60 opacity-40 hover:opacity-90'
+                        : 'border-slate-200/90'
+                    }`}
                   >
                     <div>
                       {/* Column Header */}
