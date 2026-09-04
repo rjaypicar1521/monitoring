@@ -42,6 +42,7 @@ import {
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal } from './TaskPhotoEvidenceModal';
 import { Button as StatefulButton } from './ui/stateful-button';
+import { NotificationList, NotificationItem } from './ui/notification-list';
 
 interface EnterpriseAdminDashboardProps {
   project: CCTVProject;
@@ -103,6 +104,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
   onOpenImportModal
 }) => {
   const [activeTab, setActiveTab] = useState<'Dashboard' | 'Cameras' | 'Board' | 'Team' | 'Settings'>('Dashboard');
+  const [showAdminNotifications, setShowAdminNotifications] = useState(false);
   
   // Modals
   const [showQuickCreateMenu, setShowQuickCreateMenu] = useState(false);
@@ -362,6 +364,43 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
 
   const activeBlockers = project.blockers.filter(b => !b.resolved);
   const doneTasks = project.tasks.filter(t => t.status === 'Done');
+
+  const adminNotificationItems: NotificationItem[] = React.useMemo(() => {
+    const items: NotificationItem[] = [];
+    activeBlockers.forEach((b) => {
+      items.push({
+        id: `blocker-${b.id}`,
+        title: b.description,
+        subtitle: `Action: ${b.unblockAction}`,
+        time: b.since || 'Active',
+        type: 'alert',
+        count: 1,
+        actionLabel: '✔ Resolve',
+        onAction: () => {
+          onResolveBlocker(b.id);
+        },
+      });
+    });
+    doneTasks.slice(0, 4).forEach((t) => {
+      items.push({
+        id: `done-${t.id}`,
+        title: `${t.title} (Completed)`,
+        subtitle: `Owner: ${t.owner}`,
+        time: 'Done',
+        type: 'success',
+      });
+    });
+    if (items.length === 0) {
+      items.push({
+        id: 'nominal',
+        title: 'Project on schedule',
+        subtitle: 'No active blockers reported',
+        time: 'Nominal',
+        type: 'info',
+      });
+    }
+    return items;
+  }, [activeBlockers, doneTasks, onResolveBlocker]);
 
   // Kanban Columns Data
   const columns: { status: TaskStatus; label: string; countColor: string; borderColor: string }[] = [
@@ -684,16 +723,41 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
             </div>
 
             {/* Notification Bell */}
-            <button
-              onClick={() => setActiveTab('Board')}
-              className="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition relative shadow-2xs cursor-pointer"
-              title={`${activeBlockers.length} Active Blockers`}
-            >
-              <Bell className="w-4 h-4" />
-              {activeBlockers.length > 0 && (
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 ring-2 ring-white absolute top-1 right-1 animate-pulse" />
+            <div className="relative">
+              <button
+                onClick={() => setShowAdminNotifications((prev) => !prev)}
+                className="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition relative shadow-2xs cursor-pointer"
+                title={`${activeBlockers.length} Active Blockers`}
+              >
+                <Bell className="w-4 h-4" />
+                {activeBlockers.length > 0 && (
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 ring-2 ring-white absolute top-1 right-1 animate-pulse" />
+                )}
+              </button>
+
+              {showAdminNotifications && (
+                <div className="absolute right-0 top-12 z-50 animate-in fade-in">
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowAdminNotifications(false)}
+                      className="absolute -top-2.5 -right-2.5 size-6 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs z-50 hover:bg-black shadow-md cursor-pointer border border-white"
+                      title="Close"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                    <NotificationList
+                      notifications={adminNotificationItems}
+                      title="Admin Alerts"
+                      onViewAll={() => {
+                        setActiveTab('Board');
+                        setShowAdminNotifications(false);
+                      }}
+                      className="w-80 shadow-2xl bg-white/95 backdrop-blur-md dark:bg-neutral-900 border border-slate-200/80"
+                    />
+                  </div>
+                </div>
               )}
-            </button>
+            </div>
           </div>
         </header>
 

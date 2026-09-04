@@ -37,6 +37,7 @@ import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal, LightboxPhoto } from './TaskPhotoEvidenceModal';
 import Velaris from './ui/velaris';
 import { Button as StatefulButton } from './ui/stateful-button';
+import { NotificationList, NotificationItem } from './ui/notification-list';
 
 interface CrextioDashboardProps {
   project: CCTVProject;
@@ -100,6 +101,45 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   const taskPercent = project.tasks.length > 0 
     ? Math.round((doneTasks.length / project.tasks.length) * 100) 
     : 0;
+
+  const notificationItems: NotificationItem[] = React.useMemo(() => {
+    const items: NotificationItem[] = [];
+    activeBlockers.forEach((b) => {
+      items.push({
+        id: `blocker-${b.id}`,
+        title: b.description,
+        subtitle: `Action: ${b.unblockAction}`,
+        time: b.since || 'Active',
+        type: 'alert',
+        count: 1,
+        actionLabel: isInstaller ? '✔ Mark Resolved' : undefined,
+        onAction: isInstaller
+          ? () => {
+              onResolveBlocker(b.id);
+            }
+          : undefined,
+      });
+    });
+    doneTasks.slice(0, 4).forEach((t) => {
+      items.push({
+        id: `done-${t.id}`,
+        title: `${t.title} (Completed)`,
+        subtitle: 'Verified & cleared',
+        time: 'Done',
+        type: 'success',
+      });
+    });
+    if (items.length === 0) {
+      items.push({
+        id: 'nominal',
+        title: 'Project on schedule',
+        subtitle: 'No active blockers reported',
+        time: 'Nominal',
+        type: 'info',
+      });
+    }
+    return items;
+  }, [activeBlockers, doneTasks, isInstaller, onResolveBlocker]);
 
   const leadTech = (project.technicians && project.technicians[0]) || {
     name: project.teamLead || 'Rjay Picar',
@@ -267,55 +307,24 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
             {/* NOTIFICATIONS DROPDOWN POPOVER */}
             {showNotifications && (
-              <div className="absolute right-0 top-12 w-80 bg-white rounded-2xl p-4 shadow-2xl border border-slate-200 z-50 animate-in fade-in space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                  <span className="font-bold text-xs text-slate-900 flex items-center gap-1.5">
-                    <Bell className="w-3.5 h-3.5 text-amber-500" />
-                    Project Notifications
-                  </span>
-                  <button onClick={() => setShowNotifications(false)} className="text-slate-400 hover:text-slate-600">
+              <div className="absolute right-0 top-12 z-50 animate-in fade-in">
+                <div className="relative">
+                  <button
+                    onClick={() => setShowNotifications(false)}
+                    className="absolute -top-2.5 -right-2.5 size-6 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs z-50 hover:bg-black shadow-md cursor-pointer border border-white"
+                    title="Close"
+                  >
                     <X className="w-3.5 h-3.5" />
                   </button>
-                </div>
-
-                <div className="space-y-2 text-xs">
-                  {activeBlockers.length === 0 && doneTasks.length === 0 ? (
-                    <div className="text-center py-4 text-slate-400 text-xs">
-                      No active alerts or blockers. Everything on schedule!
-                    </div>
-                  ) : (
-                    <>
-                      {activeBlockers.map((b) => (
-                        <div key={b.id} className="p-2.5 rounded-xl bg-amber-50 border border-amber-200/80 space-y-1">
-                          <div className="font-bold text-amber-900 flex items-center justify-between">
-                            <span className="flex items-center gap-1">⚠️ {b.description}</span>
-                            <span className="text-[10px] text-amber-700 font-normal">{b.since || 'Active'}</span>
-                          </div>
-                          <p className="text-[11px] text-amber-800">
-                            Action: {b.unblockAction}
-                          </p>
-                          {isInstaller && (
-                            <button
-                              onClick={() => {
-                                onResolveBlocker(b.id);
-                                setShowNotifications(false);
-                              }}
-                              className="mt-1 text-[10px] font-bold text-emerald-700 hover:underline cursor-pointer block"
-                            >
-                              ✔ Mark Resolved
-                            </button>
-                          )}
-                        </div>
-                      ))}
-
-                      {doneTasks.slice(0, 3).map((t) => (
-                        <div key={t.id} className="p-2 rounded-xl bg-emerald-50 border border-emerald-200/60 text-[11px] text-emerald-800 flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                          <span className="truncate">{t.title} (Completed)</span>
-                        </div>
-                      ))}
-                    </>
-                  )}
+                  <NotificationList
+                    notifications={notificationItems}
+                    title="Project Alerts"
+                    onViewAll={() => {
+                      setActiveNavTab('Checklist');
+                      setShowNotifications(false);
+                    }}
+                    className="w-80 shadow-2xl bg-white/95 backdrop-blur-md dark:bg-neutral-900 border border-slate-200/80"
+                  />
                 </div>
               </div>
             )}
