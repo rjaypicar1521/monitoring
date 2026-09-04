@@ -493,6 +493,23 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
               <Sliders className="w-4 h-4" />
               <span>Project Settings</span>
             </button>
+
+            {onOpenImportModal && (
+              <button
+                type="button"
+                onClick={onOpenImportModal}
+                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer text-amber-800 hover:bg-amber-50/80 group border border-dashed border-amber-200"
+                title="Import project data from DOCX or JSON"
+              >
+                <div className="flex items-center gap-2.5">
+                  <FileText className="w-4 h-4 text-amber-600 group-hover:scale-110 transition-transform" />
+                  <span>Import DOCX Report</span>
+                </div>
+                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
+                  Word
+                </span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -932,22 +949,45 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 </button>
               </div>
 
-              {/* Card 3: Dashed "+ Add New" Box (Col 3) */}
-              <div 
-                onClick={() => setShowAddCameraModal(true)}
-                className="md:col-span-3 border-2 border-dashed border-slate-300 hover:border-slate-400 bg-white/40 hover:bg-white rounded-[28px] p-6 flex flex-col items-center justify-center text-center space-y-3 cursor-pointer transition shadow-2xs group"
-              >
-                <div className="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-[#111317] group-hover:text-white transition flex items-center justify-center text-slate-700">
-                  <Plus className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="font-bold text-xs text-slate-900 group-hover:text-cyan-700 transition">
-                    + Add Endpoint / Task
+              {/* Card 3: Quick Action Box (Col 3) */}
+              <div className="md:col-span-3 flex flex-col gap-2.5">
+                <div 
+                  onClick={() => setShowAddCameraModal(true)}
+                  className="flex-1 border-2 border-dashed border-slate-300 hover:border-slate-400 bg-white/40 hover:bg-white rounded-[22px] p-3.5 flex items-center gap-3 cursor-pointer transition shadow-2xs group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-slate-100 group-hover:bg-[#111317] group-hover:text-white transition flex items-center justify-center text-slate-700 shrink-0">
+                    <Plus className="w-5 h-5" />
                   </div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">
-                    Instant form entry
+                  <div className="text-left">
+                    <div className="font-bold text-xs text-slate-900 group-hover:text-cyan-700 transition">
+                      + Add Endpoint / Task
+                    </div>
+                    <div className="text-[10px] text-slate-400">
+                      Manual form entry
+                    </div>
                   </div>
                 </div>
+
+                {onOpenImportModal && (
+                  <div 
+                    onClick={onOpenImportModal}
+                    className="flex-1 border-2 border-amber-200/90 hover:border-amber-300 bg-gradient-to-r from-amber-50/70 to-orange-50/50 hover:bg-amber-100/50 rounded-[22px] p-3.5 flex items-center gap-3 cursor-pointer transition shadow-2xs group"
+                    title="Import CCTV Achievement Report (.docx / .json)"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 group-hover:bg-amber-500 group-hover:text-white transition flex items-center justify-center shrink-0 shadow-2xs">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-bold text-xs text-amber-950 flex items-center gap-1.5">
+                        <span>Import DOCX Report</span>
+                        <span className="text-[9px] bg-amber-200 text-amber-900 px-1.5 py-0.2 rounded font-mono font-black">NEW</span>
+                      </div>
+                      <div className="text-[10px] text-amber-700/80">
+                        Upload Word or JSON data
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1226,13 +1266,27 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 </p>
               </div>
 
-              <button
-                onClick={() => setShowAddTaskModal(true)}
-                className="px-3.5 py-1.5 bg-[#1a1c22] hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5 transition cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5 text-amber-300" />
-                <span>New Milestone Task</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {onOpenImportModal && (
+                  <button
+                    type="button"
+                    onClick={onOpenImportModal}
+                    className="px-3.5 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+                    title="Import CCTV Achievement Report (.docx / .json)"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Import DOCX</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => setShowAddTaskModal(true)}
+                  className="px-3.5 py-1.5 bg-[#1a1c22] hover:bg-slate-800 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5 text-amber-300" />
+                  <span>New Milestone Task</span>
+                </button>
+              </div>
             </div>
 
             {/* 4 Kanban Columns */}
@@ -1451,6 +1505,18 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                     className="pl-9 pr-4 py-1.5 rounded-full text-xs bg-white border border-slate-300 focus:outline-none focus:border-cyan-600 text-slate-800 placeholder-slate-400 w-56 shadow-xs"
                   />
                 </div>
+
+                {onOpenImportModal && (
+                  <button
+                    type="button"
+                    onClick={onOpenImportModal}
+                    className="px-3.5 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 rounded-full text-xs font-semibold shadow-xs flex items-center gap-1.5 transition cursor-pointer shrink-0"
+                    title="Import CCTV Achievement Report (.docx / .json)"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Import DOCX</span>
+                  </button>
+                )}
 
                 <button
                   onClick={() => setShowAddCameraModal(true)}
@@ -1715,6 +1781,38 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 Manage global parameters, storage retention, and reset test data.
               </p>
             </div>
+
+            {/* DOCX Import Card */}
+            {onOpenImportModal && (
+              <div className="bg-gradient-to-br from-amber-50/70 via-orange-50/30 to-amber-50/50 p-6 rounded-3xl border border-amber-200/80 shadow-xs space-y-3 text-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-xs">
+                        <FileText className="w-4 h-4" />
+                      </div>
+                      <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                        Import DOCX Achievement Report
+                      </h3>
+                      <span className="text-[10px] uppercase font-mono font-bold px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">
+                        DOCX / JSON
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600 max-w-xl">
+                      Upload your official installation report (<code className="font-mono bg-amber-100/80 px-1 py-0.5 rounded text-amber-900">.docx</code>) to replace project data and extract real embedded photo evidence automatically.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={onOpenImportModal}
+                    className="px-4 py-2.5 bg-[#111317] hover:bg-slate-800 text-amber-300 rounded-xl font-bold flex items-center gap-2 transition cursor-pointer shadow-sm text-xs shrink-0 self-start sm:self-auto"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Open Import Wizard</span>
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-5 text-xs">
               <div className="space-y-1.5">
