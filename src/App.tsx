@@ -335,6 +335,19 @@ export const App: React.FC = () => {
     );
   };
 
+  const handleUpdateTechnician = (updatedTech: TechnicianMember) => {
+    setProjects((prev) =>
+      prev.map((p) => {
+        if (p.id !== currentProject.id) return p;
+        const currentTechs = p.technicians || [];
+        return {
+          ...p,
+          technicians: currentTechs.map((t) => (t.id === updatedTech.id ? updatedTech : t))
+        };
+      })
+    );
+  };
+
   const handleAddNote = (content: string, author: string, authorRole: 'client' | 'installer') => {
     const newNote: ProjectNote = {
       id: `note-${Date.now()}`,
@@ -444,6 +457,7 @@ export const App: React.FC = () => {
           onBatchUpdateCameraStatus={handleBatchUpdateCameraStatus}
           onAddBlocker={handleAddBlocker}
           onAddTechnician={handleAddTechnician}
+          onUpdateTechnician={handleUpdateTechnician}
           onDeleteTechnician={handleDeleteTechnician}
           onAddNote={handleAddNote}
           onDeleteNote={handleDeleteNote}

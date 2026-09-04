@@ -62,13 +62,18 @@ export interface CameraEndpoint {
   status: 'Mounted' | 'Pending Power';
 }
 
+export type TechnicianStatus = 'On Duty' | 'On Site' | 'In Transit' | 'Remote' | 'Off Duty';
+
 export interface TechnicianMember {
   id: string;
   name: string;
   role: string;
-  status: 'On Site' | 'Remote' | 'Off Duty';
+  status: TechnicianStatus;
   assigned: string;
   email: string;
+  phone?: string;
+  assignedCameras?: string[];
+  zone?: string;
 }
 
 export interface ProjectNote {

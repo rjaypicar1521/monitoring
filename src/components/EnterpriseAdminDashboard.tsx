@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CCTVProject, ExecutiveStatus, AuthUser, TaskStatus, CCTVTask, CameraEndpoint, TechnicianMember, BlockerItem } from '../types';
+import { CCTVProject, ExecutiveStatus, AuthUser, TaskStatus, CCTVTask, CameraEndpoint, TechnicianMember, TechnicianStatus, BlockerItem } from '../types';
 import { 
   CheckCircle2, 
   Clock, 
@@ -36,7 +36,8 @@ import {
   Bell,
   MessageSquare,
   Send,
-  FileText
+  FileText,
+  MapPin
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal } from './TaskPhotoEvidenceModal';
@@ -58,6 +59,7 @@ interface EnterpriseAdminDashboardProps {
   onBatchUpdateCameraStatus: (cameraIds: string[], status: 'Mounted' | 'Pending Power') => void;
   onAddBlocker: (blocker: BlockerItem) => void;
   onAddTechnician: (tech: TechnicianMember) => void;
+  onUpdateTechnician?: (tech: TechnicianMember) => void;
   onDeleteTechnician?: (techId: string) => void;
   onAddNote?: (content: string, author: string, authorRole: 'client' | 'installer') => void;
   onDeleteNote?: (noteId: string) => void;
@@ -87,6 +89,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
   onBatchUpdateCameraStatus,
   onAddBlocker,
   onAddTechnician,
+  onUpdateTechnician,
   onDeleteTechnician,
   onAddNote,
   onDeleteNote,
@@ -130,9 +133,36 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
   // Form States - Technician
   const [newTechName, setNewTechName] = useState('');
   const [newTechRole, setNewTechRole] = useState('Field Technician');
-  const [newTechStatus, setNewTechStatus] = useState<'On Site' | 'Remote' | 'Off Duty'>('On Site');
+  const [newTechStatus, setNewTechStatus] = useState<TechnicianStatus>('On Duty');
   const [newTechAssigned, setNewTechAssigned] = useState('Indoor Corridors');
   const [newTechEmail, setNewTechEmail] = useState('');
+  const [newTechZone, setNewTechZone] = useState('Ground Floor');
+  const [newTechAssignedCameras, setNewTechAssignedCameras] = useState<string[]>([]);
+
+  // Technician Mapping Modal State
+  const [mappingTech, setMappingTech] = useState<TechnicianMember | null>(null);
+  const [selectedMappingCameras, setSelectedMappingCameras] = useState<string[]>([]);
+  const [selectedMappingZone, setSelectedMappingZone] = useState<string>('');
+
+  const openMappingModal = (tech: TechnicianMember) => {
+    setMappingTech(tech);
+    setSelectedMappingCameras(tech.assignedCameras || []);
+    setSelectedMappingZone(tech.zone || tech.assigned || 'Ground Floor');
+  };
+
+  const handleSaveMapping = () => {
+    if (!mappingTech) return;
+    const updated: TechnicianMember = {
+      ...mappingTech,
+      assignedCameras: selectedMappingCameras,
+      zone: selectedMappingZone
+    };
+    if (onUpdateTechnician) {
+      onUpdateTechnician(updated);
+    }
+    showNotification(`Updated camera mapping for ${mappingTech.name}`);
+    setMappingTech(null);
+  };
 
   // Form States - Edit Camera
   const [editingCamera, setEditingCamera] = useState<CameraEndpoint | null>(null);
@@ -311,13 +341,16 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
       role: newTechRole,
       status: newTechStatus,
       assigned: newTechAssigned,
-      email: newTechEmail.trim() || `${newTechName.toLowerCase().replace(/\s+/g, '.')}@rmvn.com`
+      email: newTechEmail.trim() || `${newTechName.toLowerCase().replace(/\s+/g, '.')}@rmvn.com`,
+      assignedCameras: newTechAssignedCameras,
+      zone: newTechZone
     };
 
     onAddTechnician(newTech);
     setShowAddTechModal(false);
     setNewTechName('');
     setNewTechEmail('');
+    setNewTechAssignedCameras([]);
     showNotification(`Added Technician: ${newTech.name}`);
   };
 
@@ -1618,7 +1651,13 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                             {cam.name}
                           </td>
                           <td className="py-3 px-4 text-slate-600 font-medium">
-                            {cam.zone}
+                            <div>{cam.zone}</div>
+                            {technicianList.find(t => t.assignedCameras?.includes(cam.id)) && (
+                              <div className="text-[10px] text-indigo-700 font-semibold flex items-center gap-1 mt-0.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                {technicianList.find(t => t.assignedCameras?.includes(cam.id))?.name}
+                              </div>
+                            )}
                           </td>
                           <td className="py-3 px-4 text-slate-600 font-mono">
                             {cam.lens}
@@ -1704,12 +1743,29 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                         <div className="w-10 h-10 rounded-full bg-slate-900 text-amber-300 font-bold flex items-center justify-center text-sm">
                           {member.name.charAt(0)}
                         </div>
-                        <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
-                          member.status === 'On Site' ? 'bg-emerald-100 text-emerald-800' :
-                          member.status === 'Remote' ? 'bg-sky-100 text-sky-800' : 'bg-amber-100 text-amber-800'
-                        }`}>
-                          ● {member.status}
-                        </span>
+                        <select
+                          value={member.status}
+                          onChange={(e) => {
+                            const newStatus = e.target.value as TechnicianStatus;
+                            if (onUpdateTechnician) {
+                              onUpdateTechnician({ ...member, status: newStatus });
+                            }
+                            showNotification(`Updated ${member.name} status to ${newStatus}`);
+                          }}
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition cursor-pointer focus:outline-none ${
+                            member.status === 'On Duty' ? 'bg-emerald-50 text-emerald-800 border-emerald-300' :
+                            member.status === 'On Site' ? 'bg-blue-50 text-blue-800 border-blue-300' :
+                            member.status === 'In Transit' ? 'bg-amber-50 text-amber-800 border-amber-300' :
+                            member.status === 'Remote' ? 'bg-purple-50 text-purple-800 border-purple-300' :
+                            'bg-slate-100 text-slate-700 border-slate-300'
+                          }`}
+                        >
+                          <option value="On Duty">● On Duty</option>
+                          <option value="On Site">● On Site</option>
+                          <option value="In Transit">🚗 In Transit</option>
+                          <option value="Remote">🌐 Remote</option>
+                          <option value="Off Duty">○ Off Duty</option>
+                        </select>
                       </div>
 
                       <button
@@ -1732,18 +1788,46 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                       <p className="text-xs text-slate-500 font-medium">{member.role}</p>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-100 text-xs space-y-1 text-slate-600">
-                      <div>Assignment: <strong>{member.assigned}</strong></div>
+                    <div className="pt-2 border-t border-slate-100 text-xs space-y-2 text-slate-600">
+                      <div className="flex items-center justify-between">
+                        <div>Zone: <strong className="text-slate-800">{member.zone || member.assigned}</strong></div>
+                        <button
+                          type="button"
+                          onClick={() => openMappingModal(member)}
+                          className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <MapPin className="w-3 h-3" />
+                          <span>Map ({member.assignedCameras?.length || 0})</span>
+                        </button>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-[10px] font-bold uppercase text-slate-400">Assigned Cameras:</div>
+                        {member.assignedCameras && member.assignedCameras.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {member.assignedCameras.map(camId => (
+                              <span key={camId} className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 font-mono text-[10px]">
+                                {camId}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-[10px] text-slate-400 italic">No cameras mapped yet</div>
+                        )}
+                      </div>
+
                       <div>Contact: <span className="text-slate-500 font-mono">{member.email}</span></div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-2">
+                  <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
                     <button
-                      onClick={() => showNotification(`Contact: ${member.email}`)}
-                      className="flex-1 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition cursor-pointer"
+                      type="button"
+                      onClick={() => openMappingModal(member)}
+                      className="flex-1 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-xl border border-indigo-200 transition cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                      View Details
+                      <MapPin className="w-3.5 h-3.5" />
+                      <span>Edit Mapping</span>
                     </button>
                     <button
                       type="button"
@@ -2424,36 +2508,79 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                     <label className="font-bold text-slate-800">Shift Status:</label>
                     <select
                       value={newTechStatus}
-                      onChange={(e) => setNewTechStatus(e.target.value as any)}
+                      onChange={(e) => setNewTechStatus(e.target.value as TechnicianStatus)}
                       className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 mt-1 text-slate-900"
                     >
+                      <option value="On Duty">On Duty</option>
                       <option value="On Site">On Site</option>
+                      <option value="In Transit">In Transit</option>
                       <option value="Remote">Remote</option>
                       <option value="Off Duty">Off Duty</option>
                     </select>
                   </div>
                 </div>
 
-                <div>
-                  <label className="font-bold text-slate-800">Assigned Zone / Task:</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Parking Lot Cams 13–16"
-                    value={newTechAssigned}
-                    onChange={(e) => setNewTechAssigned(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 mt-1 text-slate-900"
-                  />
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="font-bold text-slate-800">Assigned Zone / Area:</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Ground Floor"
+                      value={newTechZone}
+                      onChange={(e) => {
+                        setNewTechZone(e.target.value);
+                        setNewTechAssigned(e.target.value);
+                      }}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 mt-1 text-slate-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-slate-800">Email Address:</label>
+                    <input
+                      type="email"
+                      placeholder="jordan.h@rmvn.com"
+                      value={newTechEmail}
+                      onChange={(e) => setNewTechEmail(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 mt-1 text-slate-900"
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-800">Email Address:</label>
-                  <input
-                    type="email"
-                    placeholder="jordan.h@rmvn.com"
-                    value={newTechEmail}
-                    onChange={(e) => setNewTechEmail(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 mt-1 text-slate-900"
-                  />
+                  <div className="flex items-center justify-between pb-1">
+                    <label className="font-bold text-slate-800">Map Camera Endpoints ({newTechAssignedCameras.length}):</label>
+                    <button
+                      type="button"
+                      onClick={() => setNewTechAssignedCameras(cameraList.map(c => c.id))}
+                      className="text-[11px] text-indigo-600 hover:underline font-semibold cursor-pointer"
+                    >
+                      Select All
+                    </button>
+                  </div>
+                  <div className="max-h-32 overflow-y-auto border border-slate-200 rounded-xl p-2 bg-slate-50 grid grid-cols-2 gap-1.5">
+                    {cameraList.map((c) => {
+                      const isSelected = newTechAssignedCameras.includes(c.id);
+                      return (
+                        <label key={c.id} className="flex items-center gap-1.5 text-xs text-slate-700 cursor-pointer p-1 hover:bg-white rounded">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setNewTechAssignedCameras([...newTechAssignedCameras, c.id]);
+                              } else {
+                                setNewTechAssignedCameras(newTechAssignedCameras.filter(id => id !== c.id));
+                              }
+                            }}
+                            className="rounded text-purple-600 focus:ring-purple-500"
+                          />
+                          <span className="font-mono font-bold text-[11px]">{c.id}</span>
+                          <span className="truncate text-slate-500 text-[10px]">({c.name})</span>
+                        </label>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div className="flex justify-end gap-2 pt-3">
@@ -2472,6 +2599,127 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL: MAP TECHNICIAN TO CAMERAS & ZONE */}
+        {mappingTech && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
+            <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
+                    {mappingTech.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">
+                      Map Cameras & Zone: {mappingTech.name}
+                    </h3>
+                    <p className="text-xs text-slate-500">{mappingTech.role} • Status: {mappingTech.status}</p>
+                  </div>
+                </div>
+                <button onClick={() => setMappingTech(null)} className="text-slate-400 hover:text-slate-600">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-4 text-xs">
+                <div>
+                  <label className="font-bold text-slate-800">Operational Zone / Area:</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Ground Floor, Perimeter, Parking"
+                    value={selectedMappingZone}
+                    onChange={(e) => setSelectedMappingZone(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 mt-1 text-slate-900 focus:outline-none focus:border-indigo-600"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between pb-1.5">
+                    <label className="font-bold text-slate-800">Assigned Camera Endpoints ({selectedMappingCameras.length} selected):</label>
+                    <div className="flex gap-2 text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMappingCameras(cameraList.map(c => c.id))}
+                        className="text-indigo-600 hover:underline font-semibold cursor-pointer"
+                      >
+                        Select All
+                      </button>
+                      <span>•</span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMappingCameras([])}
+                        className="text-slate-500 hover:underline cursor-pointer"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="max-h-60 overflow-y-auto border border-slate-200 rounded-xl p-2 bg-slate-50 space-y-1">
+                    {cameraList.map((c) => {
+                      const isSelected = selectedMappingCameras.includes(c.id);
+                      return (
+                        <label
+                          key={c.id}
+                          className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition border ${
+                            isSelected ? 'bg-indigo-50/70 border-indigo-200' : 'hover:bg-white border-transparent'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedMappingCameras([...selectedMappingCameras, c.id]);
+                                } else {
+                                  setSelectedMappingCameras(selectedMappingCameras.filter(id => id !== c.id));
+                                }
+                              }}
+                              className="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4"
+                            />
+                            <div>
+                              <div className="font-mono font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                                {c.id}
+                                <span className="font-sans font-normal text-slate-600">- {c.name}</span>
+                              </div>
+                              <div className="text-[11px] text-slate-400">
+                                {c.zone || 'General Zone'} • {c.lens}
+                              </div>
+                            </div>
+                          </div>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            c.status === 'Mounted' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            {c.status}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setMappingTech(null)}
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveMapping}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold shadow-xs cursor-pointer flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    Save Mapping
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

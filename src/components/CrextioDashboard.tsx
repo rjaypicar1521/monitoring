@@ -27,8 +27,6 @@ import {
   FileText,
   X,
   ExternalLink,
-  Upload,
-  RotateCcw,
   MessageSquare,
   Send,
   Trash2,
@@ -74,36 +72,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   const [cameraSearch, setCameraSearch] = useState('');
   const [checklistFilter, setChecklistFilter] = useState<'All' | 'Done' | 'In progress' | 'Blocked'>('All');
 
-  const DEFAULT_FACE_PHOTO = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80';
-  const [facePhoto, setFacePhoto] = useState<string>(() => {
-    return localStorage.getItem('cctv_lead_face_photo') || DEFAULT_FACE_PHOTO;
-  });
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image size should be under 5MB');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const result = event.target?.result as string;
-      if (result) {
-        setFacePhoto(result);
-        localStorage.setItem('cctv_lead_face_photo', result);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleResetPhoto = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setFacePhoto(DEFAULT_FACE_PHOTO);
-    localStorage.removeItem('cctv_lead_face_photo');
-  };
 
   const [newNoteText, setNewNoteText] = useState('');
   const projectNotes = project.notes || [];
@@ -269,11 +238,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               className="w-9 h-9 rounded-full bg-[#1a1c22] hover:bg-slate-800 text-amber-300 flex items-center justify-center font-bold text-xs shadow-xs border border-white cursor-pointer transition overflow-hidden"
               title="Profile & Project Settings"
             >
-              {facePhoto && facePhoto !== DEFAULT_FACE_PHOTO ? (
-                <img src={facePhoto} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                currentUser.name.charAt(0)
-              )}
+              {currentUser.name.charAt(0)}
             </button>
 
             {/* NOTIFICATIONS DROPDOWN POPOVER */}
@@ -336,11 +301,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               <div className="absolute right-0 top-12 w-64 bg-white rounded-2xl p-4 shadow-2xl border border-slate-200 z-50 animate-in fade-in space-y-3">
                 <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
                   <div className="w-10 h-10 rounded-full bg-[#1a1c22] text-amber-300 font-bold flex items-center justify-center text-sm overflow-hidden">
-                    {facePhoto && facePhoto !== DEFAULT_FACE_PHOTO ? (
-                      <img src={facePhoto} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-                      currentUser.name.charAt(0)
-                    )}
+                    {currentUser.name.charAt(0)}
                   </div>
                   <div>
                     <div className="font-bold text-xs text-slate-900">{currentUser.name}</div>
@@ -349,16 +310,6 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                 </div>
 
                 <div className="space-y-1.5 text-xs">
-                  <label className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold cursor-pointer border border-slate-200 transition">
-                    <Upload className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Upload Photo</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhotoUpload}
-                      className="hidden"
-                    />
-                  </label>
 
                   <div className="p-2 rounded-xl bg-slate-50 flex items-center justify-between">
                     <span className="text-slate-600 font-medium">Workspace Role:</span>
@@ -530,51 +481,37 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               
               {/* LEFT COLUMN: Profile Card & Accordion Details */}
               <div className="lg:col-span-3 space-y-4 flex flex-col justify-between">
-                <div className="relative rounded-[22px] overflow-hidden bg-slate-900 shadow-sm border border-slate-200 group h-36">
-                  <img
-                    src={facePhoto}
-                    alt="Lead Installer"
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                  />
-
-                  {/* Top Action Overlay: Upload Photo / Reset */}
-                  <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
-                    {facePhoto !== DEFAULT_FACE_PHOTO && (
-                      <button
-                        type="button"
-                        onClick={handleResetPhoto}
-                        className="p-1 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md text-white border border-white/30 shadow-md transition cursor-pointer"
-                        title="Reset to default photo"
-                      >
-                        <RotateCcw className="w-3 h-3" />
-                      </button>
-                    )}
-                    <label className="flex items-center gap-1 px-2 py-1 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md text-white text-[10px] font-semibold border border-white/30 cursor-pointer shadow-md transition hover:scale-105">
-                      <Upload className="w-3 h-3 text-amber-300" />
-                      <span>Photo</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoUpload}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent flex flex-col justify-end p-3.5 pointer-events-none">
-                    <div className="flex items-center justify-between pointer-events-auto">
-                      <div>
-                        <h3 className="text-white font-bold text-sm leading-tight">
-                          {leadTech.name}
-                        </h3>
-                        <p className="text-slate-300 text-[11px] font-medium">
-                          {leadTech.role}
-                        </p>
-                      </div>
-                      <span className="px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-md text-white text-[10px] font-bold border border-white/30">
-                        {leadTech.status}
+                {/* On Duty Technician Card (No Photo) */}
+                <div className="bg-[#191b20] text-white rounded-[24px] p-4 border border-slate-700/70 shadow-sm space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-[10px] font-mono uppercase font-bold text-amber-300 tracking-wider">
+                        On Duty Technician
                       </span>
                     </div>
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono text-[10px] font-bold">
+                      ● {leadTech.status || 'On Duty'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-amber-400 text-slate-950 font-black text-base flex items-center justify-center shadow-xs shrink-0">
+                      {leadTech.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-sm text-white truncate">
+                        {leadTech.name}
+                      </h3>
+                      <p className="text-[11px] text-slate-400 truncate">
+                        {leadTech.role}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+                    <span className="truncate">Zone: <strong className="text-slate-200">Ground Floor & Perimeter</strong></span>
+                    <span className="text-amber-300 font-mono text-[10px]">Lead Tech</span>
                   </div>
                 </div>
 
