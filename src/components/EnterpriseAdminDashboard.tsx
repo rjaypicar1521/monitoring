@@ -47,6 +47,7 @@ interface EnterpriseAdminDashboardProps {
   onUpdateCameraCount: (installed: number, total: number) => void;
   onUpdateTaskStatus: (taskId: string, newStatus: TaskStatus, blockerReason?: string) => void;
   onAddTask: (task: CCTVTask) => void;
+  onDeleteTask?: (taskId: string) => void;
   onAddCamera: (camera: CameraEndpoint) => void;
   onUpdateCamera: (camera: CameraEndpoint) => void;
   onDeleteCamera: (cameraId: string) => void;
@@ -73,6 +74,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
   onUpdateCameraCount,
   onUpdateTaskStatus,
   onAddTask,
+  onDeleteTask,
   onAddCamera,
   onUpdateCamera,
   onDeleteCamera,
@@ -220,6 +222,13 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
     setEditingCamera(null);
     setShowDeleteConfirm(false);
     showNotification(`Removed camera ${id}`);
+  };
+
+  const handleDeleteTaskCard = (taskId: string, taskTitle: string) => {
+    if (onDeleteTask) {
+      onDeleteTask(taskId);
+    }
+    showNotification(`Task removed: "${taskTitle}"`);
   };
 
   // Handlers
@@ -1097,9 +1106,23 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                                   <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-600 uppercase">
                                     {task.category}
                                   </span>
-                                  <span className="text-[10px] text-slate-400 font-mono">
-                                    {task.targetDate || 'Sep 25'}
-                                  </span>
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    <span className="text-[10px] text-slate-400 font-mono">
+                                      {task.targetDate || 'Sep 25'}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteTaskCard(task.id, task.title);
+                                      }}
+                                      className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                                      title="Delete task"
+                                      aria-label={`Delete task: ${task.title}`}
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
                                 </div>
 
                                 <div className="font-bold text-xs text-slate-900 leading-snug">

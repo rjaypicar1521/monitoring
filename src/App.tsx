@@ -99,6 +99,18 @@ export const App: React.FC = () => {
     );
   };
 
+  const handleDeleteTask = (taskId: string) => {
+    setProjects((prev) =>
+      prev.map((p) => {
+        if (!currentProject || p.id !== currentProject.id) return p;
+        return {
+          ...p,
+          tasks: (p.tasks || []).filter((t) => t.id !== taskId)
+        };
+      })
+    );
+  };
+
   const handleAddRisk = (newRisk: RiskItem) => {
     setProjects((prev) =>
       prev.map((p) => {
@@ -392,6 +404,7 @@ export const App: React.FC = () => {
           onUpdateCameraCount={handleUpdateCameraCount}
           onUpdateTaskStatus={handleUpdateTaskStatus}
           onAddTask={handleAddTask}
+          onDeleteTask={handleDeleteTask}
           onAddCamera={handleAddCamera}
           onUpdateCamera={handleUpdateCamera}
           onDeleteCamera={handleDeleteCamera}
