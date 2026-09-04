@@ -35,7 +35,8 @@ import {
   MoreHorizontal,
   Bell,
   MessageSquare,
-  Send
+  Send,
+  FileText
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal } from './TaskPhotoEvidenceModal';
@@ -66,6 +67,7 @@ interface EnterpriseAdminDashboardProps {
   copied: boolean;
   adminPassword?: string;
   onUpdateAdminPassword?: (newPassword: string) => void;
+  onOpenImportModal?: () => void;
 }
 
 export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> = ({
@@ -93,7 +95,8 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
   onCopyReport,
   copied,
   adminPassword = 'admin@123',
-  onUpdateAdminPassword
+  onUpdateAdminPassword,
+  onOpenImportModal
 }) => {
   const [activeTab, setActiveTab] = useState<'Dashboard' | 'Cameras' | 'Board' | 'Team' | 'Settings'>('Dashboard');
   
@@ -546,6 +549,19 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
               />
             </div>
 
+            {/* Import DOCX Button */}
+            {onOpenImportModal && (
+              <button
+                type="button"
+                onClick={onOpenImportModal}
+                className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-full text-xs font-semibold shadow-xs transition cursor-pointer"
+                title="Import CCTV Achievement Report (.docx / .json)"
+              >
+                <FileText className="w-3.5 h-3.5 text-amber-600" />
+                <span>Import DOCX</span>
+              </button>
+            )}
+
             {/* Quick Create Dropdown Menu */}
             <div className="relative">
               <button
@@ -602,6 +618,19 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                     <Users className="w-4 h-4 text-purple-600" />
                     <span>+ Add Field Technician</span>
                   </button>
+
+                  {onOpenImportModal && (
+                    <button
+                      onClick={() => {
+                        onOpenImportModal();
+                        setShowQuickCreateMenu(false);
+                      }}
+                      className="w-full px-3 py-2 text-left rounded-xl hover:bg-amber-50/60 flex items-center gap-2 font-bold text-amber-900 cursor-pointer border-t border-slate-100 mt-1"
+                    >
+                      <FileText className="w-4 h-4 text-amber-600" />
+                      <span>📄 Import Report (.docx)</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>

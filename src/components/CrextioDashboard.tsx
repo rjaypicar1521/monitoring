@@ -49,6 +49,7 @@ interface CrextioDashboardProps {
   onAddNote?: (content: string, author: string, authorRole: 'client' | 'installer') => void;
   onDeleteNote?: (noteId: string) => void;
   onCompleteTaskWithEvidence?: (taskId: string, photoEvidence: string, photoCaption: string) => void;
+  onOpenImportModal?: () => void;
 }
 
 export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
@@ -62,7 +63,8 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   onToggleRole,
   onAddNote,
   onDeleteNote,
-  onCompleteTaskWithEvidence
+  onCompleteTaskWithEvidence,
+  onOpenImportModal
 }) => {
   const [activeNavTab, setActiveNavTab] = useState<'Dashboard' | 'Checklist' | 'Cameras' | 'Timeline' | 'Report'>('Dashboard');
   const [expandedSection, setExpandedSection] = useState<'devices' | 'specs' | 'wiring' | null>('devices');
@@ -225,6 +227,18 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               )}
             </button>
 
+            {/* Import DOCX Pill */}
+            {onOpenImportModal && (
+              <button
+                onClick={onOpenImportModal}
+                className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 bg-white/80 hover:bg-white rounded-full border border-slate-300/70 text-xs font-semibold text-slate-700 shadow-xs transition cursor-pointer"
+                title="Import CCTV project from .docx report"
+              >
+                <FileText className="w-3.5 h-3.5 text-amber-600" />
+                <span>Import DOCX</span>
+              </button>
+            )}
+
             {/* Copy Report Pill */}
             <button
               onClick={onCopyReport}
@@ -367,6 +381,20 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     <span className="text-slate-600 font-medium">Current Project:</span>
                     <span className="font-bold text-slate-900 truncate max-w-[120px]">{project.name}</span>
                   </div>
+
+                  {onOpenImportModal && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onOpenImportModal();
+                        setShowProfileMenu(false);
+                      }}
+                      className="w-full flex items-center justify-center gap-1.5 py-2 px-3 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-xl text-xs font-bold transition cursor-pointer border border-amber-200"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-amber-700" />
+                      <span>Import Report (.docx)</span>
+                    </button>
+                  )}
                 </div>
 
                 <button

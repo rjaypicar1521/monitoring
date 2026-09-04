@@ -9,6 +9,7 @@ import { EnterpriseAdminDashboard } from './components/EnterpriseAdminDashboard'
 import { TechyAdminDashboard } from './components/TechyAdminDashboard';
 import { UserInputModal } from './components/UserInputModal';
 import { AdminAuthModal } from './components/AdminAuthModal';
+import { ImportProjectModal } from './components/ImportProjectModal';
 import { PRESET_USERS } from './components/LoginModal';
 
 export const App: React.FC = () => {
@@ -22,6 +23,7 @@ export const App: React.FC = () => {
     return localStorage.getItem('cctv_admin_password') || 'admin@123';
   });
   const [showAdminAuthModal, setShowAdminAuthModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -88,6 +90,17 @@ export const App: React.FC = () => {
   const handleAddProject = (newProject: CCTVProject) => {
     setProjects((prev) => [newProject, ...prev]);
     setSelectedProjectId(newProject.id);
+  };
+
+  const handleImportProject = (importedProject: CCTVProject) => {
+    setProjects((prev) => {
+      const exists = prev.some((p) => p.id === importedProject.id);
+      if (exists) {
+        return prev.map((p) => (p.id === importedProject.id ? importedProject : p));
+      }
+      return [importedProject, ...prev];
+    });
+    setSelectedProjectId(importedProject.id);
   };
 
   const handleAddTask = (newTask: CCTVTask) => {
@@ -411,6 +424,7 @@ export const App: React.FC = () => {
           onAddNote={handleAddNote}
           onDeleteNote={handleDeleteNote}
           onCompleteTaskWithEvidence={handleCompleteTaskWithEvidence}
+          onOpenImportModal={() => setShowImportModal(true)}
         />
       ) : (
         /* REDESIGNED ADMIN DASHBOARD: Clean Enterprise SaaS with Interactive Kanban, Camera Fleet & Team Management */
@@ -440,8 +454,16 @@ export const App: React.FC = () => {
           copied={copied}
           adminPassword={adminPassword}
           onUpdateAdminPassword={handleUpdateAdminPassword}
+          onOpenImportModal={() => setShowImportModal(true)}
         />
       )}
+
+      {/* Import Docx / Project Report Modal */}
+      <ImportProjectModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImportProject={handleImportProject}
+      />
 
       {/* Admin Password Gate Modal */}
       <AdminAuthModal
