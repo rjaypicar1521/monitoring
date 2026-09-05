@@ -172,8 +172,8 @@ export const App: React.FC = () => {
             status: newStatus,
             completedDate: newStatus === 'Done' ? new Date().toISOString().split('T')[0] : undefined,
             blockerReason: newStatus === 'Blocked' ? blockerReason : undefined,
-            photoEvidence: photoEvidence !== undefined ? photoEvidence : t.photoEvidence,
-            photoCaption: photoCaption !== undefined ? photoCaption : t.photoCaption,
+            photoEvidence: photoEvidence !== undefined ? (photoEvidence.trim() ? photoEvidence : undefined) : t.photoEvidence,
+            photoCaption: photoCaption !== undefined ? (photoCaption.trim() ? photoCaption : undefined) : t.photoCaption,
             progressPercent: newStatus === 'Done' ? 100 : newStatus === 'In progress' ? 50 : 0
           };
         });
@@ -507,14 +507,14 @@ export const App: React.FC = () => {
             project={currentProject}
             execStatus={execStatus}
             currentUser={currentUser}
-            onResolveBlocker={handleResolveBlocker}
+            onResolveBlocker={undefined}
             onUpdateCameraCount={handleUpdateCameraCount}
             onCopyReport={handleCopyReport}
             copied={copied}
             onToggleRole={handleToggleRole}
             onAddNote={handleAddNote}
             onDeleteNote={handleDeleteNote}
-            onCompleteTaskWithEvidence={handleCompleteTaskWithEvidence}
+            onCompleteTaskWithEvidence={undefined}
             onOpenProjectSelector={() => setShowProjectSelector(true)}
           />
         ) : (
@@ -584,7 +584,8 @@ export const App: React.FC = () => {
           activeProject={currentProject}
           projects={projects}
           onSelectProject={handleSelectProject}
-          onRemoveProject={handleRemoveProject}
+          onRemoveProject={currentUser.role === 'installer' ? handleRemoveProject : undefined}
+          currentUserRole={currentUser.role}
         />
 
         {/* Global Facebook Messenger Floating Popup (Shared across Client & Admin) */}

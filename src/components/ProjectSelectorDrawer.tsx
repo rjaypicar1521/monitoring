@@ -21,6 +21,7 @@ interface ProjectSelectorDrawerProps {
   projects: CCTVProject[];
   onSelectProject: (projectId: string) => void;
   onRemoveProject?: (projectId: string) => void;
+  currentUserRole?: 'client' | 'installer';
 }
 
 export const ProjectSelectorDrawer: React.FC<ProjectSelectorDrawerProps> = ({
@@ -30,10 +31,19 @@ export const ProjectSelectorDrawer: React.FC<ProjectSelectorDrawerProps> = ({
   projects,
   onSelectProject,
   onRemoveProject,
+  currentUserRole,
 }) => {
+  const canRemove = currentUserRole === 'installer' && Boolean(onRemoveProject);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPendingId, setSelectedPendingId] = useState<string | null>(null);
   const [projectToDelete, setProjectToDelete] = useState<CCTVProject | null>(null);
+
+  // Clear pending deletion if canRemove becomes false
+  useEffect(() => {
+    if (!canRemove) {
+      setProjectToDelete(null);
+    }
+  }, [canRemove]);
 
   // Reset internal states on open
   useEffect(() => {
@@ -86,7 +96,7 @@ export const ProjectSelectorDrawer: React.FC<ProjectSelectorDrawerProps> = ({
 
   // Action: confirm delete project
   const handleConfirmDeleteProject = () => {
-    if (!projectToDelete) return;
+    if (!canRemove || !projectToDelete) return;
     if (selectedPendingId === projectToDelete.id) {
       setSelectedPendingId(null);
     }
@@ -113,7 +123,7 @@ export const ProjectSelectorDrawer: React.FC<ProjectSelectorDrawerProps> = ({
         aria-label="Select project"
       >
         {/* Remove Confirmation Dialog Overlay */}
-        {projectToDelete && (
+        {canRemove && projectToDelete && (
           <div className="absolute inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-5 animate-in fade-in duration-150">
             <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-slate-200 p-5 space-y-4 animate-in zoom-in-95 duration-150">
               <div className="flex items-start gap-3">
@@ -248,7 +258,7 @@ export const ProjectSelectorDrawer: React.FC<ProjectSelectorDrawerProps> = ({
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                         Active
                       </span>
-                      {onRemoveProject && (
+                      {canRemove && (
                         <button
                           type="button"
                           onClick={(e) => {
@@ -331,7 +341,7 @@ export const ProjectSelectorDrawer: React.FC<ProjectSelectorDrawerProps> = ({
                               <Clock className="w-2.5 h-2.5 text-slate-400" />
                               Pending
                             </span>
-                            {onRemoveProject && (
+                            {canRemove && (
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -381,7 +391,7 @@ export const ProjectSelectorDrawer: React.FC<ProjectSelectorDrawerProps> = ({
             Cancel
           </button>
 
-          {selectedPendingId && onRemoveProject && (
+          {selectedPendingId && canRemove && (
             <button
               type="button"
               onClick={() => {

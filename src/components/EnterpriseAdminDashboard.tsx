@@ -1300,8 +1300,23 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                               <div className={`text-xs font-semibold truncate ${isDone ? 'line-through text-slate-400' : 'text-slate-800'}`}>
                                 {task.title}
                               </div>
-                              <div className="text-[10px] text-slate-400 font-mono">
-                                {task.owner} • {task.targetDate || 'Sep 25'}
+                              <div className="text-[10px] text-slate-400 font-mono flex items-center gap-1.5">
+                                <span>{task.owner} • {task.targetDate || 'Sep 25'}</span>
+                                {task.photoEvidence && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setLightboxPhoto({
+                                      url: task.photoEvidence!,
+                                      title: task.title,
+                                      caption: task.photoCaption,
+                                      area: task.area
+                                    })}
+                                    className="text-amber-600 hover:text-amber-700 font-bold text-[9px] flex items-center gap-0.5 cursor-pointer underline"
+                                    title="View Photo Evidence"
+                                  >
+                                    <Camera className="w-2.5 h-2.5" /> Proof
+                                  </button>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1729,20 +1744,20 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                                 {/* Photographic Evidence Thumbnail or Upload Button */}
                                 {task.photoEvidence ? (
                                   <div 
-                                    onClick={() => setLightboxPhoto({ 
-                                      url: task.photoEvidence!, 
-                                      title: task.title, 
-                                      caption: task.photoCaption, 
-                                      area: task.area 
-                                    })}
-                                    className="rounded-xl overflow-hidden border border-slate-200 group/img relative cursor-pointer h-24 bg-slate-900 shadow-2xs hover:border-amber-400 transition"
+                                    className="rounded-xl overflow-hidden border border-slate-200 group/img relative h-24 bg-slate-900 shadow-2xs hover:border-amber-400 transition"
                                   >
                                     <img 
                                       src={task.photoEvidence} 
                                       alt={task.title} 
-                                      className="w-full h-full object-cover group-hover/img:scale-105 transition duration-300" 
+                                      onClick={() => setLightboxPhoto({ 
+                                        url: task.photoEvidence!, 
+                                        title: task.title, 
+                                        caption: task.photoCaption, 
+                                        area: task.area 
+                                      })}
+                                      className="w-full h-full object-cover group-hover/img:scale-105 transition duration-300 cursor-pointer" 
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-between p-2">
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-between p-2 pointer-events-none">
                                       <span className="text-[10px] text-white font-semibold truncate flex items-center gap-1">
                                         <Camera className="w-3 h-3 text-amber-300 shrink-0" />
                                         <span className="truncate">{task.photoCaption || 'Photo verified'}</span>
@@ -1750,6 +1765,44 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                                       <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-[9px] font-bold text-white shrink-0">
                                         Proof
                                       </span>
+                                    </div>
+                                    {/* Hover overlay with Admin Actions: Inspect, Replace, Delete */}
+                                    <div className="absolute inset-0 bg-black/65 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center gap-1.5 p-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => setLightboxPhoto({ 
+                                          url: task.photoEvidence!, 
+                                          title: task.title, 
+                                          caption: task.photoCaption, 
+                                          area: task.area 
+                                        })}
+                                        className="px-2 py-1 bg-white hover:bg-slate-100 text-slate-800 rounded-lg text-[10px] font-bold transition cursor-pointer shadow-xs"
+                                        title="View Full Evidence"
+                                      >
+                                        View
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setEvidenceTask(task)}
+                                        className="px-2 py-1 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-lg text-[10px] font-bold transition cursor-pointer shadow-xs"
+                                        title="Replace Photo Evidence"
+                                      >
+                                        Replace
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          if (window.confirm(`Delete photographic evidence for "${task.title}"?`)) {
+                                            onUpdateTaskStatus(task.id, task.status, undefined, '', '');
+                                            showNotification('Photo evidence deleted successfully.');
+                                          }
+                                        }}
+                                        className="p-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition cursor-pointer shadow-xs"
+                                        title="Delete Photo Evidence"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
                                     </div>
                                   </div>
                                 ) : (
@@ -3126,13 +3179,24 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
           task={evidenceTask}
           isOpen={!!evidenceTask}
           onClose={() => setEvidenceTask(null)}
+          currentUserRole={currentUser.role}
+          onDeleteEvidence={(taskId) => {
+            onUpdateTaskStatus(taskId, evidenceTask?.status || 'In progress', undefined, '', '');
+            showNotification('Photo evidence deleted successfully.');
+            setEvidenceTask(null);
+          }}
           onConfirm={(taskId, photoEvidence, photoCaption) => {
-            if (onCompleteTaskWithEvidence) {
-              onCompleteTaskWithEvidence(taskId, photoEvidence, photoCaption);
+            if (photoEvidence) {
+              if (onCompleteTaskWithEvidence) {
+                onCompleteTaskWithEvidence(taskId, photoEvidence, photoCaption);
+              } else {
+                onUpdateTaskStatus(taskId, 'Done', undefined, photoEvidence, photoCaption);
+              }
+              showNotification('Task photo evidence updated!');
             } else {
-              onUpdateTaskStatus(taskId, 'Done', undefined, photoEvidence, photoCaption);
+              onUpdateTaskStatus(taskId, evidenceTask?.status || 'In progress', undefined, '', '');
+              showNotification('Photo evidence removed.');
             }
-            showNotification('Task completed with photographic evidence!');
           }}
         />
 

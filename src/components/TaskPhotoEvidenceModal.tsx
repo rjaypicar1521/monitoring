@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, Upload, X, Check, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { Camera, Upload, X, Check, Image as ImageIcon, AlertCircle, Trash2 } from 'lucide-react';
 import { CCTVTask } from '../types';
 import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 
@@ -8,13 +8,19 @@ interface TaskPhotoEvidenceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (taskId: string, photoEvidence: string, photoCaption: string) => void;
+  onDeleteEvidence?: (taskId: string) => void;
+  currentUserRole?: 'client' | 'installer';
+  isReadOnly?: boolean;
 }
 
 export const TaskPhotoEvidenceModal: React.FC<TaskPhotoEvidenceModalProps> = ({
   task,
   isOpen,
   onClose,
-  onConfirm
+  onConfirm,
+  onDeleteEvidence,
+  currentUserRole,
+  isReadOnly
 }) => {
   const [photoData, setPhotoData] = useState<string>('');
   const [caption, setCaption] = useState<string>('');
@@ -82,6 +88,114 @@ export const TaskPhotoEvidenceModal: React.FC<TaskPhotoEvidenceModalProps> = ({
   };
 
   if (!isOpen || !task) return null;
+
+  // STRICT CLIENT / READ-ONLY VIEW: Inspection only, no upload/change/delete buttons or file pickers
+  const isInstaller = currentUserRole === 'installer';
+  if (!isInstaller || isReadOnly) {
+    const hasPhoto = Boolean(photoData);
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in">
+        <div className="bg-white w-full max-w-lg rounded-[32px] p-6 sm:p-7 shadow-2xl border border-slate-200/90 relative space-y-5">
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+            title="Close viewer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+
+          {/* Header */}
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-[#111317] text-amber-300 flex items-center justify-center shrink-0 shadow-md">
+              <Camera className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                  Photographic Evidence
+                </h2>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                  Read Only
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">
+                Official verified site inspection photo proof
+              </p>
+            </div>
+          </div>
+
+          {/* Task Summary Pill */}
+          <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs flex items-center justify-between">
+            <div className="min-w-0 pr-2">
+              <div className="font-bold text-slate-900 truncate">{task.title}</div>
+              <div className="text-[11px] text-slate-500">
+                {task.area ? `Area: ${task.area}` : task.category} • Assigned: {task.owner}
+              </div>
+            </div>
+            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 ${
+              task.status === 'Done' ? 'bg-emerald-100 text-emerald-950' : 'bg-amber-100 text-amber-950'
+            }`}>
+              {task.status === 'Done' ? 'Verified Done' : task.status}
+            </span>
+          </div>
+
+          {/* Photo Display (Read Only) */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-800 block">
+              Site Photo Evidence
+            </label>
+
+            {hasPhoto ? (
+              <div className="relative rounded-2xl overflow-hidden border border-slate-300 bg-slate-950 max-h-64 flex items-center justify-center shadow-inner">
+                <img
+                  src={photoData}
+                  alt={task.title}
+                  className="w-full h-full max-h-64 object-contain"
+                />
+                <div className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-emerald-400 text-[10px] font-bold border border-emerald-500/30 flex items-center gap-1">
+                  <Check className="w-3 h-3" />
+                  <span>Verified Evidence</span>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 p-6 text-center space-y-2">
+                <ImageIcon className="w-8 h-8 text-slate-400 mx-auto" />
+                <div className="text-xs font-bold text-slate-700">No Photographic Evidence Uploaded</div>
+                <div className="text-[11px] text-slate-400 max-w-xs mx-auto">
+                  The installer team has not attached verified photo proof for this task yet.
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Read-Only Caption / Notes */}
+          {caption && (
+            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-1">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                Verification Notes
+              </span>
+              <p className="text-slate-800 font-medium">
+                {caption}
+              </p>
+            </div>
+          )}
+
+          {/* Actions: ONLY Close Button */}
+          <div className="pt-2 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition cursor-pointer"
+            >
+              Close Viewer
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -304,22 +418,47 @@ export const TaskPhotoEvidenceModal: React.FC<TaskPhotoEvidenceModalProps> = ({
           )}
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={!photoData}
-              className="px-5 py-2.5 rounded-xl bg-[#111317] hover:bg-slate-800 disabled:opacity-40 text-white font-bold text-xs shadow-md transition cursor-pointer flex items-center gap-1.5"
-            >
-              <Check className="w-3.5 h-3.5 text-amber-300" />
-              <span>Complete Task with Evidence</span>
-            </button>
+          <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
+            {task.photoEvidence ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm(`Delete photographic evidence for "${task.title}"?`)) {
+                    if (onDeleteEvidence) {
+                      onDeleteEvidence(task.id);
+                    } else {
+                      onConfirm(task.id, '', '');
+                    }
+                    onClose();
+                  }
+                }}
+                className="px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition cursor-pointer flex items-center gap-1.5"
+                title="Delete photographic evidence from this task"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Evidence</span>
+              </button>
+            ) : (
+              <div />
+            )}
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={!photoData}
+                className="px-5 py-2.5 rounded-xl bg-[#111317] hover:bg-slate-800 disabled:opacity-40 text-white font-bold text-xs shadow-md transition cursor-pointer flex items-center gap-1.5"
+              >
+                <Check className="w-3.5 h-3.5 text-amber-300" />
+                <span>Complete Task with Evidence</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>

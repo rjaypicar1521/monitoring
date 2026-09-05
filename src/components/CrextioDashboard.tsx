@@ -40,7 +40,7 @@ interface CrextioDashboardProps {
   project: CCTVProject;
   execStatus: ExecutiveStatus;
   currentUser: AuthUser;
-  onResolveBlocker: (id: string) => void;
+  onResolveBlocker?: (id: string) => void;
   onUpdateCameraCount: (installed: number, total: number) => void;
   onCopyReport: () => void;
   copied: boolean;
@@ -787,13 +787,27 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                       {project.tasks.slice(0, 6).map((task, idx) => {
                         const isDone = task.status === 'Done';
                         const isBlocked = task.status === 'Blocked';
+                        const hasEvidence = Boolean(task.photoEvidence);
 
                         return (
                           <div 
                             key={task.id}
                             className="flex items-center justify-between gap-2.5 group"
                           >
-                            <div className="flex items-center gap-3 min-w-0">
+                            <div 
+                              className={`flex items-center gap-3 min-w-0 ${hasEvidence ? 'cursor-pointer hover:opacity-85' : ''}`}
+                              onClick={() => {
+                                if (hasEvidence) {
+                                  setLightboxPhoto({
+                                    url: task.photoEvidence!,
+                                    title: task.title,
+                                    caption: task.photoCaption,
+                                    area: task.area
+                                  });
+                                }
+                              }}
+                              title={hasEvidence ? 'Click to inspect photographic evidence' : undefined}
+                            >
                               <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 border ${
                                 isDone 
                                   ? 'bg-amber-400 text-slate-900 border-amber-400' 
@@ -823,15 +837,21 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                             </div>
 
                             {isBlocked ? (
-                              <button
-                                onClick={() => {
-                                  const b = project.blockers.find(x => !x.resolved);
-                                  if (b) onResolveBlocker(b.id);
-                                }}
-                                className="px-2.5 py-1 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-[10px] shrink-0 transition cursor-pointer shadow-xs"
-                              >
-                                Unblock
-                              </button>
+                              isInstaller ? (
+                                <button
+                                  onClick={() => {
+                                    const b = project.blockers.find(x => !x.resolved);
+                                    if (b && onResolveBlocker) onResolveBlocker(b.id);
+                                  }}
+                                  className="px-2.5 py-1 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-[10px] shrink-0 transition cursor-pointer shadow-xs"
+                                >
+                                  Unblock
+                                </button>
+                              ) : (
+                                <span className="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 font-bold text-[10px] shrink-0 border border-rose-500/30">
+                                  Blocked
+                                </span>
+                              )
                             ) : isDone ? (
                               <div className="flex items-center gap-1.5 shrink-0">
                                 {task.photoEvidence && (
@@ -854,17 +874,35 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                                 </div>
                               </div>
                             ) : (
-                              <button
-                                onClick={() => {
-                                  if (onCompleteTaskWithEvidence) {
-                                    setEvidenceTask(task);
-                                  }
-                                }}
-                                className="w-5 h-5 rounded-full border border-slate-600 hover:border-amber-400 hover:bg-amber-400/20 flex items-center justify-center shrink-0 transition cursor-pointer"
-                                title="Complete task (Requires photo evidence)"
-                              >
-                                <Check className="w-3 h-3 text-slate-500 hover:text-amber-400 opacity-0 hover:opacity-100" />
-                              </button>
+                              isInstaller ? (
+                                <button
+                                  onClick={() => {
+                                    if (onCompleteTaskWithEvidence) {
+                                      setEvidenceTask(task);
+                                    }
+                                  }}
+                                  className="w-5 h-5 rounded-full border border-slate-600 hover:border-amber-400 hover:bg-amber-400/20 flex items-center justify-center shrink-0 transition cursor-pointer"
+                                  title="Complete task (Requires photo evidence)"
+                                >
+                                  <Check className="w-3 h-3 text-slate-500 hover:text-amber-400 opacity-0 hover:opacity-100" />
+                                </button>
+                              ) : task.photoEvidence ? (
+                                <button
+                                  onClick={() => setLightboxPhoto({
+                                    url: task.photoEvidence!,
+                                    title: task.title,
+                                    caption: task.photoCaption,
+                                    area: task.area
+                                  })}
+                                  className="px-2 py-0.5 rounded-full bg-amber-400/20 hover:bg-amber-400 hover:text-slate-900 text-amber-300 text-[10px] font-bold flex items-center gap-1 transition cursor-pointer border border-amber-400/40"
+                                  title="View Photo Evidence"
+                                >
+                                  <Camera className="w-3 h-3" />
+                                  <span>Proof</span>
+                                </button>
+                              ) : (
+                                <div className="w-4 h-4 rounded-full border border-slate-700 bg-slate-800/40 shrink-0" title="Pending task" />
+                              )
                             )}
                           </div>
                         );
@@ -1054,13 +1092,27 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               {filteredTasks.map((t, idx) => {
                 const isDone = t.status === 'Done';
                 const isBlocked = t.status === 'Blocked';
+                const hasEvidence = Boolean(t.photoEvidence);
 
                 return (
                   <div
                     key={t.id}
                     className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                   >
-                    <div className="flex items-center gap-3">
+                    <div 
+                      className={`flex items-center gap-3 ${hasEvidence ? 'cursor-pointer hover:opacity-85' : ''}`}
+                      onClick={() => {
+                        if (hasEvidence) {
+                          setLightboxPhoto({
+                            url: t.photoEvidence!,
+                            title: t.title,
+                            caption: t.photoCaption,
+                            area: t.area
+                          });
+                        }
+                      }}
+                      title={hasEvidence ? 'Click to inspect photographic evidence' : undefined}
+                    >
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
                         isDone ? 'bg-amber-400 text-slate-950' : isBlocked ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'
                       }`}>
@@ -1092,7 +1144,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
-                      {isDone && t.photoEvidence && (
+                      {hasEvidence && (
                         <button
                           type="button"
                           onClick={() => setLightboxPhoto({
@@ -1109,7 +1161,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                         </button>
                       )}
 
-                      {!isDone && onCompleteTaskWithEvidence && (
+                      {!isDone && isInstaller && onCompleteTaskWithEvidence && (
                         <button
                           type="button"
                           onClick={() => setEvidenceTask(t)}
@@ -1126,11 +1178,11 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                       }`}>
                         {t.status}
                       </span>
-                      {isBlocked && (
+                      {isBlocked && isInstaller && (
                         <button
                           onClick={() => {
                             const b = project.blockers.find(x => !x.resolved);
-                            if (b) onResolveBlocker(b.id);
+                            if (b && onResolveBlocker) onResolveBlocker(b.id);
                           }}
                           className="px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition cursor-pointer shadow-xs"
                         >
@@ -1471,11 +1523,12 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
         )}
 
         {/* Task Photo Evidence Requirement Modal */}
-        {evidenceTask && onCompleteTaskWithEvidence && (
+        {evidenceTask && onCompleteTaskWithEvidence && isInstaller && (
           <TaskPhotoEvidenceModal
             task={evidenceTask}
             isOpen={!!evidenceTask}
             onClose={() => setEvidenceTask(null)}
+            currentUserRole={currentUser.role}
             onConfirm={(taskId, photoEvidence, photoCaption) => {
               onCompleteTaskWithEvidence(taskId, photoEvidence, photoCaption);
               setEvidenceTask(null);

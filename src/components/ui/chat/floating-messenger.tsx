@@ -59,7 +59,8 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
   const [unreadCount, setUnreadCount] = useState(0);
   const [replyingTo, setReplyingTo] = useState<ChatMessageData | null>(null);
 
-  const isClient = currentUserRole === 'client';
+  const isAdmin = currentUserRole === 'installer';
+  const isClient = !isAdmin;
   const currentUserId = isClient ? 'usr-client' : 'usr-installer';
   const partnerName = isClient ? 'Rjay Picar - RMVN' : 'UPCHQ';
   const partnerRole = isClient ? 'Lead Systems Architect & Tech' : 'Client Project Sponsor';
@@ -213,7 +214,7 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
       senderName: currentUserName,
       senderRole: isClient ? 'client' : 'admin',
       text,
-      attachments,
+      attachments: isAdmin ? attachments : undefined,
       voice,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       status: 'delivered',
@@ -449,6 +450,8 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
               replyingTo={replyingTo}
               onCancelReply={() => setReplyingTo(null)}
               placeholder={`Message ${partnerName.split(' ')[0]}...`}
+              allowAttachments={isAdmin}
+              currentUserRole={currentUserRole}
             />
           </div>
         </div>

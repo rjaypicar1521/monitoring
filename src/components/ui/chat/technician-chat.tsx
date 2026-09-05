@@ -72,15 +72,17 @@ export const TechnicianChat: React.FC<TechnicianChatProps> = ({
     } catch {}
   }, [messages, storageKey]);
 
+  const isAdmin = currentUserRole === 'installer';
+
   // Handle Send message from Client
   const handleSendMessage = (text: string, attachments?: { name: string; size?: string; type?: string }[]) => {
     const newMsg: ChatMessageData = {
       id: `msg-${Date.now()}`,
       senderId: 'client-current',
       senderName: currentUserName,
-      senderRole: 'client',
+      senderRole: isAdmin ? 'technician' : 'client',
       text,
-      attachments,
+      attachments: isAdmin ? attachments : undefined,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       status: 'delivered',
       replyTo: replyingTo
@@ -254,6 +256,8 @@ export const TechnicianChat: React.FC<TechnicianChatProps> = ({
         onSend={handleSendMessage}
         replyingTo={replyingTo}
         onCancelReply={() => setReplyingTo(null)}
+        allowAttachments={isAdmin}
+        currentUserRole={isAdmin ? 'installer' : 'client'}
       />
     </div>
   );

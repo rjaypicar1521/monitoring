@@ -12,6 +12,8 @@ interface ChatComposerProps {
   onCancelReply?: () => void;
   placeholder?: string;
   disabled?: boolean;
+  allowAttachments?: boolean;
+  currentUserRole?: 'client' | 'installer';
 }
 
 export const ChatComposer: React.FC<ChatComposerProps> = ({
@@ -20,7 +22,10 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   onCancelReply,
   placeholder = 'Type a message to technician...',
   disabled = false,
+  allowAttachments,
+  currentUserRole,
 }) => {
+  const canAttachPhotos = Boolean(allowAttachments !== undefined ? allowAttachments : currentUserRole === 'installer');
   const [text, setText] = useState('');
   const [attachments, setAttachments] = useState<{ name: string; size?: string; type?: string; url?: string }[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -52,8 +57,9 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   }, []);
 
   const handleSend = () => {
-    if (!text.trim() && attachments.length === 0) return;
-    onSend(text.trim(), attachments.length > 0 ? attachments : undefined);
+    const validAttachments = canAttachPhotos && attachments.length > 0 ? attachments : undefined;
+    if (!text.trim() && !validAttachments) return;
+    onSend(text.trim(), validAttachments);
     setText('');
     setAttachments([]);
     if (onCancelReply) onCancelReply();
@@ -71,6 +77,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
 
   // Real native file picker handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!canAttachPhotos) return;
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -164,15 +171,17 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
 
   return (
     <div className="space-y-2 border-t border-slate-100 pt-3">
-      {/* Hidden native file input */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        multiple
-        accept="image/*,.pdf,.doc,.docx,.txt"
-        className="hidden"
-      />
+      {/* Hidden native file input (Admin only) */}
+      {canAttachPhotos && (
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          multiple
+          accept="image/*,.pdf,.doc,.docx,.txt"
+          className="hidden"
+        />
+      )}
 
 
       {/* Quoting / Replying preview banner */}
@@ -245,15 +254,17 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
       ) : (
         /* Standard Composer Input Box */
         <div className="flex items-end gap-2 bg-slate-50 border border-slate-200 focus-within:border-slate-800 focus-within:bg-white rounded-2xl p-2 transition shadow-2xs">
-          {/* Real file upload button */}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 transition cursor-pointer shrink-0"
-            title="Upload photo or document"
-          >
-            <Paperclip className="w-4 h-4" />
-          </button>
+          {/* Real file upload button (Admin only) */}
+          {canAttachPhotos && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 transition cursor-pointer shrink-0"
+              title="Upload photo or document"
+            >
+              <Paperclip className="w-4 h-4" />
+            </button>
+          )}
 
           {/* Real voice recording button */}
           <button
