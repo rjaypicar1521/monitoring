@@ -466,7 +466,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
   const technicianList = project.technicians || [];
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6]/92 backdrop-blur-xs flex flex-col md:flex-row text-slate-800 font-sans selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-[#f3f4f6] flex flex-col md:flex-row text-slate-800 font-sans selection:bg-black selection:text-white">
       {/* Toast feedback */}
       {actionSuccessMsg && (
         <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-xl border border-slate-700 flex items-center gap-2 animate-in fade-in">

@@ -430,80 +430,95 @@ export const App: React.FC = () => {
   }
 
   return (
-    <FloatingPathsBackground position={-1} fixed={true} className="min-h-screen bg-black text-slate-100 relative overflow-x-hidden">
-      {/* USER DASHBOARD: Super Simple, Warm, Human-Friendly Crextio Template */}
-      {currentUser.role === 'client' ? (
-        <CrextioDashboard
-          project={currentProject}
-          execStatus={execStatus}
-          currentUser={currentUser}
-          onResolveBlocker={handleResolveBlocker}
-          onUpdateCameraCount={handleUpdateCameraCount}
-          onCopyReport={handleCopyReport}
-          copied={copied}
-          onToggleRole={handleToggleRole}
-          onAddNote={handleAddNote}
-          onDeleteNote={handleDeleteNote}
-          onCompleteTaskWithEvidence={handleCompleteTaskWithEvidence}
+    <div className="min-h-screen bg-black text-slate-100 relative selection:bg-white selection:text-black">
+      {/* Decoupled Hardware-Accelerated Fixed Background Layer */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+        style={{
+          transform: 'translate3d(0, 0, 0)',
+          willChange: 'transform',
+          backfaceVisibility: 'hidden',
+          contain: 'strict',
+        }}
+      >
+        <FloatingPathsBackground position={-1} className="w-full h-full bg-transparent" />
+      </div>
+
+      {/* Main Scrollable Viewport Content */}
+      <div className="relative z-10 w-full min-h-screen">
+        {currentUser.role === 'client' ? (
+          <CrextioDashboard
+            project={currentProject}
+            execStatus={execStatus}
+            currentUser={currentUser}
+            onResolveBlocker={handleResolveBlocker}
+            onUpdateCameraCount={handleUpdateCameraCount}
+            onCopyReport={handleCopyReport}
+            copied={copied}
+            onToggleRole={handleToggleRole}
+            onAddNote={handleAddNote}
+            onDeleteNote={handleDeleteNote}
+            onCompleteTaskWithEvidence={handleCompleteTaskWithEvidence}
+          />
+        ) : (
+          /* REDESIGNED ADMIN DASHBOARD: Clean Enterprise SaaS with Interactive Kanban, Camera Fleet & Team Management */
+          <EnterpriseAdminDashboard
+            project={currentProject}
+            execStatus={execStatus}
+            currentUser={currentUser}
+            onResolveBlocker={handleResolveBlocker}
+            onUpdateCameraCount={handleUpdateCameraCount}
+            onUpdateTaskStatus={handleUpdateTaskStatus}
+            onCompleteTaskWithEvidence={handleCompleteTaskWithEvidence}
+            onAddTask={handleAddTask}
+            onDeleteTask={handleDeleteTask}
+            onAddCamera={handleAddCamera}
+            onUpdateCamera={handleUpdateCamera}
+            onDeleteCamera={handleDeleteCamera}
+            onBatchDeleteCameras={handleBatchDeleteCameras}
+            onBatchUpdateCameraStatus={handleBatchUpdateCameraStatus}
+            onAddBlocker={handleAddBlocker}
+            onAddTechnician={handleAddTechnician}
+            onUpdateTechnician={handleUpdateTechnician}
+            onDeleteTechnician={handleDeleteTechnician}
+            onAddNote={handleAddNote}
+            onDeleteNote={handleDeleteNote}
+            onResetProjectData={handleResetProjectData}
+            onToggleRole={handleToggleRole}
+            onCopyReport={handleCopyReport}
+            copied={copied}
+            adminPassword={adminPassword}
+            onUpdateAdminPassword={handleUpdateAdminPassword}
+            onOpenImportModal={() => setShowImportModal(true)}
+          />
+        )}
+
+        {/* Import Docx / Project Report Modal */}
+        <ImportProjectModal
+          isOpen={showImportModal}
+          onClose={() => setShowImportModal(false)}
+          onImportProject={handleImportProject}
         />
-      ) : (
-        /* REDESIGNED ADMIN DASHBOARD: Clean Enterprise SaaS with Interactive Kanban, Camera Fleet & Team Management */
-        <EnterpriseAdminDashboard
-          project={currentProject}
-          execStatus={execStatus}
-          currentUser={currentUser}
-          onResolveBlocker={handleResolveBlocker}
-          onUpdateCameraCount={handleUpdateCameraCount}
-          onUpdateTaskStatus={handleUpdateTaskStatus}
-          onCompleteTaskWithEvidence={handleCompleteTaskWithEvidence}
+
+        {/* Admin Password Gate Modal */}
+        <AdminAuthModal
+          isOpen={showAdminAuthModal}
+          onClose={() => setShowAdminAuthModal(false)}
+          onSuccess={handleAdminAuthSuccess}
+          expectedPassword={adminPassword}
+        />
+
+        {/* Modals for when explicitly needed */}
+        <UserInputModal
+          mode={modalState.mode}
+          isOpen={modalState.isOpen}
+          onClose={() => setModalState({ isOpen: false, mode: 'project' })}
+          onAddProject={handleAddProject}
           onAddTask={handleAddTask}
-          onDeleteTask={handleDeleteTask}
-          onAddCamera={handleAddCamera}
-          onUpdateCamera={handleUpdateCamera}
-          onDeleteCamera={handleDeleteCamera}
-          onBatchDeleteCameras={handleBatchDeleteCameras}
-          onBatchUpdateCameraStatus={handleBatchUpdateCameraStatus}
-          onAddBlocker={handleAddBlocker}
-          onAddTechnician={handleAddTechnician}
-          onUpdateTechnician={handleUpdateTechnician}
-          onDeleteTechnician={handleDeleteTechnician}
-          onAddNote={handleAddNote}
-          onDeleteNote={handleDeleteNote}
-          onResetProjectData={handleResetProjectData}
-          onToggleRole={handleToggleRole}
-          onCopyReport={handleCopyReport}
-          copied={copied}
-          adminPassword={adminPassword}
-          onUpdateAdminPassword={handleUpdateAdminPassword}
-          onOpenImportModal={() => setShowImportModal(true)}
+          onAddRisk={handleAddRisk}
+          currentProject={currentProject}
         />
-      )}
-
-      {/* Import Docx / Project Report Modal */}
-      <ImportProjectModal
-        isOpen={showImportModal}
-        onClose={() => setShowImportModal(false)}
-        onImportProject={handleImportProject}
-      />
-
-      {/* Admin Password Gate Modal */}
-      <AdminAuthModal
-        isOpen={showAdminAuthModal}
-        onClose={() => setShowAdminAuthModal(false)}
-        onSuccess={handleAdminAuthSuccess}
-        expectedPassword={adminPassword}
-      />
-
-      {/* Modals for when explicitly needed */}
-      <UserInputModal
-        mode={modalState.mode}
-        isOpen={modalState.isOpen}
-        onClose={() => setModalState({ isOpen: false, mode: 'project' })}
-        onAddProject={handleAddProject}
-        onAddTask={handleAddTask}
-        onAddRisk={handleAddRisk}
-        currentProject={currentProject}
-      />
-    </FloatingPathsBackground>
+      </div>
+    </div>
   );
 };

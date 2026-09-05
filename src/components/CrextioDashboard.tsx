@@ -34,7 +34,6 @@ import {
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal, LightboxPhoto } from './TaskPhotoEvidenceModal';
-import { FloatingPathsBackground } from './ui/floating-paths';
 import { Button as StatefulButton } from './ui/stateful-button';
 
 interface CrextioDashboardProps {
@@ -122,7 +121,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   return (
     <div className="min-h-screen bg-transparent p-0 sm:p-6 lg:p-10 font-sans text-slate-800 flex items-center justify-center selection:bg-white selection:text-black">
       {/* Outer Rounded Tablet Frame matching template (Edge-to-edge on mobile) */}
-      <div className="w-full max-w-7xl bg-[#fbf9f2]/95 backdrop-blur-md rounded-none sm:rounded-[36px] lg:rounded-[44px] shadow-none sm:shadow-2xl overflow-hidden p-3.5 sm:p-8 lg:p-10 border-0 sm:border border-white/60 relative space-y-5 sm:space-y-6 lg:space-y-8 min-h-screen sm:min-h-0">
+      <div className="w-full max-w-7xl bg-[#fbf9f2] rounded-none sm:rounded-[36px] lg:rounded-[44px] shadow-none sm:shadow-2xl overflow-hidden p-3.5 sm:p-8 lg:p-10 border-0 sm:border border-white/80 relative space-y-5 sm:space-y-6 lg:space-y-8 min-h-screen sm:min-h-0">
         
         {/* Subtle Ambient Warm Yellow / Cream Corner Glows */}
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
@@ -324,18 +323,13 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
         {/* TAB 1: MAIN DASHBOARD (CREXTIO 3-COLUMN LAYOUT) */}
         {activeNavTab === 'Dashboard' && (
           <div className="space-y-6 lg:space-y-8 animate-in fade-in">
-            {/* Hero Greeting & Status Capsule Row with Ambient Black and White Floating Paths */}
-            <section className="relative z-10 rounded-3xl overflow-hidden border border-white/15 shadow-xl bg-black/70 backdrop-blur-md">
-              {/* Floating Paths Background (Black and White) */}
-              <div className="absolute inset-0 w-full h-full pointer-events-none opacity-40">
-                <FloatingPathsBackground
-                  position={1}
-                  className="w-full h-full bg-transparent"
-                />
-              </div>
+            {/* Hero Greeting & Status Capsule Row */}
+            <section className="relative z-10 rounded-3xl overflow-hidden border border-slate-800 shadow-xl bg-gradient-to-b from-[#111317] to-[#0b0d11]">
+              {/* Subtle ambient gradient highlight */}
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800/40 via-transparent to-transparent pointer-events-none" />
 
               {/* Foreground Content Container */}
-              <div className="relative z-10 p-5 sm:p-7 space-y-4 bg-gradient-to-b from-black/40 via-black/25 to-black/65 backdrop-blur-[1px]">
+              <div className="relative z-10 p-5 sm:p-7 space-y-4 bg-gradient-to-b from-black/20 via-transparent to-black/40">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                   <div>
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-amber-300 mb-2">
