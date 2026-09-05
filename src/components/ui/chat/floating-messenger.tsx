@@ -189,18 +189,52 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
         const existing = msg.reactions || [];
         const index = existing.findIndex((r) => r.emoji === emoji);
 
+        const myIdentifier = currentUserName || (isClient ? 'UPCHQ' : 'Rjay Picar - RMVN');
+        const myKeys = [
+          myIdentifier,
+          isClient ? 'usr-client' : 'usr-installer',
+          isClient ? 'client' : 'tech',
+          isClient ? 'client-current' : 'installer'
+        ];
+
         if (index >= 0) {
-          const updated = [...existing];
-          updated[index] = {
-            ...updated[index],
-            count: updated[index].count + 1,
-            users: [...updated[index].users, currentUserName],
-          };
-          return { ...msg, reactions: updated };
+          const target = existing[index];
+          const hasAlreadyLiked = target.users?.some((u) => myKeys.includes(u));
+
+          if (hasAlreadyLiked) {
+            // TOGGLE OFF: User already liked, remove like
+            const remainingUsers = (target.users || []).filter((u) => !myKeys.includes(u));
+            const newCount = Math.max(0, target.count - 1);
+
+            if (newCount === 0 || remainingUsers.length === 0) {
+              return {
+                ...msg,
+                reactions: existing.filter((_, i) => i !== index),
+              };
+            }
+
+            const updated = [...existing];
+            updated[index] = {
+              ...target,
+              count: newCount,
+              users: remainingUsers,
+            };
+            return { ...msg, reactions: updated };
+          } else {
+            // TOGGLE ON: User has not liked yet, add single like
+            const updated = [...existing];
+            updated[index] = {
+              ...target,
+              count: target.count + 1,
+              users: [...(target.users || []), myIdentifier],
+            };
+            return { ...msg, reactions: updated };
+          }
         } else {
+          // New emoji reaction
           return {
             ...msg,
-            reactions: [...existing, { emoji, count: 1, users: [currentUserName] }],
+            reactions: [...existing, { emoji, count: 1, users: [myIdentifier] }],
           };
         }
       })

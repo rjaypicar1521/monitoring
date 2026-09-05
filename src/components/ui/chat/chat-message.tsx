@@ -7,6 +7,7 @@ const QUICK_REACTIONS = ['👍', '❤️', '🔥', '✅', '👀', '🙏'];
 interface ChatMessageProps {
   message: ChatMessageData;
   isCurrentUser: boolean;
+  currentUserId?: string;
   onReply?: (message: ChatMessageData) => void;
   onReactionAdd?: (messageId: string, emoji: string) => void;
   onDelete?: (messageId: string) => void;
@@ -15,6 +16,7 @@ interface ChatMessageProps {
 export const ChatMessage: React.FC<ChatMessageProps> = ({
   message,
   isCurrentUser,
+  currentUserId,
   onReply,
   onReactionAdd,
   onDelete,
@@ -194,17 +196,29 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         {/* Reaction Badges below bubble */}
         {message.reactions && message.reactions.length > 0 && (
           <div className={`flex flex-wrap gap-1 mt-1 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
-            {message.reactions.map((r) => (
-              <button
-                key={r.emoji}
-                type="button"
-                onClick={() => onReactionAdd?.(message.id, r.emoji)}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] bg-white border border-slate-200 shadow-2xs hover:bg-slate-50 transition cursor-pointer"
-              >
-                <span>{r.emoji}</span>
-                <span className="text-[10px] font-mono font-bold text-slate-600">{r.count}</span>
-              </button>
-            ))}
+            {message.reactions.map((r) => {
+              const hasReacted = currentUserId && r.users?.some((u) => 
+                u === currentUserId ||
+                (currentUserId === 'usr-client' && (u === 'client' || u === 'UPCHQ' || u === 'client-current')) ||
+                (currentUserId === 'usr-installer' && (u === 'tech' || u === 'installer' || u.includes('Rjay')))
+              );
+              return (
+                <button
+                  key={r.emoji}
+                  type="button"
+                  onClick={() => onReactionAdd?.(message.id, r.emoji)}
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] transition cursor-pointer border ${
+                    hasReacted
+                      ? 'bg-amber-100/90 border-amber-400 text-amber-950 font-bold shadow-2xs'
+                      : 'bg-white border-slate-200 text-slate-700 shadow-2xs hover:bg-slate-50'
+                  }`}
+                  title={hasReacted ? `Remove ${r.emoji} reaction` : `React with ${r.emoji}`}
+                >
+                  <span>{r.emoji}</span>
+                  <span className="text-[10px] font-mono font-bold">{r.count}</span>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

@@ -57,6 +57,7 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
             key={msg.id}
             message={msg}
             isCurrentUser={msg.senderId === currentUserId}
+            currentUserId={currentUserId}
             onReply={onReply}
             onReactionAdd={onReactionAdd}
             onDelete={onDelete}

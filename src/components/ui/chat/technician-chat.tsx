@@ -145,19 +145,38 @@ export const TechnicianChat: React.FC<TechnicianChatProps> = ({
         if (msg.id !== messageId) return msg;
         const existingReactions = msg.reactions || [];
         const existingIndex = existingReactions.findIndex((r) => r.emoji === emoji);
+        const myKey = 'client-current';
 
         if (existingIndex >= 0) {
-          const updated = [...existingReactions];
-          updated[existingIndex] = {
-            ...updated[existingIndex],
-            count: updated[existingIndex].count + 1,
-            users: [...updated[existingIndex].users, 'client-current'],
-          };
-          return { ...msg, reactions: updated };
+          const target = existingReactions[existingIndex];
+          const hasLiked = target.users?.includes(myKey);
+
+          if (hasLiked) {
+            // Toggle off
+            const remaining = (target.users || []).filter((u) => u !== myKey);
+            const newCount = Math.max(0, target.count - 1);
+            if (newCount === 0 || remaining.length === 0) {
+              return {
+                ...msg,
+                reactions: existingReactions.filter((_, i) => i !== existingIndex),
+              };
+            }
+            const updated = [...existingReactions];
+            updated[existingIndex] = { ...target, count: newCount, users: remaining };
+            return { ...msg, reactions: updated };
+          } else {
+            const updated = [...existingReactions];
+            updated[existingIndex] = {
+              ...target,
+              count: target.count + 1,
+              users: [...(target.users || []), myKey],
+            };
+            return { ...msg, reactions: updated };
+          }
         } else {
           return {
             ...msg,
-            reactions: [...existingReactions, { emoji, count: 1, users: ['client-current'] }],
+            reactions: [...existingReactions, { emoji, count: 1, users: [myKey] }],
           };
         }
       })
