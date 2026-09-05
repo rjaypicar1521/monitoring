@@ -251,13 +251,8 @@ export function loadProjects(): CCTVProject[] {
     if (data) {
       const sanitizedData = cleanMojibake(data);
       const parsed = JSON.parse(sanitizedData);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const projectMap = new Map<string, CCTVProject>();
-        INITIAL_PROJECTS.forEach(p => projectMap.set(p.id, p));
-        parsed.forEach((p: CCTVProject) => projectMap.set(p.id, p));
-
-        const merged = Array.from(projectMap.values());
-        return merged.map((p: CCTVProject) => {
+      if (Array.isArray(parsed)) {
+        return parsed.map((p: CCTVProject) => {
           const currentTechs = p.technicians && p.technicians.length > 0 ? p.technicians : DEFAULT_TECHNICIANS;
           const updatedTechs = currentTechs.map(t => {
             if (t.name === 'Marcus Vance' || t.id === 'tech-1') {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CCTVProject, CCTVTask, TaskStatus, RiskItem, AuthUser, ExecutiveStatus, CameraEndpoint, TechnicianMember, BlockerItem, ProjectNote } from './types';
-import { loadProjects, saveProjects, cleanMojibake } from './utils/storage';
+import { loadProjects, saveProjects, cleanMojibake, INITIAL_PROJECTS } from './utils/storage';
+import { FolderCheck } from 'lucide-react';
 import { computeExecutiveStatus, computeHealthScore, generateProjectMonitoringUpdate } from './utils/assistantEngine';
 import { Header } from './components/Header';
 import { SimpleDashboard } from './components/SimpleDashboard';
@@ -112,6 +113,16 @@ export const App: React.FC = () => {
       return [importedProject, ...prev];
     });
     setSelectedProjectId(importedProject.id);
+  };
+
+  const handleRemoveProject = (projectId: string) => {
+    setProjects((prev) => {
+      const remaining = prev.filter((p) => p.id !== projectId);
+      if (selectedProjectId === projectId) {
+        setSelectedProjectId(remaining[0]?.id || '');
+      }
+      return remaining;
+    });
   };
 
   const handleAddTask = (newTask: CCTVTask) => {
@@ -458,7 +469,40 @@ export const App: React.FC = () => {
 
       {/* Main Scrollable Viewport Content */}
       <div className="relative z-10 w-full min-h-screen">
-        {currentUser.role === 'client' ? (
+        {!currentProject ? (
+          <div className="min-h-screen flex items-center justify-center p-6">
+            <div className="max-w-md w-full bg-white/90 backdrop-blur-md rounded-3xl border border-slate-200/80 p-8 text-center shadow-xl space-y-4">
+              <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto shadow-xs border border-amber-100">
+                <FolderCheck className="w-7 h-7" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">No Projects Found</h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  All projects have been removed. You can create a new project or restore the default demo projects.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setModalState({ isOpen: true, mode: 'project' })}
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition cursor-pointer"
+                >
+                  Create New Project
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProjects(INITIAL_PROJECTS);
+                    setSelectedProjectId(INITIAL_PROJECTS[0].id);
+                  }}
+                  className="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition cursor-pointer"
+                >
+                  Restore Demo Projects
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : currentUser.role === 'client' ? (
           <CrextioDashboard
             project={currentProject}
             execStatus={execStatus}
@@ -540,6 +584,7 @@ export const App: React.FC = () => {
           activeProject={currentProject}
           projects={projects}
           onSelectProject={handleSelectProject}
+          onRemoveProject={handleRemoveProject}
         />
 
         {/* Global Facebook Messenger Floating Popup (Shared across Client & Admin) */}
