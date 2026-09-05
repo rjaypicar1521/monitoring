@@ -179,11 +179,22 @@ export const INITIAL_PROJECTS: CCTVProject[] = [
   }
 ];
 
+export function cleanMojibake(text: string): string {
+  if (!text || typeof text !== 'string') return text;
+  return text
+    .replace(/â€”/g, '-')
+    .replace(/\u00e2\u20ac\u201d/g, '-')
+    .replace(/\u00e2\u20ac\u2014/g, '-')
+    .replace(/\u2014/g, '-')
+    .replace(/\u2013/g, '-');
+}
+
 export function loadProjects(): CCTVProject[] {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
     if (data) {
-      const parsed = JSON.parse(data);
+      const sanitizedData = cleanMojibake(data);
+      const parsed = JSON.parse(sanitizedData);
       if (Array.isArray(parsed) && parsed.length > 0) {
         const validProjects = parsed.filter((p: CCTVProject) => p.id === 'proj-cctv-upc');
         if (validProjects.length > 0) {
@@ -222,7 +233,9 @@ export function loadProjects(): CCTVProject[] {
 
 export function saveProjects(projects: CCTVProject[]): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    const serialized = JSON.stringify(projects);
+    const sanitized = cleanMojibake(serialized);
+    localStorage.setItem(STORAGE_KEY, sanitized);
   } catch (err) {
     console.error('Failed to save projects to localStorage:', err);
   }

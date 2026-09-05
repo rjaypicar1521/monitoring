@@ -1312,7 +1312,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               <div>
                 <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                   <Calendar className="w-6 h-6 text-amber-600" />
-                  Project Handover Roadmap ({project.startDate || 'Aug 25'} – {project.targetLaunchDate || 'Sep 25'})
+                  Project Handover Roadmap ({project.startDate || 'Aug 25'} - {project.targetLaunchDate || 'Sep 25'})
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Target Handover: {project.targetLaunchDate || 'September 25, 2026'} • Lead: {leadTech.name}

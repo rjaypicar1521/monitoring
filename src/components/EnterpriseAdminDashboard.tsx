@@ -2400,7 +2400,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Aim and focus night vision lenses on Cams 13–18"
+                    placeholder="e.g. Aim and focus night vision lenses on Cams 13-18"
                     value={newTaskTitle}
                     onChange={(e) => setNewTaskTitle(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 mt-1 text-slate-900 focus:outline-none focus:border-cyan-600"

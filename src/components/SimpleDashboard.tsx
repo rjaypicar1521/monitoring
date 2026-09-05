@@ -295,7 +295,7 @@ export const SimpleDashboard: React.FC<SimpleDashboardProps> = ({
         {showEmailPreview && (
           <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800/80 text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed animate-in fade-in max-h-72 overflow-y-auto">
 {`Project: ${project.name}
-Period: Sep 1–7, 2026
+Period: Sep 1-7, 2026
 
 1) Status: Minor delay (easy fix)
 - Indoor wiring and cameras are going great.

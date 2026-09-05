@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CCTVProject, CCTVTask, TaskStatus, RiskItem, AuthUser, ExecutiveStatus, CameraEndpoint, TechnicianMember, BlockerItem, ProjectNote } from './types';
-import { loadProjects, saveProjects } from './utils/storage';
+import { loadProjects, saveProjects, cleanMojibake } from './utils/storage';
 import { computeExecutiveStatus, computeHealthScore, generateProjectMonitoringUpdate } from './utils/assistantEngine';
 import { Header } from './components/Header';
 import { SimpleDashboard } from './components/SimpleDashboard';
@@ -39,7 +39,7 @@ export const App: React.FC = () => {
     try {
       const saved = localStorage.getItem('cctv_monitoring_user_role_v1');
       if (saved) {
-        const parsed = JSON.parse(saved);
+        const parsed = JSON.parse(cleanMojibake(saved));
         if (parsed.role === 'client') {
           parsed.name = 'UPCHQ';
           parsed.title = 'Client Project Sponsor (UPCHQ)';
@@ -58,7 +58,7 @@ export const App: React.FC = () => {
   // Sync user role to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('cctv_monitoring_user_role_v1', JSON.stringify(currentUser));
+      localStorage.setItem('cctv_monitoring_user_role_v1', cleanMojibake(JSON.stringify(currentUser)));
     } catch {}
   }, [currentUser]);
 
