@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, ArrowUp, Paperclip, X, Image as ImageIcon, Sparkles, Mic, Square, Check } from 'lucide-react';
+import { Send, ArrowUp, Paperclip, X, Image as ImageIcon, Mic, Square, Check } from 'lucide-react';
 import { ChatMessageData } from './types';
 
 interface ChatComposerProps {
@@ -11,7 +11,6 @@ interface ChatComposerProps {
   replyingTo?: ChatMessageData | null;
   onCancelReply?: () => void;
   placeholder?: string;
-  quickPrompts?: string[];
   disabled?: boolean;
 }
 
@@ -20,12 +19,6 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
   replyingTo,
   onCancelReply,
   placeholder = 'Type a message to technician...',
-  quickPrompts = [
-    'Can we verify CAM-04 backdoor angle?',
-    'What is the ETA for power trunking line?',
-    'Electrician is on site for inspection',
-    'Please confirm DVR live feed test'
-  ],
   disabled = false,
 }) => {
   const [text, setText] = useState('');
@@ -181,24 +174,6 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
         className="hidden"
       />
 
-      {/* Quick Prompt Chips */}
-      {quickPrompts && quickPrompts.length > 0 && !isRecording && (
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] scrollbar-none">
-          <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1 shrink-0">
-            <Sparkles className="w-3 h-3" /> Quick:
-          </span>
-          {quickPrompts.map((prompt, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => setText(prompt)}
-              className="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-amber-100 hover:text-amber-950 text-slate-600 text-[11px] font-medium transition cursor-pointer shrink-0 border border-slate-200/60"
-            >
-              {prompt}
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* Quoting / Replying preview banner */}
       {replyingTo && (

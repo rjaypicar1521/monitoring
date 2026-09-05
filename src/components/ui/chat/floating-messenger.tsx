@@ -5,12 +5,8 @@ import {
   Minus, 
   Maximize2, 
   Minimize2, 
-  Phone, 
-  Radio, 
   RefreshCw, 
-  Send,
-  Sparkles,
-  PhoneCall
+  Send
 } from 'lucide-react';
 import { ChatMessageData } from './types';
 import { ChatMessageList } from './chat-message-list';
@@ -59,7 +55,6 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [showCallModal, setShowCallModal] = useState(false);
   const [replyingTo, setReplyingTo] = useState<ChatMessageData | null>(null);
 
   const isClient = currentUserRole === 'client';
@@ -220,10 +215,6 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
     saveAndSyncMessages(() => DEFAULT_MESSAGES);
   };
 
-  const handleInitiateCall = () => {
-    setShowCallModal(true);
-  };
-
   return (
     <>
       {/* 1. FLOATING CHAT HEAD TRIGGER (MESSENGER STYLE) */}
@@ -301,16 +292,6 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
 
             {/* Window Controls */}
             <div className="flex items-center gap-1 text-slate-300">
-              {/* Real Phone Call Action */}
-              <button
-                type="button"
-                onClick={handleInitiateCall}
-                className="p-1.5 rounded-full hover:bg-white/10 hover:text-white transition cursor-pointer"
-                title={`Call ${partnerName}`}
-              >
-                <Phone className="w-4 h-4" />
-              </button>
-
               {/* Expand / Minimize Window */}
               <button
                 type="button"
@@ -385,52 +366,7 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
         </div>
       )}
 
-      {/* 3. WORKING PHONE DIAL MODAL */}
-      {showCallModal && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-sm border border-slate-200 shadow-2xl space-y-4 text-center">
-            <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-xs">
-              <PhoneCall className="w-7 h-7 animate-pulse" />
-            </div>
 
-            <div className="space-y-1">
-              <h3 className="font-bold text-slate-900 text-base">
-                Call {partnerName}
-              </h3>
-              <p className="text-xs text-slate-500 font-mono">
-                Direct Field Dispatch Line
-              </p>
-              <div className="pt-2">
-                <span className="font-mono font-bold text-lg text-slate-900 bg-slate-100 px-4 py-1.5 rounded-xl border border-slate-200 inline-block">
-                  +63 (917) 582-7491
-                </span>
-              </div>
-            </div>
-
-            <p className="text-xs text-slate-500">
-              Active installer on site at Ground Floor & Perimeter zones.
-            </p>
-
-            <div className="flex gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowCallModal(false)}
-                className="flex-1 py-2.5 rounded-2xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50 transition cursor-pointer"
-              >
-                Cancel
-              </button>
-              <a
-                href="tel:+639175827491"
-                onClick={() => setShowCallModal(false)}
-                className="flex-1 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
-              >
-                <Phone className="w-3.5 h-3.5" />
-                <span>Dial Now</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };
