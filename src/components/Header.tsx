@@ -19,6 +19,7 @@ interface HeaderProps {
   copied: boolean;
   currentUser: AuthUser;
   onToggleRole: () => void;
+  onReplayIntro?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -30,7 +31,8 @@ export const Header: React.FC<HeaderProps> = ({
   onCopyReport,
   copied,
   currentUser,
-  onToggleRole
+  onToggleRole,
+  onReplayIntro
 }) => {
   const isInstaller = currentUser.role === 'installer';
 
@@ -45,7 +47,14 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
         {/* Brand & Project Selector */}
         <div className="flex items-center space-x-3">
-          <BrandLogo size="sm" showText={true} />
+          <button
+            type="button"
+            onClick={onReplayIntro}
+            className="flex items-center focus:outline-none rounded-lg p-0.5 hover:opacity-90 active:scale-95 transition text-left cursor-pointer"
+            title="Click to replay RMVN Solutions intro animation"
+          >
+            <BrandLogo size="sm" showText={true} />
+          </button>
 
           <div className="h-4 w-px bg-slate-800 hidden sm:block" />
 

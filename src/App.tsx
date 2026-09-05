@@ -15,8 +15,10 @@ import { PRESET_USERS } from './components/LoginModal';
 import { GridBackground } from './components/ui/grid-dot-backgrounds';
 import { FloatingMessenger } from './components/ui/chat';
 import { ProjectSelectorDrawer } from './components/ProjectSelectorDrawer';
+import { SplashScreen } from './components/SplashScreen';
 
 export const App: React.FC = () => {
+  const [showSplash, setShowSplash] = useState(true);
   const [projects, setProjects] = useState<CCTVProject[]>(() => loadProjects());
   const [selectedProjectId, setSelectedProjectId] = useState<string>(() => {
     const projs = loadProjects();
@@ -596,6 +598,14 @@ export const App: React.FC = () => {
             currentUserRole={currentUser.role}
             currentUserName={currentUser.name}
             onSyncNote={handleAddNote}
+          />
+        )}
+
+        {/* 3-Second Netflix-style Cinematic Opening Splash Screen */}
+        {showSplash && (
+          <SplashScreen 
+            onFinish={() => setShowSplash(false)} 
+            durationMs={3000} 
           />
         )}
       </div>
