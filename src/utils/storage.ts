@@ -176,6 +176,62 @@ export const INITIAL_PROJECTS: CCTVProject[] = [
         createdAt: 'Sep 4, 8:30 AM'
       }
     ]
+  },
+  {
+    id: 'proj-cctv-wh2',
+    name: 'Warehouse B - Perimeter & Loading Dock CCTV',
+    organization: 'METRO LOGISTICS YARD',
+    preparedBy: 'Rjay Picar - RMVN',
+    goal: 'Warehouse facility expansion: deploy 8 high-definition perimeter and loading dock turret cameras.',
+    location: 'Sector 4 Logistics Hub, Building B',
+    startDate: '2026-09-15',
+    targetLaunchDate: '2026-09-28',
+    teamLead: 'Rjay Picar - RMVN',
+    updateCadence: 'Weekly',
+    audience: 'Client',
+    totalCameras: 8,
+    installedCameras: 0,
+    overallCompletion: 0,
+    tasks: [
+      {
+        id: 't-wh-1',
+        title: 'Site survey & cable run pathways validation',
+        category: 'Site Survey',
+        status: 'Not started',
+        owner: 'Rjay Picar',
+        area: 'Perimeter Loading Bay',
+        progressPercent: 0
+      }
+    ],
+    risks: [],
+    blockers: [],
+    decisions: [],
+    cameras: [],
+    technicians: DEFAULT_TECHNICIANS,
+    notes: []
+  },
+  {
+    id: 'proj-cctv-retail',
+    name: 'Galleria Commercial Plaza - Level 1 Surveillance',
+    organization: 'PLAZA PROPERTIES CORP',
+    preparedBy: 'Rjay Picar - RMVN',
+    goal: 'Commercial retail floor CCTV setup covering corridors, escalators, and customer service counters.',
+    location: 'Downtown Commercial Center',
+    startDate: '2026-10-01',
+    targetLaunchDate: '2026-10-15',
+    teamLead: 'Rjay Picar - RMVN',
+    updateCadence: 'Weekly',
+    audience: 'Client',
+    totalCameras: 12,
+    installedCameras: 0,
+    overallCompletion: 0,
+    tasks: [],
+    risks: [],
+    blockers: [],
+    decisions: [],
+    cameras: [],
+    technicians: DEFAULT_TECHNICIANS,
+    notes: []
   }
 ];
 
@@ -196,29 +252,31 @@ export function loadProjects(): CCTVProject[] {
       const sanitizedData = cleanMojibake(data);
       const parsed = JSON.parse(sanitizedData);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        const validProjects = parsed.filter((p: CCTVProject) => p.id === 'proj-cctv-upc');
-        if (validProjects.length > 0) {
-          return validProjects.map((p: CCTVProject) => {
-            const currentTechs = p.technicians && p.technicians.length > 0 ? p.technicians : DEFAULT_TECHNICIANS;
-            const updatedTechs = currentTechs.map(t => {
-              if (t.name === 'Marcus Vance' || t.id === 'tech-1') {
-                return { ...t, name: 'Rjay Picar' };
-              }
-              if (t.name === 'UPC Administration' || t.id === 'tech-2') {
-                return { ...t, name: 'UPCHQ' };
-              }
-              return t;
-            });
-            return {
-              ...p,
-              name: p.name.includes('UPCHQ') ? p.name : 'UPCHQ - CCTV Installation & Monitoring',
-              location: p.location.includes('UPCHQ') ? p.location : 'UPCHQ - Headquarters',
-              teamLead: p.teamLead === 'Marcus Vance' ? 'Rjay Picar' : (p.teamLead || 'Rjay Picar'),
-              cameras: p.cameras && p.cameras.length > 0 ? p.cameras : DEFAULT_CAMERAS,
-              technicians: updatedTechs
-            };
+        const projectMap = new Map<string, CCTVProject>();
+        INITIAL_PROJECTS.forEach(p => projectMap.set(p.id, p));
+        parsed.forEach((p: CCTVProject) => projectMap.set(p.id, p));
+
+        const merged = Array.from(projectMap.values());
+        return merged.map((p: CCTVProject) => {
+          const currentTechs = p.technicians && p.technicians.length > 0 ? p.technicians : DEFAULT_TECHNICIANS;
+          const updatedTechs = currentTechs.map(t => {
+            if (t.name === 'Marcus Vance' || t.id === 'tech-1') {
+              return { ...t, name: 'Rjay Picar' };
+            }
+            if (t.name === 'UPC Administration' || t.id === 'tech-2') {
+              return { ...t, name: 'UPCHQ' };
+            }
+            return t;
           });
-        }
+          return {
+            ...p,
+            name: p.id === 'proj-cctv-upc' && !p.name.includes('UPCHQ') ? 'UPCHQ - CCTV Installation & Monitoring' : p.name,
+            location: p.id === 'proj-cctv-upc' && !p.location.includes('UPCHQ') ? 'UPCHQ - Headquarters' : p.location,
+            teamLead: p.teamLead === 'Marcus Vance' ? 'Rjay Picar' : (p.teamLead || 'Rjay Picar'),
+            cameras: p.cameras && p.cameras.length > 0 ? p.cameras : (p.id === 'proj-cctv-upc' ? DEFAULT_CAMERAS : []),
+            technicians: updatedTechs
+          };
+        });
       }
     }
   } catch (err) {
@@ -226,7 +284,7 @@ export function loadProjects(): CCTVProject[] {
   }
   return INITIAL_PROJECTS.map(p => ({
     ...p,
-    cameras: p.cameras || DEFAULT_CAMERAS,
+    cameras: p.cameras || (p.id === 'proj-cctv-upc' ? DEFAULT_CAMERAS : []),
     technicians: p.technicians || DEFAULT_TECHNICIANS
   }));
 }

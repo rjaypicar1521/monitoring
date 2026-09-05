@@ -38,7 +38,8 @@ import {
   Send,
   FileText,
   MapPin,
-  Menu
+  Menu,
+  Building2
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal } from './TaskPhotoEvidenceModal';
@@ -74,6 +75,7 @@ interface EnterpriseAdminDashboardProps {
   adminPassword?: string;
   onUpdateAdminPassword?: (newPassword: string) => void;
   onOpenImportModal?: () => void;
+  onOpenProjectSelector?: () => void;
 }
 
 export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> = ({
@@ -103,7 +105,8 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
   copied,
   adminPassword = 'admin@123',
   onUpdateAdminPassword,
-  onOpenImportModal
+  onOpenImportModal,
+  onOpenProjectSelector
 }) => {
   const [activeTab, setActiveTab] = useState<'Dashboard' | 'Cameras' | 'Board' | 'Team' | 'Settings'>('Dashboard');
   const [showAdminNotifications, setShowAdminNotifications] = useState(false);
@@ -490,6 +493,35 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
             <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[10px] font-mono font-bold border border-amber-200">v2.5</span>
           </div>
 
+          {/* Project Switcher Card in Sidenav */}
+          <div className="space-y-1.5">
+            <div className="text-[10px] uppercase font-bold text-slate-400 px-1 tracking-wider flex items-center justify-between">
+              <span>Project</span>
+              <span className="text-[9px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200 font-semibold">Active</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => onOpenProjectSelector?.()}
+              className="w-full text-left p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 hover:border-slate-300 transition group cursor-pointer shadow-2xs"
+              title="Click to select or switch project"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="font-bold text-xs text-slate-900 truncate group-hover:text-amber-600 transition-colors">
+                    {project.name}
+                  </div>
+                  <div className="text-[10px] text-slate-500 truncate flex items-center gap-1 mt-0.5">
+                    <Building2 className="w-3 h-3 text-slate-400 shrink-0" />
+                    <span className="truncate">{project.location}</span>
+                  </div>
+                </div>
+                <div className="w-6 h-6 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-slate-700 shrink-0 shadow-2xs">
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </div>
+              </div>
+            </button>
+          </div>
+
           {/* Main Nav Links */}
           <div className="space-y-1">
             <div className="text-[10px] uppercase font-bold text-slate-400 px-3 pb-1 tracking-wider">Overview</div>
@@ -693,6 +725,38 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                   className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Project Switcher Card in Mobile Sidenav */}
+              <div className="space-y-1.5">
+                <div className="text-[10px] uppercase font-bold text-slate-400 px-1 tracking-wider flex items-center justify-between">
+                  <span>Project</span>
+                  <span className="text-[9px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200 font-semibold">Active</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenProjectSelector?.();
+                  }}
+                  className="w-full text-left p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 transition group cursor-pointer shadow-2xs"
+                  title="Click to select or switch project"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-xs text-slate-900 truncate group-hover:text-amber-600 transition-colors">
+                        {project.name}
+                      </div>
+                      <div className="text-[10px] text-slate-500 truncate flex items-center gap-1 mt-0.5">
+                        <Building2 className="w-3 h-3 text-slate-400 shrink-0" />
+                        <span className="truncate">{project.location}</span>
+                      </div>
+                    </div>
+                    <div className="w-6 h-6 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-slate-700 shrink-0 shadow-2xs">
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
                 </button>
               </div>
 

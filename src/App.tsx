@@ -13,6 +13,7 @@ import { ImportProjectModal } from './components/ImportProjectModal';
 import { PRESET_USERS } from './components/LoginModal';
 import { GridBackground } from './components/ui/grid-dot-backgrounds';
 import { FloatingMessenger } from './components/ui/chat';
+import { ProjectSelectorDrawer } from './components/ProjectSelectorDrawer';
 
 export const App: React.FC = () => {
   const [projects, setProjects] = useState<CCTVProject[]>(() => loadProjects());
@@ -26,6 +27,7 @@ export const App: React.FC = () => {
   });
   const [showAdminAuthModal, setShowAdminAuthModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showProjectSelector, setShowProjectSelector] = useState(false);
 
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -469,6 +471,7 @@ export const App: React.FC = () => {
             onAddNote={handleAddNote}
             onDeleteNote={handleDeleteNote}
             onCompleteTaskWithEvidence={handleCompleteTaskWithEvidence}
+            onOpenProjectSelector={() => setShowProjectSelector(true)}
           />
         ) : (
           /* REDESIGNED ADMIN DASHBOARD: Clean Enterprise SaaS with Interactive Kanban, Camera Fleet & Team Management */
@@ -500,6 +503,7 @@ export const App: React.FC = () => {
             adminPassword={adminPassword}
             onUpdateAdminPassword={handleUpdateAdminPassword}
             onOpenImportModal={() => setShowImportModal(true)}
+            onOpenProjectSelector={() => setShowProjectSelector(true)}
           />
         )}
 
@@ -527,6 +531,15 @@ export const App: React.FC = () => {
           onAddTask={handleAddTask}
           onAddRisk={handleAddRisk}
           currentProject={currentProject}
+        />
+
+        {/* Sidenav Project Selector Drawer */}
+        <ProjectSelectorDrawer
+          isOpen={showProjectSelector}
+          onClose={() => setShowProjectSelector(false)}
+          activeProject={currentProject}
+          projects={projects}
+          onSelectProject={handleSelectProject}
         />
 
         {/* Global Facebook Messenger Floating Popup (Shared across Client & Admin) */}

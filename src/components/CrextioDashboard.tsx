@@ -48,6 +48,7 @@ interface CrextioDashboardProps {
   onAddNote?: (content: string, author: string, authorRole: 'client' | 'installer') => void;
   onDeleteNote?: (noteId: string) => void;
   onCompleteTaskWithEvidence?: (taskId: string, photoEvidence: string, photoCaption: string) => void;
+  onOpenProjectSelector?: () => void;
 }
 
 export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
@@ -61,7 +62,8 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   onToggleRole,
   onAddNote,
   onDeleteNote,
-  onCompleteTaskWithEvidence
+  onCompleteTaskWithEvidence,
+  onOpenProjectSelector
 }) => {
   const [activeNavTab, setActiveNavTab] = useState<'Dashboard' | 'Checklist' | 'Cameras' | 'Timeline' | 'Report'>('Dashboard');
   const [expandedSection, setExpandedSection] = useState<'devices' | 'specs' | 'wiring' | null>('devices');
@@ -119,17 +121,35 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
         {/* 1. TOP NAVIGATION BAR */}
         <header className="relative z-20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-          <div className="flex items-center justify-between w-full sm:w-auto">
-            {/* Brand Pill Logo */}
-            <div 
-              onClick={() => setActiveNavTab('Dashboard')}
-              className="flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-white/80 backdrop-blur-sm rounded-full border border-slate-300/70 shadow-xs cursor-pointer hover:bg-white transition"
-            >
-              <BrandLogo size="xs" />
-              <span className="font-bold tracking-tight text-xs sm:text-sm text-slate-900 flex items-baseline gap-1">
-                <span>Monitoring</span>
-                <span className="text-[11px] sm:text-xs font-medium text-slate-500 lowercase tracking-normal">by rmvn</span>
-              </span>
+          <div className="flex items-center justify-between w-full sm:w-auto gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              {/* Brand Pill Logo */}
+              <div 
+                onClick={() => setActiveNavTab('Dashboard')}
+                className="flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-white/80 backdrop-blur-sm rounded-full border border-slate-300/70 shadow-xs cursor-pointer hover:bg-white transition shrink-0"
+              >
+                <BrandLogo size="xs" />
+                <span className="font-bold tracking-tight text-xs sm:text-sm text-slate-900 flex items-baseline gap-1">
+                  <span>Monitoring</span>
+                  <span className="text-[11px] sm:text-xs font-medium text-slate-500 lowercase tracking-normal">by rmvn</span>
+                </span>
+              </div>
+
+              {/* Project Switcher Pill */}
+              <button
+                type="button"
+                onClick={onOpenProjectSelector}
+                className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-white/80 hover:bg-white backdrop-blur-sm rounded-full border border-slate-300/70 shadow-xs cursor-pointer transition text-left group min-w-0"
+                title="Click to select or switch project"
+              >
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <div className="flex items-center gap-1 min-w-0">
+                  <span className="font-bold text-xs sm:text-sm text-slate-800 truncate max-w-[120px] sm:max-w-[180px] group-hover:text-amber-600 transition-colors">
+                    {project.name}
+                  </span>
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 shrink-0" />
+                </div>
+              </button>
             </div>
 
             {/* Mobile Utility Controls (<sm) */}
