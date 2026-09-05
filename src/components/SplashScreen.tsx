@@ -8,7 +8,7 @@ interface SplashScreenProps {
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({
   onFinish,
-  durationMs = 3000
+  durationMs = 6000
 }) => {
   const [isDismissing, setIsDismissing] = useState(false);
 
@@ -18,13 +18,13 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
     // Smooth exit duration before unmounting callback
     setTimeout(() => {
       onFinish?.();
-    }, 600);
+    }, 800);
   }, [isDismissing, onFinish]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       handleDismiss();
-    }, Math.max(durationMs - 600, 500));
+    }, Math.max(durationMs - 800, 500));
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' || e.key === ' ' || e.key === 'Enter') {
@@ -103,19 +103,19 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
           {/* Central Logo Container with Netflix-style Zoom & Aura */}
           <div className="relative z-10 px-6 sm:px-12 flex flex-col items-center justify-center max-w-4xl w-full">
             <motion.div
-              initial={{ opacity: 0, scale: 0.88, filter: 'blur(10px) brightness(1.25)' }}
+              initial={{ opacity: 0, scale: 0.86, filter: 'blur(12px) brightness(1.3)' }}
               animate={{
                 opacity: 1,
-                scale: [0.88, 1, 1.06],
+                scale: [0.86, 0.98, 1.08],
                 filter: [
-                  'blur(10px) brightness(1.25)',
+                  'blur(12px) brightness(1.3)',
                   'blur(0px) brightness(1)',
-                  'blur(0px) brightness(1.08)'
+                  'blur(0px) brightness(1.1)'
                 ]
               }}
               transition={{
-                duration: 3,
-                times: [0, 0.35, 1],
+                duration: 6,
+                times: [0, 0.28, 1],
                 ease: [0.16, 1, 0.3, 1]
               }}
               className="relative flex items-center justify-center overflow-hidden py-4"
@@ -124,7 +124,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
               <img
                 src="/rmvn-logo-white.png"
                 alt="RMVN Solutions - Network & Systems Architects"
-                className="w-[84vw] max-w-[480px] sm:max-w-[580px] md:max-w-[640px] h-auto object-contain drop-shadow-[0_0_40px_rgba(26,98,184,0.5)] transition-transform"
+                className="w-[84vw] max-w-[480px] sm:max-w-[580px] md:max-w-[640px] h-auto object-contain drop-shadow-[0_0_45px_rgba(26,98,184,0.55)] transition-transform"
                 loading="eager"
               />
 
@@ -132,15 +132,16 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
               <motion.div
                 initial={{ x: '-150%', opacity: 0 }}
                 animate={{
-                  x: '200%',
-                  opacity: [0, 0.85, 0]
+                  x: ['-150%', '200%', '200%', '-150%', '200%'],
+                  opacity: [0, 0.85, 0, 0, 0.75]
                 }}
                 transition={{
-                  duration: 1.8,
-                  delay: 0.7,
-                  ease: [0.4, 0, 0.2, 1]
+                  duration: 5.5,
+                  times: [0, 0.38, 0.45, 0.55, 0.95],
+                  delay: 0.8,
+                  ease: 'easeInOut'
                 }}
-                className="absolute inset-y-0 w-36 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-25deg] pointer-events-none"
+                className="absolute inset-y-0 w-44 bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-[-25deg] pointer-events-none"
               />
             </motion.div>
           </div>
