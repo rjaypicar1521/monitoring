@@ -6,7 +6,6 @@ import {
   Clock, 
   Calendar, 
   Settings, 
-  Bell, 
   User, 
   ArrowUpRight, 
   Play, 
@@ -37,7 +36,6 @@ import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal, LightboxPhoto } from './TaskPhotoEvidenceModal';
 import Velaris from './ui/velaris';
 import { Button as StatefulButton } from './ui/stateful-button';
-import { NotificationList, NotificationItem } from './ui/notification-list';
 
 interface CrextioDashboardProps {
   project: CCTVProject;
@@ -71,7 +69,6 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   const [timerPlaying, setTimerPlaying] = useState(false);
   const [evidenceTask, setEvidenceTask] = useState<CCTVTask | null>(null);
   const [lightboxPhoto, setLightboxPhoto] = useState<LightboxPhoto | null>(null);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [cameraSearch, setCameraSearch] = useState('');
   const [checklistFilter, setChecklistFilter] = useState<'All' | 'Done' | 'In progress' | 'Blocked'>('All');
@@ -101,45 +98,6 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   const taskPercent = project.tasks.length > 0 
     ? Math.round((doneTasks.length / project.tasks.length) * 100) 
     : 0;
-
-  const notificationItems: NotificationItem[] = React.useMemo(() => {
-    const items: NotificationItem[] = [];
-    activeBlockers.forEach((b) => {
-      items.push({
-        id: `blocker-${b.id}`,
-        title: b.description,
-        subtitle: `Action: ${b.unblockAction}`,
-        time: b.since || 'Active',
-        type: 'alert',
-        count: 1,
-        actionLabel: isInstaller ? '✔ Mark Resolved' : undefined,
-        onAction: isInstaller
-          ? () => {
-              onResolveBlocker(b.id);
-            }
-          : undefined,
-      });
-    });
-    doneTasks.slice(0, 4).forEach((t) => {
-      items.push({
-        id: `done-${t.id}`,
-        title: `${t.title} (Completed)`,
-        subtitle: 'Verified & cleared',
-        time: 'Done',
-        type: 'success',
-      });
-    });
-    if (items.length === 0) {
-      items.push({
-        id: 'nominal',
-        title: 'Project on schedule',
-        subtitle: 'No active blockers reported',
-        time: 'Nominal',
-        type: 'info',
-      });
-    }
-    return items;
-  }, [activeBlockers, doneTasks, isInstaller, onResolveBlocker]);
 
   const leadTech = (project.technicians && project.technicians[0]) || {
     name: project.teamLead || 'Rjay Picar',
@@ -206,22 +164,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
               <button
                 onClick={() => {
-                  setShowNotifications(!showNotifications);
-                  setShowProfileMenu(false);
-                }}
-                className="w-8 h-8 bg-white/80 hover:bg-white rounded-full border border-slate-300/70 flex items-center justify-center text-slate-700 relative shadow-xs"
-                title="View Project Alerts"
-              >
-                <Bell className="w-3.5 h-3.5" />
-                {activeBlockers.length > 0 && (
-                  <span className="w-2 h-2 rounded-full bg-amber-500 absolute top-1 right-1 ring-2 ring-white animate-pulse" />
-                )}
-              </button>
-
-              <button
-                onClick={() => {
                   setShowProfileMenu(!showProfileMenu);
-                  setShowNotifications(false);
                 }}
                 className="w-8 h-8 rounded-full bg-[#1a1c22] hover:bg-slate-800 text-amber-300 flex items-center justify-center font-bold text-xs shadow-xs border border-white overflow-hidden"
               >
@@ -259,7 +202,6 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                   key={tab}
                   onClick={() => {
                     setActiveNavTab(tab);
-                    setShowNotifications(false);
                     setShowProfileMenu(false);
                   }}
                   className={`px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full transition cursor-pointer whitespace-nowrap text-xs ${
@@ -325,56 +267,16 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               )}
             </button>
 
-            {/* Functional Notification Bell Button */}
-            <button
-              onClick={() => {
-                setShowNotifications(!showNotifications);
-                setShowProfileMenu(false);
-              }}
-              className="w-9 h-9 bg-white/80 hover:bg-white rounded-full border border-slate-300/70 flex items-center justify-center text-slate-700 relative shadow-xs transition cursor-pointer"
-              title="View Project Alerts"
-            >
-              <Bell className="w-4 h-4" />
-              {activeBlockers.length > 0 && (
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 absolute top-1.5 right-1.5 ring-2 ring-white animate-pulse" />
-              )}
-            </button>
-
             {/* Functional User Profile Avatar Button */}
             <button
               onClick={() => {
                 setShowProfileMenu(!showProfileMenu);
-                setShowNotifications(false);
               }}
               className="w-9 h-9 rounded-full bg-[#1a1c22] hover:bg-slate-800 text-amber-300 flex items-center justify-center font-bold text-xs shadow-xs border border-white cursor-pointer transition overflow-hidden"
               title="Profile & Project Settings"
             >
               {currentUser.name.charAt(0)}
             </button>
-
-            {/* NOTIFICATIONS DROPDOWN POPOVER */}
-            {showNotifications && (
-              <div className="absolute right-0 top-12 z-50 animate-in fade-in">
-                <div className="relative">
-                  <button
-                    onClick={() => setShowNotifications(false)}
-                    className="absolute -top-2.5 -right-2.5 size-6 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs z-50 hover:bg-black shadow-md cursor-pointer border border-white"
-                    title="Close"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                  <NotificationList
-                    notifications={notificationItems}
-                    title="Project Alerts"
-                    onViewAll={() => {
-                      setActiveNavTab('Checklist');
-                      setShowNotifications(false);
-                    }}
-                    className="w-80 shadow-2xl bg-white/95 backdrop-blur-md dark:bg-neutral-900 border border-slate-200/80"
-                  />
-                </div>
-              </div>
-            )}
 
             {/* PROFILE & SETTINGS DROPDOWN POPOVER */}
             {showProfileMenu && (
@@ -452,46 +354,12 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     </p>
                   </div>
 
-                  {/* 3 Metric Counters matching Crextio top-right */}
-                  <div className="flex items-center justify-around sm:justify-start gap-3 sm:gap-8 bg-slate-900/80 backdrop-blur-md px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-2xl border border-white/15 shadow-md w-full sm:w-auto">
-                    <div 
-                      onClick={() => setActiveNavTab('Cameras')}
-                      className="flex items-center gap-2.5 cursor-pointer group"
-                    >
-                      <div className="text-2xl sm:text-3xl font-bold text-white font-mono group-hover:text-amber-300 transition">
-                        {project.totalCameras}
-                      </div>
-                      <div className="text-[11px] font-semibold text-slate-300 leading-tight">
-                        Total<br />Cameras
-                      </div>
-                    </div>
-
-                    <div className="h-7 w-px bg-white/20" />
-
-                    <div 
-                      onClick={() => setActiveNavTab('Cameras')}
-                      className="flex items-center gap-2.5 cursor-pointer group"
-                    >
-                      <div className="text-2xl sm:text-3xl font-bold text-emerald-400 font-mono group-hover:scale-105 transition">
-                        {project.installedCameras}
-                      </div>
-                      <div className="text-[11px] font-semibold text-slate-300 leading-tight">
-                        Mounted<br />Ready
-                      </div>
-                    </div>
-
-                    <div className="h-7 w-px bg-white/20" />
-
-                    <div 
-                      onClick={() => setActiveNavTab('Checklist')}
-                      className="flex items-center gap-2.5 cursor-pointer group"
-                    >
-                      <div className="text-2xl sm:text-3xl font-bold text-amber-400 font-mono group-hover:scale-105 transition">
-                        {activeBlockers.length}
-                      </div>
-                      <div className="text-[11px] font-semibold text-slate-300 leading-tight">
-                        Action<br />Pending
-                      </div>
+                  {/* Live Cameras Stat Display */}
+                  <div className="stats shadow cursor-pointer" onClick={() => setActiveNavTab('Cameras')}>
+                    <div className="stat">
+                      <div className="stat-title">Live Cameras</div>
+                      <div className="stat-value">{project.installedCameras}</div>
+                      <div className="stat-desc">{percentComplete}% online ({project.totalCameras} total cameras)</div>
                     </div>
                   </div>
                 </div>
