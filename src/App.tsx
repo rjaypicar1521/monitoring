@@ -601,11 +601,11 @@ export const App: React.FC = () => {
           />
         )}
 
-        {/* 6-Second Netflix-style Cinematic Opening Splash Screen */}
+        {/* 4-Second Netflix-style Cinematic Opening Splash Screen */}
         {showSplash && (
           <SplashScreen 
             onFinish={() => setShowSplash(false)} 
-            durationMs={6000} 
+            durationMs={4000} 
           />
         )}
       </div>
