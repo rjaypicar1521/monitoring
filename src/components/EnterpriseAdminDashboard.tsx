@@ -43,7 +43,6 @@ import {
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal } from './TaskPhotoEvidenceModal';
 import { Button as StatefulButton } from './ui/stateful-button';
-import { FloatingMessenger } from './ui/chat';
 import { NotificationList, NotificationItem } from './ui/notification-list';
 import { KanbanProgress } from './ui/kanban-progress';
 
@@ -1511,102 +1510,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
               </div>
             </div>
 
-            {/* ROW 4: SHARED SITE DIRECTIVES & NOTES (SYNCED WITH CLIENT DASHBOARD) */}
-            <div className="bg-white rounded-[28px] p-6 border border-slate-200/90 shadow-2xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-2xl bg-slate-900 text-amber-300 flex items-center justify-center font-bold">
-                    <MessageSquare className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                      <span>Site Directives & Notes</span>
-                      <span className="text-[10px] font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200">
-                        Live 2-Way Sync with Client
-                      </span>
-                    </h3>
-                    <p className="text-[11px] text-slate-500">
-                      Collaborative feed between client sponsor and installation engineering team. Notes appear live on both consoles.
-                    </p>
-                  </div>
-                </div>
 
-                <span className="text-xs font-mono font-bold text-slate-500">
-                  {projectNotes.length} Note{projectNotes.length === 1 ? '' : 's'}
-                </span>
-              </div>
-
-              {/* Admin Note Input Box */}
-              <form onSubmit={handleAdminSubmitNote} className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Type an admin update or response to client..."
-                  value={adminNoteText}
-                  onChange={(e) => setAdminNoteText(e.target.value)}
-                  className="flex-1 bg-slate-50 border border-slate-200 focus:border-slate-800 focus:bg-white rounded-2xl px-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none transition shadow-2xs"
-                />
-                <StatefulButton
-                  type="submit"
-                  disabled={!adminNoteText.trim()}
-                  onClick={handleAdminSubmitNote}
-                  className="min-w-[130px] rounded-2xl bg-[#111317] hover:bg-slate-800 disabled:opacity-40 text-white text-xs font-bold py-2.5 shadow-xs"
-                >
-                  Send message
-                </StatefulButton>
-              </form>
-
-              {/* Notes Stream */}
-              <div className="space-y-2.5 pt-1">
-                {projectNotes.length === 0 ? (
-                  <div className="text-center py-6 text-xs text-slate-400 italic bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                    No site notes recorded yet. Type above to post a note to the client dashboard.
-                  </div>
-                ) : (
-                  projectNotes.map((note) => {
-                    const isClient = note.authorRole === 'client';
-                    return (
-                      <div
-                        key={note.id}
-                        className={`p-3.5 rounded-2xl border transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                          isClient
-                            ? 'bg-amber-50/60 border-amber-200/80'
-                            : 'bg-slate-50 border-slate-200/90'
-                        }`}
-                      >
-                        <div className="space-y-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                              isClient ? 'bg-amber-200/80 text-amber-950 font-mono' : 'bg-[#111317] text-white font-mono'
-                            }`}>
-                              {isClient ? 'Client Directive' : 'Admin / Tech'}
-                            </span>
-                            <span className="text-xs font-bold text-slate-900">{note.author}</span>
-                            <span className="text-[10px] text-slate-400 font-mono">• {note.createdAt}</span>
-                          </div>
-                          <p className="text-xs text-slate-700 leading-relaxed pl-0.5">
-                            {note.content}
-                          </p>
-                        </div>
-
-                        {onDeleteNote && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              onDeleteNote(note.id);
-                              showNotification('Deleted note');
-                            }}
-                            className="text-slate-400 hover:text-rose-600 p-1.5 rounded-xl hover:bg-rose-50 transition cursor-pointer self-end sm:self-auto shrink-0"
-                            title="Delete note"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
           </div>
         )}
 
@@ -3173,16 +3077,6 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
           photo={lightboxPhoto}
           onClose={() => setLightboxPhoto(null)}
         />
-
-        {/* Floating Facebook Messenger Popup Widget */}
-        <FloatingMessenger
-          projectId={project.id}
-          projectName={project.name}
-          currentUserRole="installer"
-          currentUserName={currentUser.name}
-          onSyncNote={onAddNote}
-        />
-
       </main>
     </div>
   );

@@ -81,12 +81,20 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
     return DEFAULT_MESSAGES;
   });
 
-  // Save to localStorage & broadcast
+  // Re-sync messages when storageKey changes
   useEffect(() => {
     try {
-      localStorage.setItem(storageKey, JSON.stringify(messages));
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMessages(parsed);
+          return;
+        }
+      }
     } catch {}
-  }, [messages, storageKey]);
+    setMessages(DEFAULT_MESSAGES);
+  }, [storageKey]);
 
   // Listen to cross-tab storage and same-tab sync events
   useEffect(() => {
@@ -128,6 +136,17 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
     };
   }, [storageKey, isOpen]);
 
+  const saveAndSyncMessages = (updater: (prev: ChatMessageData[]) => ChatMessageData[]) => {
+    setMessages((prev) => {
+      const updated = updater(prev);
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(updated));
+        window.dispatchEvent(new Event('cctv_messenger_sync'));
+      } catch {}
+      return updated;
+    });
+  };
+
   // Handle opening messenger: resets unread count
   const handleOpenMessenger = () => {
     setIsOpen(true);
@@ -159,14 +178,7 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
         : undefined,
     };
 
-    setMessages((prev) => {
-      const updated = [...prev, newMsg];
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(updated));
-        window.dispatchEvent(new Event('cctv_messenger_sync'));
-      } catch {}
-      return updated;
-    });
+    saveAndSyncMessages((prev) => [...prev, newMsg]);
     setReplyingTo(null);
 
     // Sync to project notes
@@ -176,7 +188,7 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
   };
 
   const handleReactionAdd = (messageId: string, emoji: string) => {
-    setMessages((prev) =>
+    saveAndSyncMessages((prev) =>
       prev.map((msg) => {
         if (msg.id !== messageId) return msg;
         const existing = msg.reactions || [];
@@ -201,11 +213,11 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
   };
 
   const handleDeleteMessage = (messageId: string) => {
-    setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    saveAndSyncMessages((prev) => prev.filter((m) => m.id !== messageId));
   };
 
   const handleResetChat = () => {
-    setMessages(DEFAULT_MESSAGES);
+    saveAndSyncMessages(() => DEFAULT_MESSAGES);
   };
 
   const handleInitiateCall = () => {
@@ -261,7 +273,11 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
             <div className="flex items-center gap-3 min-w-0">
               {/* Partner Avatar */}
               <div className="relative shrink-0">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 text-slate-950 font-bold text-xs flex items-center justify-center border-2 border-white/80 shadow-xs">
+                <div className={`w-10 h-10 rounded-full font-bold text-xs flex items-center justify-center border-2 border-white/80 shadow-xs ${
+                  isClient
+                    ? 'bg-gradient-to-br from-[#181a20] to-[#2a2e39] text-amber-400'
+                    : 'bg-gradient-to-br from-amber-500 to-amber-700 text-slate-950'
+                }`}>
                   {partnerInitials}
                 </div>
                 <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-slate-900 rounded-full" />

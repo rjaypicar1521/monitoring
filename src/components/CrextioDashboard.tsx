@@ -35,7 +35,6 @@ import {
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal, LightboxPhoto } from './TaskPhotoEvidenceModal';
 import { WavyBackground } from './ui/wavy-background';
-import { FloatingMessenger } from './ui/chat';
 
 interface CrextioDashboardProps {
   project: CCTVProject;
@@ -1471,15 +1470,6 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
             onClose={() => setLightboxPhoto(null)}
           />
         )}
-
-        {/* Floating Facebook Messenger Popup Widget */}
-        <FloatingMessenger
-          projectId={project.id}
-          projectName={project.name}
-          currentUserRole="client"
-          currentUserName={currentUser.name}
-          onSyncNote={onAddNote}
-        />
 
       </div>
     </div>

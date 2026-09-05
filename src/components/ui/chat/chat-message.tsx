@@ -54,14 +54,18 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         setShowPicker(false);
       }}
     >
-      {/* Incoming Avatar (Technician) */}
+      {/* Incoming Avatar */}
       {!isCurrentUser && (
         <div className="relative shrink-0 mb-1">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 text-white font-bold text-xs flex items-center justify-center shadow-xs border border-amber-400/40">
+          <div className={`w-8 h-8 rounded-xl font-bold text-xs flex items-center justify-center shadow-xs border ${
+            message.senderRole === 'client'
+              ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 border-amber-300'
+              : 'bg-gradient-to-br from-[#181a20] to-[#2a2e39] text-amber-400 border-slate-700'
+          }`}>
             {message.senderAvatar ? (
               <img src={message.senderAvatar} alt={message.senderName} className="w-full h-full rounded-xl object-cover" />
             ) : (
-              <span>RP</span>
+              <span>{message.senderRole === 'client' ? 'UP' : 'RP'}</span>
             )}
           </div>
           <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full" />
@@ -75,11 +79,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           <span className="font-bold text-slate-800">{message.senderName}</span>
           {message.senderRole && (
             <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded-full border ${
-              isCurrentUser
+              message.senderRole === 'client'
                 ? 'bg-amber-100 text-amber-900 border-amber-200'
                 : 'bg-slate-800 text-white border-slate-700'
             }`}>
-              {isCurrentUser ? 'Client' : 'Lead Technician'}
+              {message.senderRole === 'client' ? 'Client Sponsor' : 'Lead Technician (Admin)'}
             </span>
           )}
         </div>

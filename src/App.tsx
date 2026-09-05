@@ -12,6 +12,7 @@ import { AdminAuthModal } from './components/AdminAuthModal';
 import { ImportProjectModal } from './components/ImportProjectModal';
 import { PRESET_USERS } from './components/LoginModal';
 import { GridBackground } from './components/ui/grid-dot-backgrounds';
+import { FloatingMessenger } from './components/ui/chat';
 
 export const App: React.FC = () => {
   const [projects, setProjects] = useState<CCTVProject[]>(() => loadProjects());
@@ -527,6 +528,17 @@ export const App: React.FC = () => {
           onAddRisk={handleAddRisk}
           currentProject={currentProject}
         />
+
+        {/* Global Facebook Messenger Floating Popup (Shared across Client & Admin) */}
+        {currentProject && (
+          <FloatingMessenger
+            projectId={currentProject.id}
+            projectName={currentProject.name}
+            currentUserRole={currentUser.role}
+            currentUserName={currentUser.name}
+            onSyncNote={handleAddNote}
+          />
+        )}
       </div>
     </div>
   );
