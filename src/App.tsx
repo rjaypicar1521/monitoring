@@ -11,7 +11,7 @@ import { UserInputModal } from './components/UserInputModal';
 import { AdminAuthModal } from './components/AdminAuthModal';
 import { ImportProjectModal } from './components/ImportProjectModal';
 import { PRESET_USERS } from './components/LoginModal';
-import { FloatingPathsBackground } from './components/ui/floating-paths';
+import { GridBackground } from './components/ui/grid-dot-backgrounds';
 
 export const App: React.FC = () => {
   const [projects, setProjects] = useState<CCTVProject[]>(() => loadProjects());
@@ -411,7 +411,13 @@ export const App: React.FC = () => {
 
   if (!currentProject) {
     return (
-      <FloatingPathsBackground position={-1} fixed={true} className="min-h-screen bg-black text-slate-100 flex items-center justify-center p-4">
+      <GridBackground
+        gridSize={24}
+        darkGridColor="#262626"
+        showFade={true}
+        fadeIntensity={25}
+        className="min-h-screen h-auto w-full bg-black text-slate-100 flex items-center justify-center p-4"
+      >
         <div className="text-center space-y-4 max-w-md p-6 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-white/15 shadow-2xl">
           <div className="text-3xl">📹</div>
           <h2 className="text-base font-bold text-white">No camera project connected yet</h2>
@@ -425,23 +431,26 @@ export const App: React.FC = () => {
             Create or Connect Project
           </button>
         </div>
-      </FloatingPathsBackground>
+      </GridBackground>
     );
   }
 
   return (
     <div className="min-h-screen bg-black text-slate-100 relative selection:bg-white selection:text-black">
-      {/* Decoupled Hardware-Accelerated Fixed Background Layer */}
+      {/* Decoupled Hardware-Accelerated Fixed Grid Background Layer */}
       <div 
         className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
         style={{
-          transform: 'translate3d(0, 0, 0)',
-          willChange: 'transform',
-          backfaceVisibility: 'hidden',
           contain: 'strict',
         }}
       >
-        <FloatingPathsBackground position={-1} className="w-full h-full bg-transparent" />
+        <GridBackground
+          gridSize={24}
+          darkGridColor="#262626"
+          showFade={true}
+          fadeIntensity={25}
+          className="w-full h-full min-h-screen bg-black"
+        />
       </div>
 
       {/* Main Scrollable Viewport Content */}
