@@ -130,7 +130,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       {showText && (
         <div className="flex flex-col">
           <span 
-            className="font-black tracking-[0.22em] uppercase text-sm sm:text-base leading-none select-none drop-shadow-md"
+            className="font-black tracking-wide text-sm sm:text-base leading-none select-none drop-shadow-md flex items-baseline gap-1"
             style={{
               background: 'linear-gradient(180deg, #ffffff 0%, #cbd5e1 45%, #94a3b8 70%, #64748b 100%)',
               WebkitBackgroundClip: 'text',
@@ -138,7 +138,8 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
               textShadow: '0 1px 2px rgba(0,0,0,0.8)'
             }}
           >
-            MONITORING
+            <span>Monitoring</span>
+            <span className="text-[10px] sm:text-[11px] font-medium lowercase tracking-normal text-slate-400">by rmvn</span>
           </span>
           <span className="text-[10px] tracking-widest text-cyan-400/80 font-mono font-bold uppercase mt-0.5">
             CCTV System

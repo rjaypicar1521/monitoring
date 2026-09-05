@@ -136,8 +136,9 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               className="flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-white/80 backdrop-blur-sm rounded-full border border-slate-300/70 shadow-xs cursor-pointer hover:bg-white transition"
             >
               <BrandLogo size="xs" />
-              <span className="font-black tracking-wider text-xs sm:text-sm text-slate-900 uppercase">
-                MONITORING
+              <span className="font-bold tracking-tight text-xs sm:text-sm text-slate-900 flex items-baseline gap-1">
+                <span>Monitoring</span>
+                <span className="text-[11px] sm:text-xs font-medium text-slate-500 lowercase tracking-normal">by rmvn</span>
               </span>
             </div>
 
