@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Camera, Upload, X, Check, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { CCTVTask } from '../types';
+import { Camera as CapCamera, CameraResultType, CameraSource } from '@capacitor/camera';
 
 interface TaskPhotoEvidenceModalProps {
   task: CCTVTask | null;
@@ -27,6 +28,58 @@ export const TaskPhotoEvidenceModal: React.FC<TaskPhotoEvidenceModalProps> = ({
       setError(null);
     }
   }, [isOpen, task]);
+
+  const handleCameraCapture = async () => {
+    try {
+      setError(null);
+      const photo = await CapCamera.getPhoto({
+        quality: 85,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Camera,
+        webUseInput: true
+      });
+      if (photo?.dataUrl) {
+        setPhotoData(photo.dataUrl);
+      } else if (photo?.webPath) {
+        setPhotoData(photo.webPath);
+      }
+    } catch (err: any) {
+      // User cancelled or web fallback needed
+      const msg = err?.message || String(err);
+      if (msg.toLowerCase().includes('denied')) {
+        setError('Camera permission denied. Please grant permission or upload file.');
+      } else if (!msg.toLowerCase().includes('cancel')) {
+        console.warn('Camera capture fallback to file picker:', err);
+        fileInputRef.current?.click();
+      }
+    }
+  };
+
+  const handleGallerySelect = async () => {
+    try {
+      setError(null);
+      const photo = await CapCamera.getPhoto({
+        quality: 85,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Photos,
+        webUseInput: true
+      });
+      if (photo?.dataUrl) {
+        setPhotoData(photo.dataUrl);
+      } else if (photo?.webPath) {
+        setPhotoData(photo.webPath);
+      }
+    } catch (err: any) {
+      const msg = err?.message || String(err);
+      if (msg.toLowerCase().includes('denied')) {
+        setError('Photo gallery permission denied. Please grant permission or choose file.');
+      } else if (!msg.toLowerCase().includes('cancel')) {
+        fileInputRef.current?.click();
+      }
+    }
+  };
 
   if (!isOpen || !task) return null;
 
@@ -123,10 +176,17 @@ export const TaskPhotoEvidenceModal: React.FC<TaskPhotoEvidenceModalProps> = ({
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
                   <button
                     type="button"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={handleGallerySelect}
                     className="px-3 py-1.5 bg-white text-slate-900 rounded-xl text-xs font-bold shadow-md cursor-pointer hover:bg-slate-100 transition"
                   >
                     Change Photo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCameraCapture}
+                    className="px-3 py-1.5 bg-amber-400 text-slate-950 rounded-xl text-xs font-bold shadow-md cursor-pointer hover:bg-amber-500 transition"
+                  >
+                    Retake
                   </button>
                   <button
                     type="button"
@@ -138,18 +198,29 @@ export const TaskPhotoEvidenceModal: React.FC<TaskPhotoEvidenceModalProps> = ({
                 </div>
               </div>
             ) : (
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-300 hover:border-slate-800 bg-slate-50 hover:bg-slate-100/80 rounded-2xl p-6 text-center cursor-pointer transition space-y-2"
-              >
-                <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center mx-auto">
-                  <Upload className="w-5 h-5 text-slate-700" />
-                </div>
-                <div className="text-xs font-bold text-slate-800">
-                  Click to upload site photo evidence
-                </div>
-                <div className="text-[11px] text-slate-400">
-                  PNG, JPG, or WEBP up to 5MB
+              <div className="space-y-2.5">
+                <button
+                  type="button"
+                  onClick={handleCameraCapture}
+                  className="w-full flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-2xl bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-xs shadow-md transition cursor-pointer active:scale-[0.99]"
+                >
+                  <Camera className="w-4 h-4" />
+                  <span>Take Live Photo (Native Camera)</span>
+                </button>
+
+                <div
+                  onClick={handleGallerySelect}
+                  className="border-2 border-dashed border-slate-300 hover:border-slate-800 bg-slate-50 hover:bg-slate-100/80 rounded-2xl p-4 text-center cursor-pointer transition space-y-1"
+                >
+                  <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center mx-auto">
+                    <Upload className="w-4 h-4 text-slate-700" />
+                  </div>
+                  <div className="text-xs font-bold text-slate-800">
+                    Or select image from device gallery
+                  </div>
+                  <div className="text-[10px] text-slate-400">
+                    PNG, JPG, or WEBP up to 5MB
+                  </div>
                 </div>
               </div>
             )}

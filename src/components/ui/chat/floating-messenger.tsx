@@ -29,6 +29,7 @@ const DEFAULT_MESSAGES: ChatMessageData[] = [
     text: 'Hello UPCHQ team! All preliminary cabling for Zones 1-3 is complete. CAM-01 (Main Gate) and CAM-02 (Perimeter West) are verified online in 1080p.',
     timestamp: '10:15 AM',
     status: 'read',
+    readBy: ['usr-client', 'usr-installer'],
     reactions: [{ emoji: '👍', count: 2, users: ['client', 'tech'] }],
   },
   {
@@ -39,6 +40,7 @@ const DEFAULT_MESSAGES: ChatMessageData[] = [
     text: 'Field update: Backdoor (CAM-04) cable is pulled at the doorway. Bracket mounting is temporarily deferred for occupant privacy clearance. Let me know when authorized to drill.',
     timestamp: '11:30 AM',
     status: 'read',
+    readBy: ['usr-client', 'usr-installer'],
   },
 ];
 
@@ -58,9 +60,22 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
   const [replyingTo, setReplyingTo] = useState<ChatMessageData | null>(null);
 
   const isClient = currentUserRole === 'client';
+  const currentUserId = isClient ? 'usr-client' : 'usr-installer';
   const partnerName = isClient ? 'Rjay Picar - RMVN' : 'UPCHQ';
   const partnerRole = isClient ? 'Lead Systems Architect & Tech' : 'Client Project Sponsor';
   const partnerInitials = isClient ? 'RP' : 'UP';
+
+  // Helper to compute unread incoming messages for the current user
+  const computeUnreadCount = (msgList: ChatMessageData[], userId: string): number => {
+    return msgList.filter((m) => {
+      // Only count messages from the OTHER user
+      if (m.senderId === userId) return false;
+      // If legacy message with status 'read' and no readBy array, consider already read
+      if (m.status === 'read' && (!m.readBy || m.readBy.length === 0)) return false;
+      // Unread if readBy doesn't include current user
+      return !m.readBy || !m.readBy.includes(userId);
+    }).length;
+  };
 
   // Load messages from localStorage
   const [messages, setMessages] = useState<ChatMessageData[]>(() => {
@@ -111,9 +126,6 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
           const parsed = JSON.parse(e.newValue);
           if (Array.isArray(parsed)) {
             setMessages(parsed);
-            if (!isOpen) {
-              setUnreadCount((prev) => prev + 1);
-            }
           }
         } catch {}
       }
@@ -129,7 +141,7 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
       window.removeEventListener('storage', handleStorage);
       window.removeEventListener('cctv_messenger_sync', handleCustomSync);
     };
-  }, [storageKey, isOpen]);
+  }, [storageKey]);
 
   const saveAndSyncMessages = (updater: (prev: ChatMessageData[]) => ChatMessageData[]) => {
     setMessages((prev) => {
@@ -142,10 +154,51 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
     });
   };
 
-  // Handle opening messenger: resets unread count
+  // Track unread count and automatically mark messages as read when messenger is open
+  useEffect(() => {
+    if (isOpen) {
+      // Messenger is open: mark all incoming unread messages as read by current user
+      const unreadExists = messages.some(
+        (m) => m.senderId !== currentUserId && (!m.readBy || !m.readBy.includes(currentUserId))
+      );
+      if (unreadExists) {
+        saveAndSyncMessages((prev) =>
+          prev.map((m) => {
+            if (m.senderId !== currentUserId && (!m.readBy || !m.readBy.includes(currentUserId))) {
+              return {
+                ...m,
+                status: 'read',
+                readBy: [...(m.readBy || []), currentUserId],
+              };
+            }
+            return m;
+          })
+        );
+      }
+      setUnreadCount(0);
+    } else {
+      // Messenger is closed: calculate exact unread count
+      const count = computeUnreadCount(messages, currentUserId);
+      setUnreadCount(count);
+    }
+  }, [messages, currentUserId, isOpen]);
+
+  // Handle opening messenger: resets unread count and marks all as read
   const handleOpenMessenger = () => {
     setIsOpen(true);
     setUnreadCount(0);
+    saveAndSyncMessages((prev) =>
+      prev.map((m) => {
+        if (m.senderId !== currentUserId && (!m.readBy || !m.readBy.includes(currentUserId))) {
+          return {
+            ...m,
+            status: 'read',
+            readBy: [...(m.readBy || []), currentUserId],
+          };
+        }
+        return m;
+      })
+    );
   };
 
   // Handle Send Message
@@ -156,7 +209,7 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
   ) => {
     const newMsg: ChatMessageData = {
       id: `msg-${Date.now()}`,
-      senderId: isClient ? 'usr-client' : 'usr-installer',
+      senderId: currentUserId,
       senderName: currentUserName,
       senderRole: isClient ? 'client' : 'admin',
       text,
@@ -164,6 +217,7 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
       voice,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       status: 'delivered',
+      readBy: [currentUserId],
       replyTo: replyingTo
         ? {
             id: replyingTo.id,
@@ -276,8 +330,8 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
 
             {/* Unread Badge Count */}
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white font-bold text-[11px] font-mono px-2 py-0.5 rounded-full border-2 border-white shadow-sm animate-bounce">
-                {unreadCount}
+              <span className="absolute -top-1.5 -right-1.5 bg-rose-600 text-white font-black text-[11px] font-mono min-w-[22px] h-[22px] px-1 rounded-full border-2 border-white shadow-lg flex items-center justify-center animate-in zoom-in-75 duration-200">
+                {unreadCount > 99 ? '99+' : unreadCount}
               </span>
             )}
           </button>

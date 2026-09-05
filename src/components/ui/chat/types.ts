@@ -16,6 +16,7 @@ export interface ChatMessageData {
   text: string;
   timestamp: string | number | Date;
   status?: 'sending' | 'sent' | 'delivered' | 'read';
+  readBy?: string[];
   replyTo?: {
     id: string;
     senderName: string;
