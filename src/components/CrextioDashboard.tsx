@@ -35,6 +35,7 @@ import {
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal, LightboxPhoto } from './TaskPhotoEvidenceModal';
 import { Button as StatefulButton } from './ui/stateful-button';
+import { WavyBackground } from './ui/wavy-background';
 
 interface CrextioDashboardProps {
   project: CCTVProject;
@@ -324,13 +325,23 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
         {/* TAB 1: MAIN DASHBOARD (CREXTIO 3-COLUMN LAYOUT) */}
         {activeNavTab === 'Dashboard' && (
           <div className="space-y-6 lg:space-y-8 animate-in fade-in">
-            {/* Hero Greeting & Status Capsule Row */}
-            <section className="relative z-10 rounded-3xl overflow-hidden border border-slate-800 shadow-xl bg-gradient-to-b from-[#111317] to-[#0b0d11]">
-              {/* Subtle ambient gradient highlight */}
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800/40 via-transparent to-transparent pointer-events-none" />
+            {/* Hero Greeting & Status Capsule Row with Ambient WavyBackground */}
+            <section className="relative z-10 rounded-3xl overflow-hidden border border-white/15 shadow-2xl bg-[#0b0f19]">
+              {/* Fluid Telemetry Wavy Background Canvas Layer */}
+              <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0">
+                <WavyBackground
+                  containerClassName="w-full h-full min-h-0 bg-transparent"
+                  colors={["#f59e0b", "#10b981", "#06b6d4", "#3b82f6", "#059669"]}
+                  speed="slow"
+                  waveOpacity={0.35}
+                  blur={12}
+                  waveWidth={60}
+                  backgroundFill="#0b0f19"
+                />
+              </div>
 
               {/* Foreground Content Container */}
-              <div className="relative z-10 p-5 sm:p-7 space-y-4 bg-gradient-to-b from-black/20 via-transparent to-black/40">
+              <div className="relative z-10 p-5 sm:p-7 space-y-4 bg-gradient-to-b from-black/40 via-black/20 to-black/60 backdrop-blur-[1px]">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                   <div>
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-amber-300 mb-2">
