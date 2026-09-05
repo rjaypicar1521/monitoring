@@ -34,9 +34,8 @@ import {
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal, LightboxPhoto } from './TaskPhotoEvidenceModal';
-import { Button as StatefulButton } from './ui/stateful-button';
 import { WavyBackground } from './ui/wavy-background';
-import { TechnicianChat } from './ui/chat';
+import { FloatingMessenger } from './ui/chat';
 
 interface CrextioDashboardProps {
   project: CCTVProject;
@@ -999,15 +998,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               </div>
             </div>
 
-            {/* CHATCN: MESSAGE TO TECHNICIAN (REPLACES SITE NOTES) */}
-            <TechnicianChat
-              projectId={project.id}
-              projectName={project.name}
-              technicianName={project.teamLead || 'Rjay Picar - RMVN'}
-              currentUserName={currentUser.name}
-              currentUserRole={currentUser.title}
-              onSyncNote={onAddNote}
-            />
+
           </div>
         )}
 
@@ -1480,6 +1471,15 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
             onClose={() => setLightboxPhoto(null)}
           />
         )}
+
+        {/* Floating Facebook Messenger Popup Widget */}
+        <FloatingMessenger
+          projectId={project.id}
+          projectName={project.name}
+          currentUserRole="client"
+          currentUserName={currentUser.name}
+          onSyncNote={onAddNote}
+        />
 
       </div>
     </div>

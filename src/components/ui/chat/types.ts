@@ -32,6 +32,10 @@ export interface ChatMessageData {
     type?: string;
     url?: string;
   }[];
+  voice?: {
+    url: string;
+    duration: number;
+  };
   isPinned?: boolean;
 }
 

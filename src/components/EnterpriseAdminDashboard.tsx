@@ -43,6 +43,7 @@ import {
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal } from './TaskPhotoEvidenceModal';
 import { Button as StatefulButton } from './ui/stateful-button';
+import { FloatingMessenger } from './ui/chat';
 import { NotificationList, NotificationItem } from './ui/notification-list';
 import { KanbanProgress } from './ui/kanban-progress';
 
@@ -3171,6 +3172,15 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
         <PhotoLightboxModal
           photo={lightboxPhoto}
           onClose={() => setLightboxPhoto(null)}
+        />
+
+        {/* Floating Facebook Messenger Popup Widget */}
+        <FloatingMessenger
+          projectId={project.id}
+          projectName={project.name}
+          currentUserRole="installer"
+          currentUserName={currentUser.name}
+          onSyncNote={onAddNote}
         />
 
       </main>

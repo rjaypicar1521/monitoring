@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Check, CheckCheck, Clock, Reply, SmilePlus, Trash2, Pin, Paperclip, FileText, Image as ImageIcon } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Check, CheckCheck, Clock, Reply, SmilePlus, Trash2, Pin, Paperclip, FileText, Image as ImageIcon, Play, Pause, Mic, Download } from 'lucide-react';
 import { ChatMessageData } from './types';
 
 const QUICK_REACTIONS = ['👍', '❤️', '🔥', '✅', '👀', '🙏'];
@@ -21,6 +21,23 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 }) => {
   const [showToolbar, setShowToolbar] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const toggleAudio = () => {
+    if (!message.voice?.url) return;
+    if (!audioRef.current) {
+      audioRef.current = new Audio(message.voice.url);
+      audioRef.current.onended = () => setIsPlayingAudio(false);
+      audioRef.current.onerror = () => setIsPlayingAudio(false);
+    }
+    if (isPlayingAudio) {
+      audioRef.current.pause();
+      setIsPlayingAudio(false);
+    } else {
+      audioRef.current.play().then(() => setIsPlayingAudio(true)).catch(() => setIsPlayingAudio(false));
+    }
+  };
 
   const formattedTime = typeof message.timestamp === 'string'
     ? message.timestamp
@@ -88,25 +105,68 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           }`}
         >
           {/* Main message text */}
-          <p className="whitespace-pre-wrap select-text">{message.text}</p>
+          {message.text && <p className="whitespace-pre-wrap select-text">{message.text}</p>}
 
-          {/* Attachments if any */}
-          {message.attachments && message.attachments.length > 0 && (
-            <div className="mt-2.5 pt-2 border-t border-slate-200/40 space-y-1.5">
-              {message.attachments.map((att, idx) => (
-                <div
-                  key={idx}
-                  className={`flex items-center gap-2 p-2 rounded-xl border text-[11px] ${
-                    isCurrentUser
-                      ? 'bg-slate-800/80 border-slate-700 text-slate-200'
-                      : 'bg-slate-50 border-slate-200 text-slate-700'
-                  }`}
-                >
-                  <FileText className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                  <span className="font-medium truncate flex-1">{att.name}</span>
-                  {att.size && <span className="text-[10px] opacity-60 font-mono">{att.size}</span>}
+          {/* Real Voice Note with Playback */}
+          {message.voice && (
+            <div className={`flex items-center gap-3 p-2 rounded-xl my-1 border ${
+              isCurrentUser ? 'bg-slate-800 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
+            }`}>
+              <button
+                type="button"
+                onClick={toggleAudio}
+                className="w-8 h-8 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 shadow-xs transition cursor-pointer"
+                title={isPlayingAudio ? 'Pause voice note' : 'Play voice note'}
+              >
+                {isPlayingAudio ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+              </button>
+              <div className="flex-1 min-w-[130px] space-y-1">
+                <div className="flex items-center justify-between text-[10px] font-mono">
+                  <span className="flex items-center gap-1 font-bold text-amber-500">
+                    <Mic className="w-3 h-3" /> Voice Note
+                  </span>
+                  <span className="opacity-70">{message.voice.duration}s</span>
                 </div>
-              ))}
+                <div className="w-full bg-slate-200/40 h-1.5 rounded-full overflow-hidden">
+                  <div className={`h-full bg-amber-500 rounded-full transition-all duration-300 ${isPlayingAudio ? 'w-full animate-pulse' : 'w-1/3'}`} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Real Attachments & Photos */}
+          {message.attachments && message.attachments.length > 0 && (
+            <div className="mt-2.5 pt-2 border-t border-slate-200/40 space-y-2">
+              {message.attachments.map((att, idx) => {
+                const isImage = att.type?.startsWith('image/') || att.url?.startsWith('data:image/');
+                return isImage && att.url ? (
+                  <div key={idx} className="rounded-xl overflow-hidden border border-slate-200/60 group/att relative">
+                    <img src={att.url} alt={att.name} className="max-h-52 w-full object-cover rounded-xl" />
+                    <div className="p-1.5 flex items-center justify-between text-[10px] font-mono bg-black/60 text-white backdrop-blur-xs">
+                      <span className="truncate max-w-[180px]">{att.name}</span>
+                      <a href={att.url} download={att.name} className="hover:text-amber-400 p-0.5 flex items-center gap-1" title="Download image">
+                        <Download className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <a
+                    key={idx}
+                    href={att.url || '#'}
+                    download={att.name}
+                    className={`flex items-center gap-2 p-2 rounded-xl border text-[11px] hover:border-amber-400 transition cursor-pointer ${
+                      isCurrentUser
+                        ? 'bg-slate-800/80 border-slate-700 text-slate-200'
+                        : 'bg-slate-50 border-slate-200 text-slate-700'
+                    }`}
+                  >
+                    <FileText className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <span className="font-medium truncate flex-1">{att.name}</span>
+                    {att.size && <span className="text-[10px] opacity-60 font-mono">{att.size}</span>}
+                    <Download className="w-3.5 h-3.5 opacity-60 hover:opacity-100 shrink-0" />
+                  </a>
+                );
+              })}
             </div>
           )}
 
