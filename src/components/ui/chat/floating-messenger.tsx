@@ -88,8 +88,20 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
     } catch {}
   }, [messages, storageKey]);
 
-  // Listen to cross-tab storage events
+  // Listen to cross-tab storage and same-tab sync events
   useEffect(() => {
+    const syncFromStorage = () => {
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            setMessages(parsed);
+          }
+        }
+      } catch {}
+    };
+
     const handleStorage = (e: StorageEvent) => {
       if (e.key === storageKey && e.newValue) {
         try {
@@ -104,8 +116,16 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
       }
     };
 
+    const handleCustomSync = () => {
+      syncFromStorage();
+    };
+
     window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    window.addEventListener('cctv_messenger_sync', handleCustomSync);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('cctv_messenger_sync', handleCustomSync);
+    };
   }, [storageKey, isOpen]);
 
   // Handle opening messenger: resets unread count
@@ -139,57 +159,19 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
         : undefined,
     };
 
-    setMessages((prev) => [...prev, newMsg]);
+    setMessages((prev) => {
+      const updated = [...prev, newMsg];
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(updated));
+        window.dispatchEvent(new Event('cctv_messenger_sync'));
+      } catch {}
+      return updated;
+    });
     setReplyingTo(null);
 
     // Sync to project notes
     if (onSyncNote && text.trim()) {
       onSyncNote(text.trim(), currentUserName, isClient ? 'client' : 'installer');
-    }
-
-    // If client sent message, simulate smart field response from technician
-    if (isClient) {
-      const lower = text.toLowerCase();
-      setTimeout(() => {
-        setIsTyping(true);
-      }, 700);
-
-      setTimeout(() => {
-        setIsTyping(false);
-        let reply = 'Copy that! Message logged on the field console. Standing by on site.';
-
-        if (lower.includes('cam') || lower.includes('angle') || lower.includes('camera')) {
-          reply = 'Received! I will verify the optical alignment and bracket firmness on the CCTV tester right away.';
-        } else if (lower.includes('cable') || lower.includes('power') || lower.includes('electrician')) {
-          reply = 'Understood. Conduit run is secured with EMT clamps. Once energized, we will terminate the 12V DC jacks.';
-        } else if (lower.includes('backdoor') || lower.includes('privacy')) {
-          reply = 'Acknowledged. Holding off on CAM-04 mounting until cleared. Cables are secured inside the junction box.';
-        } else if (voice) {
-          reply = 'Voice memo received and reviewed loud and clear! Proceeding with your verbal instructions on site.';
-        } else if (attachments && attachments.length > 0) {
-          reply = `Received attachment (${attachments[0].name}). Reviewing site specs now.`;
-        }
-
-        const techReply: ChatMessageData = {
-          id: `msg-${Date.now() + 1}`,
-          senderId: 'usr-installer',
-          senderName: 'Rjay Picar - RMVN',
-          senderRole: 'technician',
-          text: reply,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          status: 'delivered',
-          replyTo: {
-            id: newMsg.id,
-            senderName: newMsg.senderName,
-            text: newMsg.text || (voice ? '[Voice Note]' : '[Attachment]'),
-          },
-        };
-
-        setMessages((prev) => [...prev, techReply]);
-        if (!isOpen) {
-          setUnreadCount((prev) => prev + 1);
-        }
-      }, 2300);
     }
   };
 
