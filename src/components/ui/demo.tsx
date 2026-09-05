@@ -1,20 +1,16 @@
 import React from "react";
-import Velaris from "@/components/ui/velaris";
+import { FloatingPathsBackground } from "@/components/ui/floating-paths";
 
-export default function VelarisDemo() {
+export default function FloatingPathsBackgroundExample() {
   return (
-    <Velaris height="500px" className="rounded-xl">
-      <div className="flex h-full w-full flex-col items-center justify-center gap-4 px-6 text-center">
-        <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs font-medium text-white/80 backdrop-blur">
-          Powered by WebGL
-        </span>
-        <h1 className="max-w-2xl text-4xl font-semibold tracking-tight text-white sm:text-6xl">
-          Living gradients in motion
-        </h1>
-        <p className="max-w-md text-sm text-white/70 sm:text-base">
-          An animated simplex-noise background with color blending, vignette glow and film grain.
-        </p>
+    <FloatingPathsBackground
+      className="aspect-16/9 flex items-center justify-center min-h-[300px]"
+      position={-1}
+    >
+      <div className="text-center p-6">
+        <h2 className="text-2xl font-bold tracking-tight text-white">Floating Paths Background</h2>
+        <p className="text-xs text-slate-400 mt-1">Black and white monochrome paths in motion</p>
       </div>
-    </Velaris>
+    </FloatingPathsBackground>
   );
 }

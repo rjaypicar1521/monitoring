@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal, LightboxPhoto } from './TaskPhotoEvidenceModal';
-import Velaris from './ui/velaris';
+import { FloatingPathsBackground } from './ui/floating-paths';
 import { Button as StatefulButton } from './ui/stateful-button';
 
 interface CrextioDashboardProps {
@@ -120,9 +120,9 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   });
 
   return (
-    <div className="min-h-screen bg-[#fbf9f2] sm:bg-[#b0b8c4] p-0 sm:p-6 lg:p-10 font-sans text-slate-800 flex items-center justify-center selection:bg-amber-400 selection:text-slate-900">
+    <div className="min-h-screen bg-transparent p-0 sm:p-6 lg:p-10 font-sans text-slate-800 flex items-center justify-center selection:bg-white selection:text-black">
       {/* Outer Rounded Tablet Frame matching template (Edge-to-edge on mobile) */}
-      <div className="w-full max-w-7xl bg-[#fbf9f2] rounded-none sm:rounded-[36px] lg:rounded-[44px] shadow-none sm:shadow-2xl overflow-hidden p-3.5 sm:p-8 lg:p-10 border-0 sm:border border-white/80 relative space-y-5 sm:space-y-6 lg:space-y-8 min-h-screen sm:min-h-0">
+      <div className="w-full max-w-7xl bg-[#fbf9f2]/95 backdrop-blur-md rounded-none sm:rounded-[36px] lg:rounded-[44px] shadow-none sm:shadow-2xl overflow-hidden p-3.5 sm:p-8 lg:p-10 border-0 sm:border border-white/60 relative space-y-5 sm:space-y-6 lg:space-y-8 min-h-screen sm:min-h-0">
         
         {/* Subtle Ambient Warm Yellow / Cream Corner Glows */}
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
@@ -324,17 +324,13 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
         {/* TAB 1: MAIN DASHBOARD (CREXTIO 3-COLUMN LAYOUT) */}
         {activeNavTab === 'Dashboard' && (
           <div className="space-y-6 lg:space-y-8 animate-in fade-in">
-            {/* Hero Greeting & Status Capsule Row with Ambient Velaris Background */}
-            <section className="relative z-10 rounded-3xl overflow-hidden border border-slate-800/80 shadow-md bg-[#0b0f19]">
-              {/* Velaris Living Gradient Shader */}
-              <div className="absolute inset-0 w-full h-full pointer-events-none opacity-85">
-                <Velaris
-                  height="100%"
-                  colors={["#f59e0b", "#10b981", "#059669", "#0f172a"]}
-                  bg="#0b0f19"
-                  grain={0.25}
-                  speed={1.2}
-                  className="w-full h-full"
+            {/* Hero Greeting & Status Capsule Row with Ambient Black and White Floating Paths */}
+            <section className="relative z-10 rounded-3xl overflow-hidden border border-white/15 shadow-xl bg-black/70 backdrop-blur-md">
+              {/* Floating Paths Background (Black and White) */}
+              <div className="absolute inset-0 w-full h-full pointer-events-none opacity-40">
+                <FloatingPathsBackground
+                  position={1}
+                  className="w-full h-full bg-transparent"
                 />
               </div>
 

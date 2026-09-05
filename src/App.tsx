@@ -11,6 +11,7 @@ import { UserInputModal } from './components/UserInputModal';
 import { AdminAuthModal } from './components/AdminAuthModal';
 import { ImportProjectModal } from './components/ImportProjectModal';
 import { PRESET_USERS } from './components/LoginModal';
+import { FloatingPathsBackground } from './components/ui/floating-paths';
 
 export const App: React.FC = () => {
   const [projects, setProjects] = useState<CCTVProject[]>(() => loadProjects());
@@ -410,8 +411,8 @@ export const App: React.FC = () => {
 
   if (!currentProject) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
-        <div className="text-center space-y-4 max-w-md p-6 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl">
+      <FloatingPathsBackground position={-1} fixed={true} className="min-h-screen bg-black text-slate-100 flex items-center justify-center p-4">
+        <div className="text-center space-y-4 max-w-md p-6 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-white/15 shadow-2xl">
           <div className="text-3xl">📹</div>
           <h2 className="text-base font-bold text-white">No camera project connected yet</h2>
           <p className="text-xs text-slate-400 leading-relaxed">
@@ -419,17 +420,17 @@ export const App: React.FC = () => {
           </p>
           <button
             onClick={() => setModalState({ isOpen: true, mode: 'project' })}
-            className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-semibold shadow-md transition"
+            className="px-4 py-2 bg-white text-black hover:bg-slate-200 rounded-xl text-xs font-bold shadow-md transition cursor-pointer"
           >
             Create or Connect Project
           </button>
         </div>
-      </div>
+      </FloatingPathsBackground>
     );
   }
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden">
+    <FloatingPathsBackground position={-1} fixed={true} className="min-h-screen bg-black text-slate-100 relative overflow-x-hidden">
       {/* USER DASHBOARD: Super Simple, Warm, Human-Friendly Crextio Template */}
       {currentUser.role === 'client' ? (
         <CrextioDashboard
@@ -503,6 +504,6 @@ export const App: React.FC = () => {
         onAddRisk={handleAddRisk}
         currentProject={currentProject}
       />
-    </div>
+    </FloatingPathsBackground>
   );
 };
