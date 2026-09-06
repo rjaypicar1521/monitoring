@@ -74,6 +74,23 @@ export interface TechnicianMember {
   phone?: string;
   assignedCameras?: string[];
   zone?: string;
+  isTimedIn?: boolean;
+  timeIn?: string;
+  timeOut?: string;
+  attendanceDate?: string;
+}
+
+export interface AttendanceEvent {
+  id: string;
+  type: 'TIME_IN' | 'TIME_OUT';
+  technicianId: string;
+  technicianName: string;
+  technicianRole: string;
+  projectName: string;
+  projectId: string;
+  time: string;
+  timestamp: number;
+  status: TechnicianStatus;
 }
 
 export interface ProjectNote {

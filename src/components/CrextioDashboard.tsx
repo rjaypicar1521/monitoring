@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CCTVProject, ExecutiveStatus, AuthUser, TaskStatus, CCTVTask } from '../types';
+import { CCTVProject, ExecutiveStatus, AuthUser, TaskStatus, CCTVTask, AttendanceEvent, TechnicianMember } from '../types';
 import { 
   Camera, 
   CheckCircle2, 
@@ -17,24 +17,33 @@ import {
   HardDrive, 
   ShieldCheck, 
   Copy, 
-  ClipboardCheck,
-  AlertTriangle,
-  Layers,
-  Wrench,
-  Check,
-  Search,
-  FileText,
-  X,
-  ExternalLink,
-  MessageSquare,
-  Send,
-  Trash2,
-  Image as ImageIcon,
-  Lock
+  ClipboardCheck, 
+  AlertTriangle, 
+  Layers, 
+  Wrench, 
+  Check, 
+  Search, 
+  FileText, 
+  X, 
+  ExternalLink, 
+  MessageSquare, 
+  Send, 
+  Trash2, 
+  Image as ImageIcon, 
+  Lock,
+  Bell
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal, LightboxPhoto } from './TaskPhotoEvidenceModal';
 import { WavyBackground } from './ui/wavy-background';
+import { AttendanceToastBanner } from './AttendanceToastBanner';
+import { 
+  subscribeToAttendance, 
+  showDesktopPushNotification, 
+  playAttendanceChime, 
+  requestNotificationPermission, 
+  getNotificationPermission 
+} from '../utils/attendanceService';
 
 interface CrextioDashboardProps {
   project: CCTVProject;
@@ -74,8 +83,70 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   const [cameraSearch, setCameraSearch] = useState('');
   const [checklistFilter, setChecklistFilter] = useState<'All' | 'Done' | 'In progress' | 'Blocked'>('All');
 
+  const [attendanceNotification, setAttendanceNotification] = useState<AttendanceEvent | null>(null);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | 'unsupported'>('default');
 
+  const leadTech: TechnicianMember = (project.technicians && (project.technicians.find(t => t.name.includes('Rjay') || t.id === 'tech-1') || project.technicians[0])) || {
+    id: 'tech-1',
+    name: project.teamLead || 'Rjay Picar',
+    role: 'Lead Systems & CCTV Architect (RMVN Solutions)',
+    status: 'On Duty',
+    assigned: 'CCTV Architecture & Live Monitoring',
+    email: 'rjay@rmvn.com',
+    isTimedIn: false,
+    timeIn: undefined
+  };
 
+  React.useEffect(() => {
+    setNotificationPermission(getNotificationPermission());
+
+    // If technician is currently timed in, show popup notification on client dashboard
+    if (leadTech.isTimedIn) {
+      const dismissKey = `dismissed_attendance_${leadTech.id}_${leadTech.timeIn || 'today'}`;
+      const isDismissed = typeof sessionStorage !== 'undefined' && sessionStorage.getItem(dismissKey);
+      if (!isDismissed) {
+        setAttendanceNotification({
+          id: `att-timedin-${leadTech.id}-${leadTech.timeIn || 'today'}`,
+          type: 'TIME_IN',
+          technicianId: leadTech.id,
+          technicianName: leadTech.name,
+          technicianRole: leadTech.role,
+          projectName: project.name,
+          projectId: project.id,
+          time: leadTech.timeIn || 'On Site',
+          timestamp: Date.now(),
+          status: 'On Site'
+        });
+      }
+    }
+
+    const unsubscribe = subscribeToAttendance((event: AttendanceEvent) => {
+      // In-app rich toast banner on Client view
+      setAttendanceNotification(event);
+
+      // Play subtle audio chime via Web Audio API
+      playAttendanceChime(event.type);
+
+      // Trigger native Windows screen push notification
+      showDesktopPushNotification(event);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [project.id, project.name, leadTech.isTimedIn, leadTech.timeIn, leadTech.id, leadTech.name, leadTech.role]);
+
+  const handleDismissAttendance = () => {
+    if (attendanceNotification) {
+      const dismissKey = `dismissed_attendance_${attendanceNotification.technicianId}_${attendanceNotification.time}`;
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem(dismissKey, 'true');
+        }
+      } catch {}
+    }
+    setAttendanceNotification(null);
+  };
 
   const isInstaller = currentUser.role === 'installer';
   const percentComplete = project.totalCameras > 0 
@@ -89,12 +160,6 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   const taskPercent = project.tasks.length > 0 
     ? Math.round((doneTasks.length / project.tasks.length) * 100) 
     : 0;
-
-  const leadTech = (project.technicians && project.technicians[0]) || {
-    name: project.teamLead || 'Rjay Picar',
-    role: 'Lead CCTV Installer',
-    status: 'On Duty'
-  };
 
   // Synchronized camera fleet from project data
   const cameraSpots = project.cameras || [];
@@ -112,6 +177,12 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
   return (
     <div className="min-h-screen bg-transparent p-0 sm:p-6 lg:p-10 font-sans text-slate-800 flex items-center justify-center selection:bg-white selection:text-black">
+      {/* Top-Right Floating Attendance Toast Banner */}
+      <AttendanceToastBanner
+        event={attendanceNotification}
+        onDismiss={handleDismissAttendance}
+      />
+
       {/* Outer Rounded Tablet Frame matching template (Edge-to-edge on mobile) */}
       <div className="w-full max-w-7xl bg-[#fbf9f2] rounded-none sm:rounded-[36px] lg:rounded-[44px] shadow-none sm:shadow-2xl overflow-hidden p-3.5 sm:p-8 lg:p-10 border-0 sm:border border-white/80 relative space-y-5 sm:space-y-6 lg:space-y-8 min-h-screen sm:min-h-0">
         
@@ -154,6 +225,20 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
             {/* Mobile Utility Controls (<sm) */}
             <div className="flex items-center gap-1.5 sm:hidden">
+              {notificationPermission === 'default' && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const res = await requestNotificationPermission();
+                    setNotificationPermission(res);
+                  }}
+                  className="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-full shadow-xs transition cursor-pointer"
+                  title="Enable Windows screen alerts"
+                >
+                  <Bell className="w-3.5 h-3.5 text-amber-600 animate-bounce" />
+                </button>
+              )}
+
               <button
                 onClick={onToggleRole}
                 className="flex items-center gap-1 px-2.5 py-1 bg-white/80 hover:bg-white rounded-full border border-slate-300/70 text-[11px] font-medium text-slate-700 shadow-xs"
@@ -238,6 +323,23 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
           {/* Right Utility Controls (Desktop sm: and above) */}
           <div className="hidden sm:flex items-center gap-2 relative">
+            {/* Windows Desktop Push Notification Request / Status */}
+            {notificationPermission === 'default' && (
+              <button
+                type="button"
+                onClick={async () => {
+                  const res = await requestNotificationPermission();
+                  setNotificationPermission(res);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-full text-xs font-semibold shadow-xs transition cursor-pointer"
+                title="Enable Windows desktop popups when technicians arrive"
+              >
+                <Bell className="w-3.5 h-3.5 text-amber-600 animate-bounce" />
+                <span className="hidden md:inline">Enable Windows Alerts</span>
+                <span className="md:hidden">Alerts</span>
+              </button>
+            )}
+
             {/* Role Switcher Pill */}
             <button
               onClick={onToggleRole}
@@ -463,13 +565,29 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                 <div className="bg-[#191b20] text-white rounded-[24px] p-4 border border-slate-700/70 shadow-sm space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className={`w-2 h-2 rounded-full ${
+                        leadTech.isTimedIn ? 'bg-emerald-400 animate-pulse' :
+                        leadTech.status === 'Off Duty' ? 'bg-slate-500' :
+                        'bg-emerald-400 animate-pulse'
+                      }`} />
                       <span className="text-[10px] font-mono uppercase font-bold text-amber-300 tracking-wider">
-                        On Duty Technician
+                        {leadTech.isTimedIn ? 'Technician On Site' : leadTech.status === 'Off Duty' ? 'Technician Off Duty' : 'On Duty Technician'}
                       </span>
                     </div>
-                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono text-[10px] font-bold">
-                      ● {leadTech.status || 'On Duty'}
+                    <span className={`px-2.5 py-0.5 rounded-full border font-mono text-[10px] font-bold flex items-center gap-1.5 ${
+                      leadTech.isTimedIn
+                        ? 'bg-emerald-500/30 text-emerald-300 border-emerald-400/50 shadow-xs'
+                        : leadTech.status === 'Off Duty'
+                        ? 'bg-slate-700/50 text-slate-300 border-slate-600'
+                        : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                    }`}>
+                      {leadTech.isTimedIn && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                      )}
+                      <span>● {leadTech.status || 'On Duty'}</span>
+                      {leadTech.isTimedIn && leadTech.timeIn && (
+                        <span className="text-[9px] text-amber-300 font-mono">({leadTech.timeIn})</span>
+                      )}
                     </span>
                   </div>
 
@@ -489,7 +607,14 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
                   <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
                     <span className="truncate">Zone: <strong className="text-slate-200">Ground Floor & Perimeter</strong></span>
-                    <span className="text-amber-300 font-mono text-[10px]">Lead Tech</span>
+                    {leadTech.isTimedIn && leadTech.timeIn ? (
+                      <span className="text-emerald-300 font-mono text-[10px] font-semibold flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-emerald-400" />
+                        <span>Timed In: {leadTech.timeIn}</span>
+                      </span>
+                    ) : (
+                      <span className="text-amber-300 font-mono text-[10px]">Lead Tech</span>
+                    )}
                   </div>
                 </div>
 

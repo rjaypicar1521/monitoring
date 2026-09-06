@@ -61,6 +61,17 @@ export const App: React.FC = () => {
     saveProjects(projects);
   }, [projects]);
 
+  // Listen for cross-tab project changes (e.g. technician attendance from other tabs)
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if ((e.key === 'cctv_monitoring_projects_v6' || e.key === 'cctv_attendance_event') && e.newValue) {
+        setProjects(loadProjects());
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
   // Sync user role to localStorage
   useEffect(() => {
     try {
@@ -364,9 +375,12 @@ export const App: React.FC = () => {
       prev.map((p) => {
         if (p.id !== currentProject.id) return p;
         const currentTechs = p.technicians || [];
+        const exists = currentTechs.some((t) => t.id === updatedTech.id);
         return {
           ...p,
-          technicians: currentTechs.map((t) => (t.id === updatedTech.id ? updatedTech : t))
+          technicians: exists
+            ? currentTechs.map((t) => (t.id === updatedTech.id ? updatedTech : t))
+            : [...currentTechs, updatedTech]
         };
       })
     );

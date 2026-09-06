@@ -1,5 +1,13 @@
-import React, { useState } from 'react';
-import { CCTVProject, ExecutiveStatus, AuthUser, TaskStatus, CCTVTask, CameraEndpoint, TechnicianMember, TechnicianStatus, BlockerItem } from '../types';
+import React, { useState, useEffect } from 'react';
+import { CCTVProject, ExecutiveStatus, AuthUser, TaskStatus, CCTVTask, CameraEndpoint, TechnicianMember, TechnicianStatus, BlockerItem, AttendanceEvent } from '../types';
+import { 
+  broadcastAttendance, 
+  formatAttendanceTime, 
+  showDesktopPushNotification, 
+  requestNotificationPermission, 
+  getNotificationPermission, 
+  isNotificationSupported 
+} from '../utils/attendanceService';
 import { 
   CheckCircle2, 
   Clock, 
@@ -114,6 +122,11 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileKanbanStage, setMobileKanbanStage] = useState<TaskStatus>('In progress');
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | 'unsupported'>('default');
+
+  useEffect(() => {
+    setNotificationPermission(getNotificationPermission());
+  }, []);
   
   // Modals
   const [showQuickCreateMenu, setShowQuickCreateMenu] = useState(false);
@@ -467,6 +480,103 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
   };
   // Synchronized technicians roster
   const technicianList = project.technicians || [];
+  const leadTech = technicianList.find(t => t.name.includes('Rjay') || t.id === 'tech-1') || technicianList[0] || {
+    id: 'tech-1',
+    name: 'Rjay Picar',
+    role: 'Lead Systems & CCTV Architect (RMVN Solutions)',
+    status: 'On Duty' as TechnicianStatus,
+    assigned: 'CCTV Architecture & Live Monitoring',
+    email: 'rjay@rmvn.com'
+  };
+
+  const handleToggleTechnicianAttendance = async (targetTech?: TechnicianMember) => {
+    const techToUpdate = targetTech || leadTech;
+    const isCurrentlyTimedIn = !!techToUpdate.isTimedIn;
+    const nowFormatted = formatAttendanceTime();
+    const todayDate = new Date().toISOString().split('T')[0];
+
+    let updatedTech: TechnicianMember;
+    if (!isCurrentlyTimedIn) {
+      updatedTech = {
+        ...techToUpdate,
+        isTimedIn: true,
+        status: 'On Site',
+        timeIn: nowFormatted,
+        timeOut: undefined,
+        attendanceDate: todayDate
+      };
+
+      if (onUpdateTechnician) {
+        onUpdateTechnician(updatedTech);
+      }
+
+      const event: AttendanceEvent = {
+        id: `att-${Date.now()}`,
+        type: 'TIME_IN',
+        technicianId: updatedTech.id,
+        technicianName: updatedTech.name,
+        technicianRole: updatedTech.role,
+        projectName: project.name,
+        projectId: project.id,
+        time: nowFormatted,
+        timestamp: Date.now(),
+        status: 'On Site'
+      };
+
+      broadcastAttendance(event);
+
+      // Trigger native Windows screen push notification popup
+      if (isNotificationSupported()) {
+        const currentPerm = getNotificationPermission();
+        if (currentPerm === 'granted') {
+          showDesktopPushNotification(event);
+        } else if (currentPerm === 'default') {
+          try {
+            const requested = await requestNotificationPermission();
+            setNotificationPermission(requested);
+            if (requested === 'granted') {
+              showDesktopPushNotification(event);
+            }
+          } catch {}
+        }
+      }
+
+      showNotification(`Technician ${updatedTech.name} Timed In at ${nowFormatted} (Broadcasted to Client & Windows Alert)`);
+    } else {
+      updatedTech = {
+        ...techToUpdate,
+        isTimedIn: false,
+        status: 'Off Duty',
+        timeOut: nowFormatted,
+        attendanceDate: todayDate
+      };
+
+      if (onUpdateTechnician) {
+        onUpdateTechnician(updatedTech);
+      }
+
+      const event: AttendanceEvent = {
+        id: `att-${Date.now()}`,
+        type: 'TIME_OUT',
+        technicianId: updatedTech.id,
+        technicianName: updatedTech.name,
+        technicianRole: updatedTech.role,
+        projectName: project.name,
+        projectId: project.id,
+        time: nowFormatted,
+        timestamp: Date.now(),
+        status: 'Off Duty'
+      };
+
+      broadcastAttendance(event);
+
+      if (isNotificationSupported() && getNotificationPermission() === 'granted') {
+        showDesktopPushNotification(event);
+      }
+
+      showNotification(`Technician ${updatedTech.name} Timed Out at ${nowFormatted}`);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f3f4f6] flex flex-col md:flex-row text-slate-800 font-sans selection:bg-black selection:text-white">
@@ -668,6 +778,21 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
         </div>
 
         <div className="flex items-center gap-1">
+          {/* Quick Time In / Out Button */}
+          <button
+            type="button"
+            onClick={() => handleToggleTechnicianAttendance(leadTech)}
+            className={`flex items-center gap-1 px-2 py-1 rounded-xl text-[10px] font-bold border transition cursor-pointer shrink-0 ${
+              leadTech.isTimedIn
+                ? 'bg-emerald-50 text-emerald-900 border-emerald-300'
+                : 'bg-amber-50 text-amber-900 border-amber-200'
+            }`}
+            title={leadTech.isTimedIn ? 'Time Out Rjay Picar' : 'Time In Rjay Picar'}
+          >
+            <Clock className={`w-3 h-3 ${leadTech.isTimedIn ? 'text-emerald-600' : 'text-amber-600'}`} />
+            <span>{leadTech.isTimedIn ? `Out (${leadTech.timeIn || 'In'})` : 'Time In'}</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
@@ -973,6 +1098,60 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
               <FileText className="w-3.5 h-3.5 text-amber-600" />
               <span>Import DOCX</span>
             </button>
+
+            {/* 1-Click Quick Time In / Time Out Button for Technician (Rjay Picar) */}
+            <button
+              type="button"
+              onClick={() => handleToggleTechnicianAttendance(leadTech)}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-bold transition shadow-2xs cursor-pointer border shrink-0 ${
+                leadTech.isTimedIn
+                  ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border-emerald-400 ring-2 ring-emerald-400/20'
+                  : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300 hover:border-slate-400'
+              }`}
+              title={
+                leadTech.isTimedIn
+                  ? `Click to Time Out ${leadTech.name} (Currently On Site since ${leadTech.timeIn || 'earlier'})`
+                  : `1-Click Quick Time In for ${leadTech.name}`
+              }
+            >
+              {leadTech.isTimedIn ? (
+                <>
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                  </span>
+                  <span>On Site ({leadTech.timeIn || 'In'})</span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-200 text-emerald-900 font-black">
+                    Time Out
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Clock className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Time In ({leadTech.name.split(' ')[0]})</span>
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 font-bold">
+                    Quick
+                  </span>
+                </>
+              )}
+            </button>
+
+            {/* Windows Push Notification Authorization Pill */}
+            {notificationPermission === 'default' && (
+              <button
+                type="button"
+                onClick={async () => {
+                  const res = await requestNotificationPermission();
+                  setNotificationPermission(res);
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-full text-xs font-bold shadow-2xs transition cursor-pointer shrink-0"
+                title="Enable Windows desktop popups when technicians arrive"
+              >
+                <Bell className="w-3.5 h-3.5 text-amber-600 animate-bounce" />
+                <span className="hidden xl:inline">Enable Windows Alerts</span>
+                <span className="xl:hidden">Alerts</span>
+              </button>
+            )}
 
             {/* Quick Create Dropdown Menu */}
             <div className="relative">
@@ -1367,9 +1546,29 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                           </div>
                         </div>
 
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
-                          {tech.status}
-                        </span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleTechnicianAttendance(tech)}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition cursor-pointer flex items-center gap-1 ${
+                              tech.isTimedIn
+                                ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border-emerald-300'
+                                : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+                            }`}
+                            title={tech.isTimedIn ? `Time Out ${tech.name}` : `Time In ${tech.name}`}
+                          >
+                            <Clock className="w-2.5 h-2.5 text-amber-600" />
+                            <span>{tech.isTimedIn ? `Out (${tech.timeIn || 'In'})` : 'Time In'}</span>
+                          </button>
+
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            tech.status === 'On Site' ? 'bg-blue-100 text-blue-800' :
+                            tech.status === 'On Duty' ? 'bg-emerald-100 text-emerald-800' :
+                            'bg-slate-100 text-slate-700'
+                          }`}>
+                            {tech.status}
+                          </span>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -2209,6 +2408,35 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                       </div>
 
                       <div>Contact: <span className="text-slate-500 font-mono">{member.email}</span></div>
+                    </div>
+
+                    {/* Attendance Punch-Clock Control */}
+                    <div className="mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Clock className={`w-4 h-4 shrink-0 ${member.isTimedIn ? 'text-emerald-500' : 'text-slate-400'}`} />
+                        <div className="min-w-0">
+                          <div className="text-[11px] font-bold text-slate-800 truncate">
+                            {member.isTimedIn ? `Timed In: ${member.timeIn || 'Today'}` : 'Attendance: Off Duty'}
+                          </div>
+                          <div className="text-[9px] text-slate-400 truncate">
+                            {member.isTimedIn ? 'Status: On Site (Client Notified)' : (member.timeOut ? `Timed out at ${member.timeOut}` : '1-Click punch clock')}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleToggleTechnicianAttendance(member)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 shadow-2xs flex items-center gap-1.5 ${
+                          member.isTimedIn
+                            ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'
+                            : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                        }`}
+                        title={member.isTimedIn ? `Time Out ${member.name}` : `Time In ${member.name}`}
+                      >
+                        <Clock className="w-3 h-3" />
+                        <span>{member.isTimedIn ? 'Time Out' : 'Time In'}</span>
+                      </button>
                     </div>
                   </div>
 
