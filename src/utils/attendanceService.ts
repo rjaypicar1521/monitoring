@@ -1,15 +1,121 @@
 import { AttendanceEvent } from '../types';
+import { ChatMessageData } from '../components/ui/chat/types';
+import { DEFAULT_MESSAGES, DEFAULT_INITIAL_MESSAGES } from '../components/ui/chat/chat-constants';
 
 const ATTENDANCE_CHANNEL_NAME = 'cctv_attendance_channel';
 const ATTENDANCE_STORAGE_KEY = 'cctv_attendance_event';
 const ATTENDANCE_CUSTOM_EVENT = 'cctv_attendance_event';
+
+// Module-level deduplication tracking for posted chat notices across listeners
+const processedAttendanceNoticeKeys = new Set<string>();
+
+/**
+ * Automatically posts an automated system notice to chat message lists (e.g. in
+ * FloatingMessenger, TechnicianChat, and localStorage).
+ */
+export function postAttendanceChatMessage(event: AttendanceEvent): ChatMessageData | null {
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+    return null;
+  }
+
+  const timeFormatted = event.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const timeKeyPart = timeFormatted.replace(/[^a-zA-Z0-9]/g, '');
+  const eventId = event.id || `att-${event.type}-${event.technicianId || 'tech'}-${timeKeyPart}`;
+  const messageId = `msg-${eventId.startsWith('msg-') ? eventId : `att-${eventId}`}`;
+
+  // Global deduplication check: avoid double-posting the same notice within 10 seconds
+  const dedupeKey = `${eventId}_${event.type}_${event.projectId || ''}`;
+  if (processedAttendanceNoticeKeys.has(dedupeKey)) {
+    return null;
+  }
+  processedAttendanceNoticeKeys.add(dedupeKey);
+  setTimeout(() => {
+    processedAttendanceNoticeKeys.delete(dedupeKey);
+  }, 10000);
+
+  const targetProjectId = event.projectId || 'proj-cctv-upc';
+  const messengerStorageKey = `cctv_messenger_chat_${targetProjectId}`;
+  const techChatStorageKey = `cctv_chat_messages_v2_${targetProjectId}`;
+
+  const rawName = (event.technicianName || 'Rjay Picar').trim();
+  const titlePrefix = (event.technicianRole?.includes('Lead') || rawName.includes('Rjay') || !event.technicianRole)
+    ? 'Lead Technician'
+    : event.technicianRole;
+
+  // Strip prefix from rawName if already present to avoid duplicate titles
+  const escapedPrefix = titlePrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const techName = rawName.replace(new RegExp(`^${escapedPrefix}\\s+`, 'i'), '').trim();
+  const displayName = `${titlePrefix} ${techName}`.trim();
+
+  const isTimeIn = event.type === 'TIME_IN';
+  const messageText = isTimeIn
+    ? `🕒 [System Notice]: ${displayName} has timed in (On Site) at ${timeFormatted}.`
+    : `🕒 [System Notice]: ${displayName} has timed out (Off Duty) at ${timeFormatted}.`;
+
+  const newMsg: ChatMessageData = {
+    id: messageId,
+    senderId: 'system',
+    senderName: 'System Notice',
+    senderRole: 'system',
+    text: messageText,
+    timestamp: timeFormatted,
+    status: 'delivered',
+    readBy: [],
+  };
+
+  const appendToStorage = (key: string, fallbackDefaults: ChatMessageData[]): boolean => {
+    try {
+      let currentList: ChatMessageData[] = fallbackDefaults;
+      const raw = localStorage.getItem(key);
+      if (raw !== null) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            currentList = parsed;
+          }
+        } catch {}
+      }
+
+      if (currentList.some((m) => m.id === messageId || (m.text === messageText && m.timestamp === timeFormatted))) {
+        return false;
+      }
+
+      const updated = [...currentList, newMsg];
+      localStorage.setItem(key, JSON.stringify(updated));
+      return true;
+    } catch (err) {
+      console.warn(`Failed to append attendance message to ${key}:`, err);
+      return false;
+    }
+  };
+
+  const updatedMessenger = appendToStorage(messengerStorageKey, DEFAULT_MESSAGES);
+  const updatedTechChat = appendToStorage(techChatStorageKey, DEFAULT_INITIAL_MESSAGES);
+
+  if (updatedMessenger || updatedTechChat) {
+    try {
+      window.dispatchEvent(new CustomEvent('cctv_messenger_sync', { detail: { message: newMsg, projectId: targetProjectId } }));
+      window.dispatchEvent(new CustomEvent('cctv_chat_sync', { detail: { message: newMsg, projectId: targetProjectId } }));
+    } catch {}
+  }
+
+  return newMsg;
+}
 
 /**
  * Broadcasts an attendance event (TIME_IN or TIME_OUT) across all active tabs,
  * storing to localStorage and dispatching locally for single-tab reactive updates.
  */
 export function broadcastAttendance(event: AttendanceEvent): void {
-  // 1. BroadcastChannel for cross-tab communication
+  // Ensure event has an ID
+  if (!event.id) {
+    event.id = `att-${event.type}-${event.technicianId || 'tech'}-${Date.now()}`;
+  }
+
+  // 1. Post automated system notice to chat messages list and localStorage
+  postAttendanceChatMessage(event);
+
+  // 2. BroadcastChannel for cross-tab communication
   try {
     if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
       const channel = new BroadcastChannel(ATTENDANCE_CHANNEL_NAME);
@@ -20,7 +126,7 @@ export function broadcastAttendance(event: AttendanceEvent): void {
     console.warn('BroadcastChannel error:', err);
   }
 
-  // 2. localStorage for persistent cross-tab and history
+  // 3. localStorage for persistent cross-tab and history
   try {
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem(ATTENDANCE_STORAGE_KEY, JSON.stringify(event));
@@ -29,7 +135,7 @@ export function broadcastAttendance(event: AttendanceEvent): void {
     console.warn('Failed to save attendance event to localStorage:', err);
   }
 
-  // 3. Local CustomEvent for same-tab / same-window updates
+  // 4. Local CustomEvent for same-tab / same-window updates
   try {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent(ATTENDANCE_CUSTOM_EVENT, { detail: event }));
@@ -39,10 +145,6 @@ export function broadcastAttendance(event: AttendanceEvent): void {
   }
 }
 
-/**
- * Subscribes to attendance events from BroadcastChannel, localStorage StorageEvent,
- * and same-tab CustomEvents.
- */
 /**
  * Subscribes to attendance events from BroadcastChannel, localStorage StorageEvent,
  * and same-tab CustomEvents with automatic event deduplication.
@@ -56,13 +158,17 @@ export function subscribeToAttendance(callback: (event: AttendanceEvent) => void
   const seenEventIds = new Set<string>();
 
   const notify = (event: AttendanceEvent) => {
-    if (!event || !event.id) return;
-    if (seenEventIds.has(event.id)) return;
-    seenEventIds.add(event.id);
+    if (!event) return;
+    const eventId = event.id || `att-${event.type}-${event.technicianId || 'tech'}-${event.time || Date.now()}`;
+    if (seenEventIds.has(eventId)) return;
+    seenEventIds.add(eventId);
     // Prune seen set after 30s
     setTimeout(() => {
-      seenEventIds.delete(event.id);
+      seenEventIds.delete(eventId);
     }, 30000);
+
+    // Ensure attendance chat message is written and synced
+    postAttendanceChatMessage(event);
 
     callback(event);
   };

@@ -3,6 +3,10 @@ import { MessageSquare, Shield, CheckCircle2, RefreshCw, Radio, PhoneCall } from
 import { ChatMessageData } from './types';
 import { ChatMessageList } from './chat-message-list';
 import { ChatComposer } from './chat-composer';
+import { DEFAULT_INITIAL_MESSAGES } from './chat-constants';
+import { subscribeToAttendance } from '../../../utils/attendanceService';
+
+export { DEFAULT_INITIAL_MESSAGES };
 
 interface TechnicianChatProps {
   projectId: string;
@@ -14,28 +18,6 @@ interface TechnicianChatProps {
   onSyncNote?: (content: string, author: string, authorRole: 'client' | 'installer') => void;
   className?: string;
 }
-
-const DEFAULT_INITIAL_MESSAGES: ChatMessageData[] = [
-  {
-    id: 'msg-init-1',
-    senderId: 'tech-rjay',
-    senderName: 'Rjay Picar - RMVN',
-    senderRole: 'technician',
-    text: 'Good day UPCHQ Team! All preliminary cabling for Zones 1-3 is complete. CAM-01 (Main Gate) and CAM-02 (Perimeter West) have been tested and verified online with 1080p stream.',
-    timestamp: 'Today, 10:15 AM',
-    status: 'read',
-    reactions: [{ emoji: '👍', count: 2, users: ['client', 'tech'] }],
-  },
-  {
-    id: 'msg-init-2',
-    senderId: 'tech-rjay',
-    senderName: 'Rjay Picar - RMVN',
-    senderRole: 'technician',
-    text: 'Field update on Backdoor (CAM-04): Cable is pulled and ready at entrance. Physical bracket mounting is temporarily held for occupant privacy clearance. Let me know if we can proceed this afternoon.',
-    timestamp: 'Today, 11:30 AM',
-    status: 'read',
-  },
-];
 
 export const TechnicianChat: React.FC<TechnicianChatProps> = ({
   projectId,
@@ -65,12 +47,90 @@ export const TechnicianChat: React.FC<TechnicianChatProps> = ({
   const [isTyping, setIsTyping] = useState(false);
   const [replyingTo, setReplyingTo] = useState<ChatMessageData | null>(null);
 
-  // Sync to localStorage
+  // Sync to localStorage and broadcast sync event
+  const saveAndSyncMessages = (updater: (prev: ChatMessageData[]) => ChatMessageData[]) => {
+    setMessages((prev) => {
+      const updated = updater(prev);
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(updated));
+        window.dispatchEvent(new CustomEvent('cctv_chat_sync', { detail: { projectId } }));
+      } catch {}
+      return updated;
+    });
+  };
+
+  // Re-sync when storageKey changes
   useEffect(() => {
     try {
-      localStorage.setItem(storageKey, JSON.stringify(messages));
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMessages(parsed);
+          return;
+        }
+      }
     } catch {}
-  }, [messages, storageKey]);
+    setMessages(DEFAULT_INITIAL_MESSAGES);
+  }, [storageKey]);
+
+  // Listen to cross-tab storage and same-tab chat sync events
+  useEffect(() => {
+    const syncFromStorage = () => {
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            setMessages(parsed);
+          }
+        }
+      } catch {}
+    };
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === storageKey && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) {
+            setMessages(parsed);
+          }
+        } catch {}
+      }
+    };
+
+    const handleCustomSync = (e?: Event) => {
+      const custom = e as CustomEvent<{ projectId?: string }>;
+      if (custom?.detail?.projectId && custom.detail.projectId !== projectId) {
+        return;
+      }
+      syncFromStorage();
+    };
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('cctv_chat_sync', handleCustomSync);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('cctv_chat_sync', handleCustomSync);
+    };
+  }, [storageKey, projectId]);
+
+  // Subscribe to real-time attendance events
+  useEffect(() => {
+    const unsubscribe = subscribeToAttendance((event) => {
+      if (event.projectId && event.projectId !== projectId) return;
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setMessages(parsed);
+          }
+        }
+      } catch {}
+    });
+    return () => unsubscribe();
+  }, [projectId, storageKey]);
 
   const isAdmin = currentUserRole === 'installer';
 
@@ -94,7 +154,7 @@ export const TechnicianChat: React.FC<TechnicianChatProps> = ({
         : undefined,
     };
 
-    setMessages((prev) => [...prev, newMsg]);
+    saveAndSyncMessages((prev) => [...prev, newMsg]);
     setReplyingTo(null);
 
     // Also optionally sync to project note log
@@ -137,12 +197,12 @@ export const TechnicianChat: React.FC<TechnicianChatProps> = ({
         },
       };
 
-      setMessages((prev) => [...prev, techReply]);
+      saveAndSyncMessages((prev) => [...prev, techReply]);
     }, 2400);
   };
 
   const handleReactionAdd = (messageId: string, emoji: string) => {
-    setMessages((prev) =>
+    saveAndSyncMessages((prev) =>
       prev.map((msg) => {
         if (msg.id !== messageId) return msg;
         const existingReactions = msg.reactions || [];
@@ -186,11 +246,11 @@ export const TechnicianChat: React.FC<TechnicianChatProps> = ({
   };
 
   const handleDeleteMessage = (messageId: string) => {
-    setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    saveAndSyncMessages((prev) => prev.filter((m) => m.id !== messageId));
   };
 
   const handleResetChat = () => {
-    setMessages(DEFAULT_INITIAL_MESSAGES);
+    saveAndSyncMessages(() => DEFAULT_INITIAL_MESSAGES);
   };
 
   return (

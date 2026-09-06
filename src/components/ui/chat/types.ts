@@ -11,7 +11,7 @@ export interface ChatMessageData {
   id: string;
   senderId: string;
   senderName: string;
-  senderRole?: 'client' | 'technician' | 'admin';
+  senderRole?: 'client' | 'technician' | 'admin' | 'system';
   senderAvatar?: string;
   text: string;
   timestamp: string | number | Date;

@@ -4,3 +4,4 @@ export * from './chat-composer';
 export * from './chat-message-list';
 export * from './technician-chat';
 export * from './floating-messenger';
+export * from './chat-constants';

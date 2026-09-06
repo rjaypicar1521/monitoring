@@ -11,6 +11,10 @@ import {
 import { ChatMessageData } from './types';
 import { ChatMessageList } from './chat-message-list';
 import { ChatComposer } from './chat-composer';
+import { DEFAULT_MESSAGES, isMessageUnreadForUser } from './chat-constants';
+import { subscribeToAttendance } from '../../../utils/attendanceService';
+
+export { DEFAULT_MESSAGES };
 
 interface FloatingMessengerProps {
   projectId: string;
@@ -19,30 +23,6 @@ interface FloatingMessengerProps {
   currentUserName: string;
   onSyncNote?: (content: string, author: string, authorRole: 'client' | 'installer') => void;
 }
-
-const DEFAULT_MESSAGES: ChatMessageData[] = [
-  {
-    id: 'm-init-1',
-    senderId: 'usr-installer',
-    senderName: 'Rjay Picar - RMVN',
-    senderRole: 'technician',
-    text: 'Hello UPCHQ team! All preliminary cabling for Zones 1-3 is complete. CAM-01 (Main Gate) and CAM-02 (Perimeter West) are verified online in 1080p.',
-    timestamp: '10:15 AM',
-    status: 'read',
-    readBy: ['usr-client', 'usr-installer'],
-    reactions: [{ emoji: '👍', count: 2, users: ['client', 'tech'] }],
-  },
-  {
-    id: 'm-init-2',
-    senderId: 'usr-installer',
-    senderName: 'Rjay Picar - RMVN',
-    senderRole: 'technician',
-    text: 'Field update: Backdoor (CAM-04) cable is pulled at the doorway. Bracket mounting is temporarily deferred for occupant privacy clearance. Let me know when authorized to drill.',
-    timestamp: '11:30 AM',
-    status: 'read',
-    readBy: ['usr-client', 'usr-installer'],
-  },
-];
 
 export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
   projectId,
@@ -68,14 +48,7 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
 
   // Helper to compute unread incoming messages for the current user
   const computeUnreadCount = (msgList: ChatMessageData[], userId: string): number => {
-    return msgList.filter((m) => {
-      // Only count messages from the OTHER user
-      if (m.senderId === userId) return false;
-      // If legacy message with status 'read' and no readBy array, consider already read
-      if (m.status === 'read' && (!m.readBy || m.readBy.length === 0)) return false;
-      // Unread if readBy doesn't include current user
-      return !m.readBy || !m.readBy.includes(userId);
-    }).length;
+    return msgList.filter((m) => isMessageUnreadForUser(m, userId)).length;
   };
 
   // Load messages from localStorage
@@ -132,7 +105,14 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
       }
     };
 
-    const handleCustomSync = () => {
+    const handleCustomSync = (e?: Event) => {
+      const custom = e as CustomEvent<{ sender?: string; projectId?: string }>;
+      if (custom?.detail?.sender === currentUserId && custom?.detail?.projectId === projectId) {
+        return;
+      }
+      if (custom?.detail?.projectId && custom.detail.projectId !== projectId) {
+        return;
+      }
       syncFromStorage();
     };
 
@@ -142,14 +122,35 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
       window.removeEventListener('storage', handleStorage);
       window.removeEventListener('cctv_messenger_sync', handleCustomSync);
     };
-  }, [storageKey]);
+  }, [storageKey, projectId, currentUserId]);
+
+  // Subscribe to real-time attendance events (time in / time out)
+  useEffect(() => {
+    const unsubscribe = subscribeToAttendance((event) => {
+      if (event.projectId && event.projectId !== projectId) return;
+      try {
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setMessages(parsed);
+          }
+        }
+      } catch {}
+    });
+    return () => unsubscribe();
+  }, [projectId, storageKey]);
 
   const saveAndSyncMessages = (updater: (prev: ChatMessageData[]) => ChatMessageData[]) => {
     setMessages((prev) => {
       const updated = updater(prev);
       try {
         localStorage.setItem(storageKey, JSON.stringify(updated));
-        window.dispatchEvent(new Event('cctv_messenger_sync'));
+        window.dispatchEvent(
+          new CustomEvent('cctv_messenger_sync', {
+            detail: { sender: currentUserId, projectId },
+          })
+        );
       } catch {}
       return updated;
     });
@@ -159,13 +160,11 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
   useEffect(() => {
     if (isOpen) {
       // Messenger is open: mark all incoming unread messages as read by current user
-      const unreadExists = messages.some(
-        (m) => m.senderId !== currentUserId && (!m.readBy || !m.readBy.includes(currentUserId))
-      );
+      const unreadExists = messages.some((m) => isMessageUnreadForUser(m, currentUserId));
       if (unreadExists) {
         saveAndSyncMessages((prev) =>
           prev.map((m) => {
-            if (m.senderId !== currentUserId && (!m.readBy || !m.readBy.includes(currentUserId))) {
+            if (isMessageUnreadForUser(m, currentUserId)) {
               return {
                 ...m,
                 status: 'read',
@@ -188,18 +187,21 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
   const handleOpenMessenger = () => {
     setIsOpen(true);
     setUnreadCount(0);
-    saveAndSyncMessages((prev) =>
-      prev.map((m) => {
-        if (m.senderId !== currentUserId && (!m.readBy || !m.readBy.includes(currentUserId))) {
-          return {
-            ...m,
-            status: 'read',
-            readBy: [...(m.readBy || []), currentUserId],
-          };
-        }
-        return m;
-      })
-    );
+    const unreadExists = messages.some((m) => isMessageUnreadForUser(m, currentUserId));
+    if (unreadExists) {
+      saveAndSyncMessages((prev) =>
+        prev.map((m) => {
+          if (isMessageUnreadForUser(m, currentUserId)) {
+            return {
+              ...m,
+              status: 'read',
+              readBy: [...(m.readBy || []), currentUserId],
+            };
+          }
+          return m;
+        })
+      );
+    }
   };
 
   // Handle Send Message
@@ -304,16 +306,41 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
     saveAndSyncMessages(() => DEFAULT_MESSAGES);
   };
 
+  const latestUnreadMsg = unreadCount > 0
+    ? [...messages].reverse().find((m) => isMessageUnreadForUser(m, currentUserId))
+    : null;
+
   return (
     <>
       {/* 1. FLOATING CHAT HEAD TRIGGER (MESSENGER STYLE) */}
       {!isOpen && (
-        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 animate-in fade-in zoom-in-90 duration-200">
+        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2.5 animate-in fade-in zoom-in-90 duration-200">
+          {/* Notification Preview Toast Pill on unread notice/message */}
+          {unreadCount > 0 && latestUnreadMsg && (
+            <button
+              type="button"
+              onClick={handleOpenMessenger}
+              className="hidden sm:flex items-center gap-2.5 max-w-[280px] sm:max-w-[340px] bg-slate-900/95 hover:bg-slate-850 text-white text-xs px-3.5 py-2.5 rounded-2xl shadow-xl border border-slate-700/80 backdrop-blur-md animate-in slide-in-from-right-4 fade-in duration-300 text-left transition cursor-pointer group"
+              title="Click to view notification in Messenger"
+            >
+              <div className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping shrink-0" />
+              <div className="min-w-0 flex-1 truncate">
+                <p className="font-bold text-[10px] text-amber-400 truncate flex items-center gap-1.5">
+                  <span>{latestUnreadMsg.senderName}</span>
+                  <span className="text-[9px] font-mono text-slate-400">({unreadCount} new)</span>
+                </p>
+                <p className="text-[11px] text-slate-200 truncate group-hover:text-white">
+                  {latestUnreadMsg.text}
+                </p>
+              </div>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={handleOpenMessenger}
             className="group relative flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-tr from-[#0084FF] via-[#0066FF] to-[#A033FF] hover:scale-105 active:scale-95 text-white shadow-xl shadow-blue-500/30 transition-transform duration-200 cursor-pointer border-2 border-white/80"
-            title="Open Messenger"
+            title={unreadCount > 0 ? `${unreadCount} unread - Open Messenger` : 'Open Messenger'}
           >
             {/* Facebook Messenger SVG Icon */}
             <svg
@@ -439,7 +466,7 @@ export const FloatingMessenger: React.FC<FloatingMessengerProps> = ({
               onReply={(msg) => setReplyingTo(msg)}
               onReactionAdd={handleReactionAdd}
               onDelete={handleDeleteMessage}
-              className="flex-1 min-h-0"
+              className="flex-1 min-h-0 max-h-none h-full"
             />
           </div>
 

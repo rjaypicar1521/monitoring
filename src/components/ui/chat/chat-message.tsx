@@ -45,6 +45,169 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     ? message.timestamp
     : new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+  const isSystem = message.senderRole === 'system' || message.senderId === 'system' || message.text.includes('[System Notice]');
+
+  if (isSystem) {
+    const isTimeIn = message.text.includes('timed in') || message.text.includes('On Site');
+    const isTimeOut = message.text.includes('timed out') || message.text.includes('Off Duty');
+
+    return (
+      <div
+        className="group/msg relative my-3 px-1 sm:px-2 flex justify-center w-full animate-in fade-in zoom-in-95 duration-200"
+        onMouseEnter={() => setShowToolbar(true)}
+        onMouseLeave={() => {
+          setShowToolbar(false);
+          setShowPicker(false);
+        }}
+      >
+        <div
+          className={`relative max-w-[96%] sm:max-w-[90%] w-full rounded-2xl p-3 sm:p-3.5 border shadow-md transition-all ${
+            isTimeIn
+              ? 'bg-gradient-to-r from-[#0d2218] via-slate-900 to-[#0d2218] border-emerald-500/50 text-emerald-100 shadow-emerald-950/20'
+              : isTimeOut
+              ? 'bg-gradient-to-r from-[#291705] via-slate-900 to-[#291705] border-amber-500/50 text-amber-100 shadow-amber-950/20'
+              : 'bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border-sky-500/40 text-slate-100 shadow-slate-950/20'
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            {/* System Status Icon Badge */}
+            <div
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0 border mt-0.5 ${
+                isTimeIn
+                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-xs'
+                  : isTimeOut
+                  ? 'bg-amber-500/20 text-amber-400 border-amber-500/40 shadow-xs'
+                  : 'bg-sky-500/20 text-sky-400 border-sky-500/40'
+              }`}
+            >
+              <Clock className="w-4 h-4 animate-pulse" />
+            </div>
+
+            <div className="flex-1 min-w-0">
+              {/* Header: System Badge & Status Badge & Timestamp */}
+              <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+                <span className="text-[10px] font-mono font-bold tracking-wider uppercase px-2 py-0.5 rounded-md bg-white/10 text-white border border-white/15 flex items-center gap-1.5">
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      isTimeIn ? 'bg-emerald-400 animate-ping' : isTimeOut ? 'bg-amber-400' : 'bg-sky-400'
+                    }`}
+                  />
+                  System Notice
+                </span>
+
+                {isTimeIn && (
+                  <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    ON SITE
+                  </span>
+                )}
+
+                {isTimeOut && (
+                  <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    OFF DUTY
+                  </span>
+                )}
+
+                <span className="text-[10px] font-mono text-slate-400 ml-auto">
+                  {formattedTime}
+                </span>
+              </div>
+
+              {/* Message text with status highlighting */}
+              <p className="text-xs sm:text-[13px] font-medium leading-relaxed select-text text-slate-100 whitespace-pre-wrap">
+                {message.text}
+              </p>
+            </div>
+          </div>
+
+          {/* Reaction Badges */}
+          {message.reactions && message.reactions.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2.5 pt-2 border-t border-white/10 justify-start">
+              {message.reactions.map((r) => {
+                const hasReacted = currentUserId && r.users?.some((u) =>
+                  u === currentUserId ||
+                  (currentUserId === 'usr-client' && (u === 'client' || u === 'UPCHQ' || u === 'client-current')) ||
+                  (currentUserId === 'usr-installer' && (u === 'tech' || u === 'installer' || u.includes('Rjay')))
+                );
+                return (
+                  <button
+                    key={r.emoji}
+                    type="button"
+                    onClick={() => onReactionAdd?.(message.id, r.emoji)}
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] transition cursor-pointer border ${
+                      hasReacted
+                        ? 'bg-amber-400/30 border-amber-400 text-amber-200 font-bold'
+                        : 'bg-white/10 border-white/20 text-slate-200 hover:bg-white/15'
+                    }`}
+                    title={hasReacted ? `Remove ${r.emoji} reaction` : `React with ${r.emoji}`}
+                  >
+                    <span>{r.emoji}</span>
+                    <span className="text-[10px] font-mono font-bold">{r.count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Hover Toolbar */}
+        {showToolbar && (
+          <div className="absolute -top-3 z-20 flex items-center gap-0.5 rounded-xl border border-slate-700 bg-slate-900/95 backdrop-blur-md px-1 py-0.5 shadow-md transition animate-in fade-in zoom-in-95 right-4">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowPicker(!showPicker)}
+                className="p-1 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-white/10 transition cursor-pointer"
+                title="Add reaction"
+              >
+                <SmilePlus className="w-3.5 h-3.5" />
+              </button>
+
+              {showPicker && (
+                <div className="absolute bottom-full right-0 mb-1.5 flex items-center gap-1 bg-slate-900 border border-slate-700 p-1 rounded-2xl shadow-xl z-30">
+                  {QUICK_REACTIONS.map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      onClick={() => {
+                        onReactionAdd?.(message.id, emoji);
+                        setShowPicker(false);
+                      }}
+                      className="w-7 h-7 flex items-center justify-center text-sm rounded-xl hover:scale-125 hover:bg-slate-800 transition cursor-pointer"
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {onReply && (
+              <button
+                type="button"
+                onClick={() => onReply(message)}
+                className="p-1 rounded-lg text-slate-400 hover:text-sky-400 hover:bg-white/10 transition cursor-pointer"
+                title="Reply"
+              >
+                <Reply className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() => onDelete(message.id)}
+                className="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 transition cursor-pointer"
+                title="Dismiss notice"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
       className={`group/msg relative flex gap-2.5 my-3.5 items-end ${
@@ -83,9 +246,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded-full border ${
               message.senderRole === 'client'
                 ? 'bg-amber-100 text-amber-900 border-amber-200'
+                : message.senderRole === 'system'
+                ? 'bg-sky-500/20 text-sky-300 border-sky-500/30'
                 : 'bg-slate-800 text-white border-slate-700'
             }`}>
-              {message.senderRole === 'client' ? 'Client Sponsor' : 'Lead Technician (Admin)'}
+              {message.senderRole === 'client'
+                ? 'Client Sponsor'
+                : message.senderRole === 'system'
+                ? 'System Notice'
+                : 'Lead Technician (Admin)'}
             </span>
           )}
         </div>

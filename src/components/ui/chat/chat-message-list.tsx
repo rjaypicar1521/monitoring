@@ -38,7 +38,9 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
   return (
     <div
       ref={scrollRef}
-      className={`overflow-y-auto px-1 py-3 space-y-1 max-h-[380px] min-h-[160px] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent ${className}`}
+      className={`overflow-y-auto px-1 py-3 space-y-1 min-h-[160px] scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent ${
+        className.includes('max-h-') ? '' : 'max-h-[380px]'
+      } ${className}`}
     >
       {/* Date Header Pill */}
       <div className="flex items-center justify-center my-2">
