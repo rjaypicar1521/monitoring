@@ -11,6 +11,8 @@ import {
   Play, 
   ChevronDown, 
   ChevronUp, 
+  ChevronLeft,
+  ChevronRight,
   HardDrive, 
   ShieldCheck, 
   Copy, 
@@ -39,6 +41,168 @@ import {
   requestNotificationPermission, 
   getNotificationPermission 
 } from '../utils/attendanceService';
+
+/**
+ * Sleek Mini Calendar Widget displaying current month and prominently highlighting today's date
+ */
+const MiniCalendar: React.FC<{ className?: string }> = ({ className = '' }) => {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+  const todayDate = today.getDate();
+
+  const [viewDate, setViewDate] = useState(() => new Date(currentYear, currentMonth, 1));
+  const viewYear = viewDate.getFullYear();
+  const viewMonth = viewDate.getMonth();
+
+  const isCurrentMonth = viewYear === currentYear && viewMonth === currentMonth;
+
+  const monthName = viewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const weekday = today.toLocaleDateString('en-US', { weekday: 'short' });
+  const monthDayYear = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const todayLabel = `Today, ${weekday} ${monthDayYear}`;
+
+  const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
+
+  const days: { day: number; isCurrentMonth: boolean; isToday: boolean }[] = [];
+  
+  // Previous month trailing days
+  for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+    days.push({
+      day: daysInPrevMonth - i,
+      isCurrentMonth: false,
+      isToday: false,
+    });
+  }
+  
+  // Current month days
+  for (let d = 1; d <= daysInMonth; d++) {
+    days.push({
+      day: d,
+      isCurrentMonth: true,
+      isToday: isCurrentMonth && d === todayDate,
+    });
+  }
+  
+  // Next month leading days to complete week rows
+  const remaining = (7 - (days.length % 7)) % 7;
+  for (let i = 1; i <= remaining; i++) {
+    days.push({
+      day: i,
+      isCurrentMonth: false,
+      isToday: false,
+    });
+  }
+
+  const prevMonth = () => setViewDate(new Date(viewYear, viewMonth - 1, 1));
+  const nextMonth = () => setViewDate(new Date(viewYear, viewMonth + 1, 1));
+  const jumpToToday = () => setViewDate(new Date(currentYear, currentMonth, 1));
+
+  const weekDayLabels = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+  return (
+    <div className={`bg-slate-50/95 border border-slate-200/90 rounded-2xl p-3 shadow-xs space-y-2.5 ${className}`}>
+      {/* Month Header & Controls */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Calendar className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+          <span className="font-bold text-xs text-slate-900 truncate">
+            {monthName}
+          </span>
+        </div>
+        <div className="flex items-center gap-0.5 shrink-0">
+          <button
+            type="button"
+            onClick={prevMonth}
+            className="p-1 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition cursor-pointer"
+            title="Previous month"
+            aria-label="Previous month"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={nextMonth}
+            className="p-1 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition cursor-pointer"
+            title="Next month"
+            aria-label="Next month"
+          >
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Prominent Today Date Label & Return Button */}
+      <button
+        type="button"
+        onClick={jumpToToday}
+        disabled={isCurrentMonth}
+        className={`w-full flex items-center justify-between px-2.5 py-1.5 bg-amber-500/10 border border-amber-400/40 rounded-xl transition text-left group ${
+          !isCurrentMonth ? 'hover:bg-amber-500/20 hover:border-amber-500 cursor-pointer' : 'cursor-default'
+        }`}
+        title={!isCurrentMonth ? 'Click to jump back to current month' : todayLabel}
+      >
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+          <span className="text-[11px] font-bold text-amber-950 truncate">
+            {todayLabel}
+          </span>
+        </div>
+        {!isCurrentMonth && (
+          <span className="text-[9px] font-mono font-bold text-amber-800 bg-amber-200/90 px-1.5 py-0.5 rounded-md shrink-0 shadow-xs">
+            Jump to Today
+          </span>
+        )}
+      </button>
+
+      {/* Weekday headers */}
+      <div className="grid grid-cols-7 gap-1 text-center">
+        {weekDayLabels.map((lbl, idx) => (
+          <span
+            key={lbl + idx}
+            className="text-[9px] font-bold text-slate-400 uppercase tracking-wider font-mono py-0.5"
+          >
+            {lbl}
+          </span>
+        ))}
+      </div>
+
+      {/* Days Grid */}
+      <div className="grid grid-cols-7 gap-1 text-center" role="grid" aria-label="Calendar days">
+        {days.map((item, idx) => {
+          const cellKey = `${viewYear}-${viewMonth}-${idx}-${item.day}`;
+          if (item.isToday) {
+            return (
+              <span
+                key={cellKey}
+                className="h-6 w-full flex items-center justify-center text-[10px] font-mono font-black rounded-lg bg-amber-400 text-slate-950 shadow-xs ring-2 ring-amber-500/50 cursor-default"
+                title={todayLabel}
+                aria-current="date"
+              >
+                {item.day}
+              </span>
+            );
+          }
+
+          return (
+            <span
+              key={cellKey}
+              className={`h-6 w-full flex items-center justify-center text-[10px] font-mono rounded-lg transition ${
+                item.isCurrentMonth
+                  ? 'text-slate-700 font-medium'
+                  : 'text-slate-300 font-normal'
+              }`}
+            >
+              {item.day}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 interface CrextioDashboardProps {
   project: CCTVProject;
@@ -69,7 +233,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   onCompleteTaskWithEvidence,
   onOpenProjectSelector
 }) => {
-  const [activeNavTab, setActiveNavTab] = useState<'Dashboard' | 'Checklist' | 'Cameras' | 'Timeline' | 'Report'>('Dashboard');
+  const [activeNavTab, setActiveNavTab] = useState<'Dashboard' | 'Checklist' | 'Cameras' | 'Report'>('Dashboard');
   const [expandedSection, setExpandedSection] = useState<'devices' | 'specs' | 'wiring' | null>('devices');
   const [timerPlaying, setTimerPlaying] = useState(false);
   const [evidenceTask, setEvidenceTask] = useState<CCTVTask | null>(null);
@@ -198,6 +362,18 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
     return t.status === checklistFilter;
   });
 
+  const todayDateFormatted = new Date().toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+
+  const todayDateShort = new Date().toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric'
+  });
+
   return (
     <div className="min-h-screen bg-[#fbf9f2] flex flex-col md:flex-row text-slate-800 font-sans selection:bg-black selection:text-white relative">
       {/* Top-Right Floating Attendance Toast Banner */}
@@ -208,7 +384,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
       {/* FIGMA SIDEBAR NAVIGATION (DESKTOP) */}
       <aside className="hidden md:flex md:w-64 bg-white border-r border-slate-200/90 flex-col justify-between p-5 shrink-0 z-30 shadow-xs h-screen sticky top-0 overflow-y-auto">
-        <div className="space-y-6">
+        <div className="space-y-4 lg:space-y-5">
           {/* Brand Header */}
           <div className="flex items-center justify-between">
             <div 
@@ -313,22 +489,6 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               </span>
             </button>
 
-            {/* Timeline (Locked) */}
-            <button
-              type="button"
-              disabled
-              title="Timeline schedule is locked for client view"
-              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-medium text-slate-400 bg-slate-50/50 cursor-not-allowed opacity-60"
-            >
-              <div className="flex items-center gap-2.5">
-                <Lock className="w-4 h-4 text-slate-400" />
-                <span>Timeline</span>
-              </div>
-              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-600">
-                Locked
-              </span>
-            </button>
-
             {/* Report */}
             <button
               onClick={() => setActiveNavTab('Report')}
@@ -344,6 +504,9 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               </div>
             </button>
           </div>
+
+          {/* Mini Calendar Widget with Date Today */}
+          <MiniCalendar />
         </div>
 
         {/* Bottom Section */}
@@ -407,6 +570,13 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5">
+          {/* Compact Today's Date Pill on Mobile */}
+          <div className="flex items-center gap-1 px-2.5 py-1 bg-slate-50 border border-slate-200/90 rounded-full text-[10px] text-slate-800 font-semibold shadow-xs">
+            <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
+            <span className="hidden min-[380px]:inline truncate">{todayDateFormatted}</span>
+            <span className="inline min-[380px]:hidden truncate">{todayDateShort}</span>
+          </div>
+
           {/* Copy Report Pill on Mobile */}
           <button
             type="button"
@@ -454,7 +624,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
             onClick={() => setMobileMenuOpen(false)}
           />
           <aside className="relative w-72 max-w-[85vw] bg-white h-full shadow-2xl p-5 z-10 animate-in slide-in-from-left duration-200 flex flex-col justify-between overflow-y-auto">
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Brand Header & Close Button */}
               <div className="flex items-center justify-between">
                 <div 
@@ -580,21 +750,6 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                 </button>
 
                 <button
-                  type="button"
-                  disabled
-                  title="Timeline schedule is locked for client view"
-                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-medium text-slate-400 bg-slate-50/50 cursor-not-allowed opacity-60"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Lock className="w-4 h-4 text-slate-400" />
-                    <span>Timeline</span>
-                  </div>
-                  <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-600">
-                    Locked
-                  </span>
-                </button>
-
-                <button
                   onClick={() => {
                     setActiveNavTab('Report');
                     setMobileMenuOpen(false);
@@ -611,6 +766,9 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                   </div>
                 </button>
               </div>
+
+              {/* Mini Calendar Widget with Date Today */}
+              <MiniCalendar />
             </div>
 
             {/* Bottom of Mobile Drawer */}
@@ -667,7 +825,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-amber-100/40 rounded-full blur-3xl pointer-events-none" />
 
         {/* Desktop Top Utility Bar */}
-        <div className="hidden sm:flex items-center justify-between gap-4 relative z-20 pb-1 border-b border-slate-200/60">
+        <div className="hidden md:flex items-center justify-between gap-4 relative z-20 pb-1 border-b border-slate-200/60">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs font-bold text-slate-800">
@@ -680,6 +838,12 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Compact Today's Date Pill */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200/90 rounded-full text-xs font-semibold text-slate-800 shadow-xs">
+              <Calendar className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span>{todayDateFormatted}</span>
+            </div>
+
             <button
               onClick={onCopyReport}
               className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1a1c22] hover:bg-slate-800 text-white rounded-full text-xs font-semibold shadow-xs transition cursor-pointer"
@@ -1672,151 +1836,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
           </div>
         )}
 
-        {/* TAB 4: TIMELINE & CALENDAR SCHEDULE */}
-        {activeNavTab === 'Timeline' && (
-          <div className="space-y-5 animate-in fade-in">
-            {/* Locked Schedule Banner */}
-            <div className="bg-slate-900 text-white p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs border border-slate-800">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-slate-800 text-amber-400 flex items-center justify-center shrink-0">
-                  <Lock className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="font-bold text-sm flex items-center gap-2">
-                    <span>Timeline & Handover Roadmap Locked</span>
-                    <span className="text-[10px] font-mono font-bold bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full">
-                      Read Only
-                    </span>
-                  </div>
-                  <div className="text-xs text-slate-300">
-                    Milestone schedule and completion dates are locked and managed by the Lead CCTV Installer.
-                  </div>
-                </div>
-              </div>
-              <div className="text-xs text-slate-400 font-mono shrink-0">
-                Target: {project.targetLaunchDate || 'September 25, 2026'}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                  <Calendar className="w-6 h-6 text-amber-600" />
-                  Project Handover Roadmap ({project.startDate || 'Aug 25'} - {project.targetLaunchDate || 'Sep 25'})
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Target Handover: {project.targetLaunchDate || 'September 25, 2026'} • Lead: {leadTech.name}
-                </p>
-              </div>
-
-              <div className={`px-3 py-1 font-bold text-xs rounded-full border ${
-                activeBlockers.length > 0
-                  ? 'bg-amber-100 text-amber-900 border-amber-200'
-                  : 'bg-emerald-100 text-emerald-900 border-emerald-200'
-              }`}>
-                Pacing: {percentComplete}% ({execStatus.schedule})
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Phase 1: Completed */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
-                    Phase 1 (Completed)
-                  </div>
-                  <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
-                    {doneTasks.length} Done
-                  </span>
-                </div>
-                <h3 className="font-bold text-slate-900 text-sm">Cabling & Infrastructure</h3>
-                <div className="space-y-2 text-xs text-slate-600">
-                  {doneTasks.length > 0 ? (
-                    doneTasks.map(t => (
-                      <div key={t.id} className="flex items-center gap-1.5 text-[11px]">
-                        <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        <span className="truncate">{t.title}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-[11px] text-slate-400 italic">No completed milestones yet.</div>
-                  )}
-                </div>
-                <div className="text-[11px] text-emerald-600 font-semibold pt-1 border-t border-slate-100">
-                  ✔ Verified and approved
-                </div>
-              </div>
-
-              {/* Phase 2: Active / In Progress */}
-              <div className={`bg-white p-5 rounded-2xl shadow-xs space-y-3 border ${
-                activeBlockers.length > 0 
-                  ? 'border-amber-400 ring-2 ring-amber-400/30' 
-                  : 'border-slate-200'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-bold text-amber-700 uppercase tracking-wider">
-                    Phase 2 (Active Now)
-                  </div>
-                  <span className="text-[10px] font-mono font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">
-                    {inProgressTasks.length} In Flight
-                  </span>
-                </div>
-                <h3 className="font-bold text-slate-900 text-sm">Mounting & Hardware Tie-in</h3>
-                <div className="space-y-2 text-xs text-slate-600">
-                  {inProgressTasks.length > 0 ? (
-                    inProgressTasks.map(t => (
-                      <div key={t.id} className="flex items-center justify-between gap-1 text-[11px]">
-                        <span className="truncate flex-1 font-medium text-slate-800">{t.title}</span>
-                        <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold shrink-0 ${
-                          t.status === 'Blocked' ? 'bg-rose-100 text-rose-700' : 'bg-sky-100 text-sky-700'
-                        }`}>
-                          {t.status}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-[11px] text-slate-400 italic">No tasks currently in progress.</div>
-                  )}
-                </div>
-                {activeBlockers.length > 0 && (
-                  <div className="text-[11px] text-amber-800 bg-amber-50 p-2 rounded-xl border border-amber-200">
-                    ⚠️ {activeBlockers[0].description} ({activeBlockers[0].unblockAction})
-                  </div>
-                )}
-              </div>
-
-              {/* Phase 3: Upcoming */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    Phase 3 (Upcoming)
-                  </div>
-                  <span className="text-[10px] font-mono font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
-                    {pendingTasks.length} Queued
-                  </span>
-                </div>
-                <h3 className="font-bold text-slate-900 text-sm">Testing & Final Handover</h3>
-                <div className="space-y-2 text-xs text-slate-600">
-                  {pendingTasks.length > 0 ? (
-                    pendingTasks.map(t => (
-                      <div key={t.id} className="flex items-center justify-between gap-1 text-[11px]">
-                        <span className="truncate text-slate-600">{t.title}</span>
-                        <span className="text-[10px] text-slate-400 font-mono shrink-0">{t.targetDate || 'Sep 25'}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-[11px] text-slate-400 italic">All milestones initiated.</div>
-                  )}
-                </div>
-                <div className="text-[11px] text-slate-500 font-semibold pt-1 border-t border-slate-100">
-                  Final Launch Date: {project.targetLaunchDate || 'Sep 25'}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 5: OFFICIAL CLIENT UPDATE REPORT (8 SECTIONS) */}
+        {/* TAB 4: OFFICIAL CLIENT UPDATE REPORT (8 SECTIONS) */}
         {activeNavTab === 'Report' && (
           <div className="space-y-5 animate-in fade-in">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
