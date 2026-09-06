@@ -10,7 +10,7 @@ export const DEFAULT_CAMERAS: CameraEndpoint[] = [
 ];
 
 export const DEFAULT_TECHNICIANS: TechnicianMember[] = [
-  { id: 'tech-1', name: 'Rjay Picar', role: 'Lead Systems & CCTV Architect (RMVN Solutions)', status: 'On Duty', assigned: 'CCTV Architecture & Live Monitoring', email: 'rjay@rmvn.com', assignedCameras: ['CAM-01', 'CAM-02', 'CAM-03', 'CAM-04'], zone: 'Ground Floor & Perimeter' },
+  { id: 'tech-1', name: 'Rjay Picar', role: 'Lead Systems & CCTV Architect (RMVN Solutions)', status: 'Off Duty', isTimedIn: false, assigned: 'CCTV Architecture & Live Monitoring', email: 'rjay@rmvn.com', assignedCameras: ['CAM-01', 'CAM-02', 'CAM-03', 'CAM-04'], zone: 'Ground Floor & Perimeter' },
   { id: 'tech-2', name: 'UPCHQ', role: 'Client Facility Sponsor & Decision Maker', status: 'On Site', assigned: 'Site Access & Area Clearance', email: 'admin@upchq.org', assignedCameras: ['CAM-01', 'CAM-02'], zone: 'Reception & Main Office' }
 ];
 

@@ -484,14 +484,15 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
     id: 'tech-1',
     name: 'Rjay Picar',
     role: 'Lead Systems & CCTV Architect (RMVN Solutions)',
-    status: 'On Duty' as TechnicianStatus,
+    status: 'Off Duty' as TechnicianStatus,
     assigned: 'CCTV Architecture & Live Monitoring',
-    email: 'rjay@rmvn.com'
+    email: 'rjay@rmvn.com',
+    isTimedIn: false
   };
 
   const handleToggleTechnicianAttendance = async (targetTech?: TechnicianMember) => {
     const techToUpdate = targetTech || leadTech;
-    const isCurrentlyTimedIn = !!techToUpdate.isTimedIn;
+    const isCurrentlyTimedIn = !!techToUpdate.isTimedIn && techToUpdate.status !== 'Off Duty';
     const nowFormatted = formatAttendanceTime();
     const todayDate = new Date().toISOString().split('T')[0];
 
@@ -783,14 +784,14 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
             type="button"
             onClick={() => handleToggleTechnicianAttendance(leadTech)}
             className={`flex items-center gap-1 px-2 py-1 rounded-xl text-[10px] font-bold border transition cursor-pointer shrink-0 ${
-              leadTech.isTimedIn
+              leadTech.isTimedIn && leadTech.status !== 'Off Duty'
                 ? 'bg-emerald-50 text-emerald-900 border-emerald-300'
                 : 'bg-amber-50 text-amber-900 border-amber-200'
             }`}
-            title={leadTech.isTimedIn ? 'Time Out Rjay Picar' : 'Time In Rjay Picar'}
+            title={leadTech.isTimedIn && leadTech.status !== 'Off Duty' ? 'Time Out Rjay Picar' : 'Time In Rjay Picar'}
           >
-            <Clock className={`w-3 h-3 ${leadTech.isTimedIn ? 'text-emerald-600' : 'text-amber-600'}`} />
-            <span>{leadTech.isTimedIn ? `Out (${leadTech.timeIn || 'In'})` : 'Time In'}</span>
+            <Clock className={`w-3 h-3 ${leadTech.isTimedIn && leadTech.status !== 'Off Duty' ? 'text-emerald-600' : 'text-amber-600'}`} />
+            <span>{leadTech.isTimedIn && leadTech.status !== 'Off Duty' ? `Out (${leadTech.timeIn || 'In'})` : 'Time In'}</span>
           </button>
 
           <button
@@ -1104,17 +1105,17 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
               type="button"
               onClick={() => handleToggleTechnicianAttendance(leadTech)}
               className={`flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-bold transition shadow-2xs cursor-pointer border shrink-0 ${
-                leadTech.isTimedIn
+                leadTech.isTimedIn && leadTech.status !== 'Off Duty'
                   ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border-emerald-400 ring-2 ring-emerald-400/20'
                   : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300 hover:border-slate-400'
               }`}
               title={
-                leadTech.isTimedIn
+                leadTech.isTimedIn && leadTech.status !== 'Off Duty'
                   ? `Click to Time Out ${leadTech.name} (Currently On Site since ${leadTech.timeIn || 'earlier'})`
                   : `1-Click Quick Time In for ${leadTech.name}`
               }
             >
-              {leadTech.isTimedIn ? (
+              {leadTech.isTimedIn && leadTech.status !== 'Off Duty' ? (
                 <>
                   <span className="relative flex h-2.5 w-2.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -1551,19 +1552,20 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                             type="button"
                             onClick={() => handleToggleTechnicianAttendance(tech)}
                             className={`px-2 py-1 rounded-lg text-[10px] font-bold border transition cursor-pointer flex items-center gap-1 ${
-                              tech.isTimedIn
+                              tech.isTimedIn && tech.status !== 'Off Duty'
                                 ? 'bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border-emerald-300'
                                 : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
                             }`}
-                            title={tech.isTimedIn ? `Time Out ${tech.name}` : `Time In ${tech.name}`}
+                            title={tech.isTimedIn && tech.status !== 'Off Duty' ? `Time Out ${tech.name}` : `Time In ${tech.name}`}
                           >
                             <Clock className="w-2.5 h-2.5 text-amber-600" />
-                            <span>{tech.isTimedIn ? `Out (${tech.timeIn || 'In'})` : 'Time In'}</span>
+                            <span>{tech.isTimedIn && tech.status !== 'Off Duty' ? `Out (${tech.timeIn || 'In'})` : 'Time In'}</span>
                           </button>
 
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                             tech.status === 'On Site' ? 'bg-blue-100 text-blue-800' :
                             tech.status === 'On Duty' ? 'bg-emerald-100 text-emerald-800' :
+                            tech.status === 'Off Duty' ? 'bg-slate-100 text-slate-600 border border-slate-200' :
                             'bg-slate-100 text-slate-700'
                           }`}>
                             {tech.status}
@@ -2338,8 +2340,55 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                           value={member.status}
                           onChange={(e) => {
                             const newStatus = e.target.value as TechnicianStatus;
+                            const nowFormatted = formatAttendanceTime();
+                            const todayDate = new Date().toISOString().split('T')[0];
                             if (onUpdateTechnician) {
-                              onUpdateTechnician({ ...member, status: newStatus });
+                              if (newStatus === 'Off Duty') {
+                                const updated: TechnicianMember = {
+                                  ...member,
+                                  status: newStatus,
+                                  isTimedIn: false,
+                                  timeOut: nowFormatted,
+                                  attendanceDate: todayDate
+                                };
+                                onUpdateTechnician(updated);
+                                broadcastAttendance({
+                                  id: `att-${Date.now()}`,
+                                  type: 'TIME_OUT',
+                                  technicianId: member.id,
+                                  technicianName: member.name,
+                                  technicianRole: member.role,
+                                  projectName: project.name,
+                                  projectId: project.id,
+                                  time: nowFormatted,
+                                  timestamp: Date.now(),
+                                  status: 'Off Duty'
+                                });
+                              } else if (newStatus === 'On Site') {
+                                const updated: TechnicianMember = {
+                                  ...member,
+                                  status: newStatus,
+                                  isTimedIn: true,
+                                  timeIn: member.timeIn || nowFormatted,
+                                  timeOut: undefined,
+                                  attendanceDate: todayDate
+                                };
+                                onUpdateTechnician(updated);
+                                broadcastAttendance({
+                                  id: `att-${Date.now()}`,
+                                  type: 'TIME_IN',
+                                  technicianId: member.id,
+                                  technicianName: member.name,
+                                  technicianRole: member.role,
+                                  projectName: project.name,
+                                  projectId: project.id,
+                                  time: nowFormatted,
+                                  timestamp: Date.now(),
+                                  status: 'On Site'
+                                });
+                              } else {
+                                onUpdateTechnician({ ...member, status: newStatus });
+                              }
                             }
                             showNotification(`Updated ${member.name} status to ${newStatus}`);
                           }}
@@ -2413,13 +2462,13 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                     {/* Attendance Punch-Clock Control */}
                     <div className="mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <Clock className={`w-4 h-4 shrink-0 ${member.isTimedIn ? 'text-emerald-500' : 'text-slate-400'}`} />
+                        <Clock className={`w-4 h-4 shrink-0 ${member.isTimedIn && member.status !== 'Off Duty' ? 'text-emerald-500' : 'text-slate-400'}`} />
                         <div className="min-w-0">
                           <div className="text-[11px] font-bold text-slate-800 truncate">
-                            {member.isTimedIn ? `Timed In: ${member.timeIn || 'Today'}` : 'Attendance: Off Duty'}
+                            {member.isTimedIn && member.status !== 'Off Duty' ? `Timed In: ${member.timeIn || 'Today'}` : 'Attendance: Off Duty'}
                           </div>
                           <div className="text-[9px] text-slate-400 truncate">
-                            {member.isTimedIn ? 'Status: On Site (Client Notified)' : (member.timeOut ? `Timed out at ${member.timeOut}` : '1-Click punch clock')}
+                            {member.isTimedIn && member.status !== 'Off Duty' ? 'Status: On Site (Client Notified)' : (member.timeOut ? `Timed out at ${member.timeOut}` : '1-Click punch clock')}
                           </div>
                         </div>
                       </div>
@@ -2428,14 +2477,14 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                         type="button"
                         onClick={() => handleToggleTechnicianAttendance(member)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer shrink-0 shadow-2xs flex items-center gap-1.5 ${
-                          member.isTimedIn
+                          member.isTimedIn && member.status !== 'Off Duty'
                             ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'
                             : 'bg-emerald-600 hover:bg-emerald-500 text-white'
                         }`}
-                        title={member.isTimedIn ? `Time Out ${member.name}` : `Time In ${member.name}`}
+                        title={member.isTimedIn && member.status !== 'Off Duty' ? `Time Out ${member.name}` : `Time In ${member.name}`}
                       >
                         <Clock className="w-3 h-3" />
-                        <span>{member.isTimedIn ? 'Time Out' : 'Time In'}</span>
+                        <span>{member.isTimedIn && member.status !== 'Off Duty' ? 'Time Out' : 'Time In'}</span>
                       </button>
                     </div>
                   </div>

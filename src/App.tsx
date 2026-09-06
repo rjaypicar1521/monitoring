@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { CCTVProject, CCTVTask, TaskStatus, RiskItem, AuthUser, ExecutiveStatus, CameraEndpoint, TechnicianMember, BlockerItem, ProjectNote } from './types';
+import { CCTVProject, CCTVTask, TaskStatus, RiskItem, AuthUser, ExecutiveStatus, CameraEndpoint, TechnicianMember, BlockerItem, ProjectNote, AttendanceEvent, TechnicianStatus } from './types';
 import { loadProjects, saveProjects, cleanMojibake, INITIAL_PROJECTS } from './utils/storage';
+import { subscribeToAttendance } from './utils/attendanceService';
 import { FolderCheck } from 'lucide-react';
 import { computeExecutiveStatus, computeHealthScore, generateProjectMonitoringUpdate } from './utils/assistantEngine';
 import { Header } from './components/Header';
@@ -70,6 +71,57 @@ export const App: React.FC = () => {
     };
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  // Sync real-time attendance events (BroadcastChannel, CustomEvent, localStorage)
+  useEffect(() => {
+    const unsubscribe = subscribeToAttendance((event: AttendanceEvent) => {
+      setProjects((prev) =>
+        prev.map((p) => {
+          if (event.projectId && p.id !== event.projectId) return p;
+          const currentTechs = p.technicians || [];
+          const matchesTech = (t: TechnicianMember) =>
+            t.id === event.technicianId ||
+            t.name === event.technicianName ||
+            (Boolean(event.technicianName?.includes('Rjay')) && t.name.includes('Rjay'));
+
+          const exists = currentTechs.some(matchesTech);
+          if (!exists) {
+            const newTech: TechnicianMember = {
+              id: event.technicianId,
+              name: event.technicianName,
+              role: event.technicianRole || 'Lead Systems & CCTV Architect (RMVN Solutions)',
+              status: (event.status as TechnicianStatus) || (event.type === 'TIME_IN' ? 'On Site' : 'Off Duty'),
+              assigned: 'CCTV Architecture & Live Monitoring',
+              email: 'rjay@rmvn.com',
+              isTimedIn: event.type === 'TIME_IN',
+              timeIn: event.type === 'TIME_IN' ? event.time : undefined,
+              timeOut: event.type === 'TIME_OUT' ? event.time : undefined
+            };
+            return {
+              ...p,
+              technicians: [...currentTechs, newTech]
+            };
+          }
+          return {
+            ...p,
+            technicians: currentTechs.map((t) => {
+              if (matchesTech(t)) {
+                return {
+                  ...t,
+                  isTimedIn: event.type === 'TIME_IN',
+                  status: (event.status as TechnicianStatus) || (event.type === 'TIME_IN' ? 'On Site' : 'Off Duty'),
+                  timeIn: event.type === 'TIME_IN' ? event.time : t.timeIn,
+                  timeOut: event.type === 'TIME_OUT' ? event.time : undefined
+                };
+              }
+              return t;
+            })
+          };
+        })
+      );
+    });
+    return () => unsubscribe();
   }, []);
 
   // Sync user role to localStorage

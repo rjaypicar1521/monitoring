@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { CCTVProject, ExecutiveStatus, AuthUser, TaskStatus, CCTVTask, AttendanceEvent, TechnicianMember } from '../types';
+import { CCTVProject, ExecutiveStatus, AuthUser, TaskStatus, CCTVTask, AttendanceEvent, TechnicianMember, TechnicianStatus } from '../types';
 import { 
   Camera, 
   CheckCircle2, 
   Clock, 
+  Moon,
   Calendar, 
   User, 
   ArrowUpRight, 
@@ -79,23 +80,36 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
   const [attendanceNotification, setAttendanceNotification] = useState<AttendanceEvent | null>(null);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | 'unsupported'>('default');
+  const [attendanceOverride, setAttendanceOverride] = useState<Partial<TechnicianMember> | null>(null);
 
-  const leadTech: TechnicianMember = (project.technicians && (project.technicians.find(t => t.name.includes('Rjay') || t.id === 'tech-1') || project.technicians[0])) || {
+  const baseLeadTech: TechnicianMember = (project.technicians && (project.technicians.find(t => t.name.includes('Rjay') || t.id === 'tech-1') || project.technicians[0])) || {
     id: 'tech-1',
     name: project.teamLead || 'Rjay Picar',
     role: 'Lead Systems & CCTV Architect (RMVN Solutions)',
-    status: 'On Duty',
+    status: 'Off Duty',
     assigned: 'CCTV Architecture & Live Monitoring',
     email: 'rjay@rmvn.com',
     isTimedIn: false,
     timeIn: undefined
   };
 
+  const leadTech: TechnicianMember = {
+    ...baseLeadTech,
+    ...(attendanceOverride || {})
+  };
+
+  const isTechTimedIn = Boolean(leadTech.isTimedIn && leadTech.status !== 'Off Duty');
+
+  // Clear temporary override whenever project technicians update from props/parent
+  React.useEffect(() => {
+    setAttendanceOverride(null);
+  }, [project.technicians]);
+
   React.useEffect(() => {
     setNotificationPermission(getNotificationPermission());
 
     // If technician is currently timed in, show popup notification on client dashboard
-    if (leadTech.isTimedIn) {
+    if (isTechTimedIn) {
       const dismissKey = `dismissed_attendance_${leadTech.id}_${leadTech.timeIn || 'today'}`;
       const isDismissed = typeof sessionStorage !== 'undefined' && sessionStorage.getItem(dismissKey);
       if (!isDismissed) {
@@ -115,6 +129,20 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
     }
 
     const unsubscribe = subscribeToAttendance((event: AttendanceEvent) => {
+      // Immediately reflect attendance status on local technician card
+      const isLead = event.technicianId === baseLeadTech.id ||
+        event.technicianName === baseLeadTech.name ||
+        (Boolean(event.technicianName?.includes('Rjay')) && baseLeadTech.name.includes('Rjay'));
+
+      if (isLead) {
+        setAttendanceOverride({
+          isTimedIn: event.type === 'TIME_IN',
+          status: (event.status as TechnicianStatus) || (event.type === 'TIME_IN' ? 'On Site' : 'Off Duty'),
+          timeIn: event.type === 'TIME_IN' ? event.time : baseLeadTech.timeIn,
+          timeOut: event.type === 'TIME_OUT' ? event.time : undefined
+        });
+      }
+
       // In-app rich toast banner on Client view
       setAttendanceNotification(event);
 
@@ -128,7 +156,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
     return () => {
       unsubscribe();
     };
-  }, [project.id, project.name, leadTech.isTimedIn, leadTech.timeIn, leadTech.id, leadTech.name, leadTech.role]);
+  }, [project.id, project.name, isTechTimedIn, leadTech.id, leadTech.timeIn, baseLeadTech.id, baseLeadTech.name, baseLeadTech.role, baseLeadTech.timeIn]);
 
   const handleDismissAttendance = () => {
     if (attendanceNotification) {
@@ -802,32 +830,39 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               
               {/* LEFT COLUMN: Profile Card & Accordion Details */}
               <div className="lg:col-span-3 space-y-4 flex flex-col justify-between">
-                {/* On Duty Technician Card (No Photo) */}
+                {/* On Duty / Off Duty Technician Card (No Photo) */}
                 <div className="bg-[#191b20] text-white rounded-[24px] p-4 border border-slate-700/70 shadow-sm space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${
-                        leadTech.isTimedIn ? 'bg-emerald-400 animate-pulse' :
-                        leadTech.status === 'Off Duty' ? 'bg-slate-500' :
-                        'bg-emerald-400 animate-pulse'
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${
+                        isTechTimedIn ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'
                       }`} />
-                      <span className="text-[10px] font-mono uppercase font-bold text-amber-300 tracking-wider">
-                        {leadTech.isTimedIn ? 'Technician On Site' : leadTech.status === 'Off Duty' ? 'Technician Off Duty' : 'On Duty Technician'}
+                      <span className={`text-[10px] font-mono uppercase font-bold tracking-wider truncate ${
+                        isTechTimedIn ? 'text-amber-300' : 'text-slate-400'
+                      }`}>
+                        {isTechTimedIn ? 'TECHNICIAN ON SITE' : 'TECHNICIAN OFF DUTY'}
                       </span>
                     </div>
-                    <span className={`px-2.5 py-0.5 rounded-full border font-mono text-[10px] font-bold flex items-center gap-1.5 ${
-                      leadTech.isTimedIn
+                    <span className={`px-2.5 py-0.5 rounded-full border font-mono text-[10px] font-bold flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
+                      isTechTimedIn
                         ? 'bg-emerald-500/30 text-emerald-300 border-emerald-400/50 shadow-xs'
-                        : leadTech.status === 'Off Duty'
-                        ? 'bg-slate-700/50 text-slate-300 border-slate-600'
-                        : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                        : 'bg-slate-700/50 text-slate-300 border-slate-600'
                     }`}>
-                      {leadTech.isTimedIn && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                      )}
-                      <span>● {leadTech.status || 'On Duty'}</span>
-                      {leadTech.isTimedIn && leadTech.timeIn && (
-                        <span className="text-[9px] text-amber-300 font-mono">({leadTech.timeIn})</span>
+                      {isTechTimedIn ? (
+                        <>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
+                          <span>● {leadTech.status === 'Off Duty' ? 'On Site' : (leadTech.status || 'On Site')}</span>
+                          {leadTech.timeIn && (
+                            <span className="text-[9px] text-amber-300 font-mono">({leadTech.timeIn})</span>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <span>● Off Duty</span>
+                          {leadTech.timeOut && leadTech.timeOut.trim() && (
+                            <span className="text-[9px] text-slate-300 font-mono">({leadTech.timeOut})</span>
+                          )}
+                        </>
                       )}
                     </span>
                   </div>
@@ -846,15 +881,23 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
-                    <span className="truncate">Zone: <strong className="text-slate-200">Ground Floor & Perimeter</strong></span>
-                    {leadTech.isTimedIn && leadTech.timeIn ? (
-                      <span className="text-emerald-300 font-mono text-[10px] font-semibold flex items-center gap-1">
+                  <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between gap-2">
+                    <span className="truncate">Zone: <strong className="text-slate-200">{leadTech.zone || 'Ground Floor & Perimeter'}</strong></span>
+                    {isTechTimedIn ? (
+                      <span className="text-emerald-300 font-mono text-[10px] font-semibold flex items-center gap-1 shrink-0 whitespace-nowrap">
                         <Clock className="w-3 h-3 text-emerald-400" />
-                        <span>Timed In: {leadTech.timeIn}</span>
+                        <span>Timed In: {leadTech.timeIn || 'On Site'}</span>
+                      </span>
+                    ) : leadTech.timeOut && leadTech.timeOut.trim() ? (
+                      <span className="text-slate-400 font-mono text-[10px] font-semibold flex items-center gap-1 shrink-0 whitespace-nowrap">
+                        <Clock className="w-3 h-3 text-slate-400" />
+                        <span>Timed Out: {leadTech.timeOut}</span>
                       </span>
                     ) : (
-                      <span className="text-amber-300 font-mono text-[10px]">Lead Tech</span>
+                      <span className="text-slate-400 font-mono text-[10px] font-semibold flex items-center gap-1 shrink-0 whitespace-nowrap">
+                        <Moon className="w-3 h-3 text-amber-400/80" />
+                        <span>Off Duty</span>
+                      </span>
                     )}
                   </div>
                 </div>
