@@ -5,33 +5,27 @@ import {
   CheckCircle2, 
   Clock, 
   Calendar, 
-  Settings, 
   User, 
   ArrowUpRight, 
   Play, 
-  Pause, 
   ChevronDown, 
   ChevronUp, 
-  Sliders, 
-  Laptop, 
   HardDrive, 
   ShieldCheck, 
   Copy, 
   ClipboardCheck, 
   AlertTriangle, 
-  Layers, 
-  Wrench, 
   Check, 
   Search, 
   FileText, 
   X, 
-  ExternalLink, 
-  MessageSquare, 
-  Send, 
-  Trash2, 
-  Image as ImageIcon, 
   Lock,
-  Bell
+  Bell,
+  LayoutDashboard,
+  CheckSquare,
+  Building2,
+  ArrowRight,
+  Menu
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal, LightboxPhoto } from './TaskPhotoEvidenceModal';
@@ -79,7 +73,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   const [timerPlaying, setTimerPlaying] = useState(false);
   const [evidenceTask, setEvidenceTask] = useState<CCTVTask | null>(null);
   const [lightboxPhoto, setLightboxPhoto] = useState<LightboxPhoto | null>(null);
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cameraSearch, setCameraSearch] = useState('');
   const [checklistFilter, setChecklistFilter] = useState<'All' | 'Done' | 'In progress' | 'Blocked'>('All');
 
@@ -163,6 +157,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
   // Synchronized camera fleet from project data
   const cameraSpots = project.cameras || [];
+  const totalCameraCount = cameraSpots.length > 0 ? cameraSpots.length : project.totalCameras;
 
   const filteredCameras = cameraSpots.filter(c => 
     c.name.toLowerCase().includes(cameraSearch.toLowerCase()) ||
@@ -176,55 +171,422 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   });
 
   return (
-    <div className="min-h-screen bg-transparent p-0 sm:p-6 lg:p-10 font-sans text-slate-800 flex items-center justify-center selection:bg-white selection:text-black">
+    <div className="min-h-screen bg-[#fbf9f2] flex flex-col md:flex-row text-slate-800 font-sans selection:bg-black selection:text-white relative">
       {/* Top-Right Floating Attendance Toast Banner */}
       <AttendanceToastBanner
         event={attendanceNotification}
         onDismiss={handleDismissAttendance}
       />
 
-      {/* Outer Rounded Tablet Frame matching template (Edge-to-edge on mobile) */}
-      <div className="w-full max-w-7xl bg-[#fbf9f2] rounded-none sm:rounded-[36px] lg:rounded-[44px] shadow-none sm:shadow-2xl overflow-hidden p-3.5 sm:p-8 lg:p-10 border-0 sm:border border-white/80 relative space-y-5 sm:space-y-6 lg:space-y-8 min-h-screen sm:min-h-0">
-        
-        {/* Subtle Ambient Warm Yellow / Cream Corner Glows */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-amber-100/40 rounded-full blur-3xl pointer-events-none" />
+      {/* FIGMA SIDEBAR NAVIGATION (DESKTOP) */}
+      <aside className="hidden md:flex md:w-64 bg-white border-r border-slate-200/90 flex-col justify-between p-5 shrink-0 z-30 shadow-xs h-screen sticky top-0 overflow-y-auto">
+        <div className="space-y-6">
+          {/* Brand Header */}
+          <div className="flex items-center justify-between">
+            <div 
+              onClick={() => setActiveNavTab('Dashboard')}
+              className="flex items-center gap-2.5 cursor-pointer group"
+              title="Return to Dashboard"
+            >
+              <BrandLogo size="sm" />
+              <div>
+                <div className="font-black text-sm text-slate-900 tracking-tight leading-none group-hover:text-amber-600 transition-colors">RMVN CCTV</div>
+                <div className="text-[10px] text-slate-400 font-mono mt-0.5">Client Portal</div>
+              </div>
+            </div>
+            <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[10px] font-mono font-bold border border-amber-200">v2.5</span>
+          </div>
 
-        {/* 1. TOP NAVIGATION BAR */}
-        <header className="relative z-20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-          <div className="flex items-center justify-between w-full sm:w-auto gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              {/* Brand Pill Logo */}
-              <div 
-                onClick={() => setActiveNavTab('Dashboard')}
-                className="flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 bg-white/80 backdrop-blur-sm rounded-full border border-slate-300/70 shadow-xs cursor-pointer hover:bg-white transition shrink-0"
-              >
-                <BrandLogo size="xs" />
-                <span className="font-bold tracking-tight text-xs sm:text-sm text-slate-900 flex items-baseline gap-1">
-                  <span>Monitoring</span>
-                  <span className="text-[11px] sm:text-xs font-medium text-slate-500 lowercase tracking-normal">by rmvn</span>
+          {/* Active Project Switcher Card in Sidenav */}
+          <div className="space-y-1.5">
+            <div className="text-[10px] uppercase font-bold text-slate-400 px-1 tracking-wider flex items-center justify-between">
+              <span>Project</span>
+              <span className="text-[9px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 font-semibold">Active</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => onOpenProjectSelector?.()}
+              className="w-full text-left p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 hover:border-slate-300 transition group cursor-pointer shadow-sm"
+              title="Click to select or switch project"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="font-bold text-xs text-slate-900 truncate group-hover:text-amber-600 transition-colors">
+                    {project.name}
+                  </div>
+                  <div className="text-[10px] text-slate-500 truncate flex items-center gap-1 mt-0.5">
+                    <Building2 className="w-3 h-3 text-slate-400 shrink-0" />
+                    <span className="truncate">{project.location}</span>
+                  </div>
+                </div>
+                <div className="w-6 h-6 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-slate-700 shrink-0 shadow-sm">
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* Main Navigation Links */}
+          <div className="space-y-1">
+            <div className="text-[10px] uppercase font-bold text-slate-400 px-3 pb-1 tracking-wider">Navigation</div>
+            
+            {/* Dashboard */}
+            <button
+              onClick={() => setActiveNavTab('Dashboard')}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
+                activeNavTab === 'Dashboard' 
+                  ? 'bg-[#111317] text-white shadow-md' 
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <LayoutDashboard className="w-4 h-4" />
+                <span>Dashboard</span>
+              </div>
+            </button>
+
+            {/* Checklist */}
+            <button
+              onClick={() => setActiveNavTab('Checklist')}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
+                activeNavTab === 'Checklist' 
+                  ? 'bg-[#111317] text-white shadow-md' 
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <CheckSquare className="w-4 h-4" />
+                <span>Checklist</span>
+              </div>
+              {activeBlockers.length > 0 && (
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-400 text-slate-950">
+                  {activeBlockers.length}
                 </span>
+              )}
+            </button>
+
+            {/* Cameras */}
+            <button
+              onClick={() => setActiveNavTab('Cameras')}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
+                activeNavTab === 'Cameras' 
+                  ? 'bg-[#111317] text-white shadow-md' 
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Camera className="w-4 h-4" />
+                <span>Cameras</span>
+              </div>
+              <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                activeNavTab === 'Cameras' ? 'bg-slate-800 text-amber-300' : 'bg-slate-100 text-slate-700'
+              }`}>
+                {totalCameraCount}
+              </span>
+            </button>
+
+            {/* Timeline (Locked) */}
+            <button
+              type="button"
+              disabled
+              title="Timeline schedule is locked for client view"
+              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-medium text-slate-400 bg-slate-50/50 cursor-not-allowed opacity-60"
+            >
+              <div className="flex items-center gap-2.5">
+                <Lock className="w-4 h-4 text-slate-400" />
+                <span>Timeline</span>
+              </div>
+              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-600">
+                Locked
+              </span>
+            </button>
+
+            {/* Report */}
+            <button
+              onClick={() => setActiveNavTab('Report')}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
+                activeNavTab === 'Report' 
+                  ? 'bg-[#111317] text-white shadow-md' 
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <FileText className="w-4 h-4" />
+                <span>Report</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="space-y-3 pt-4 border-t border-slate-100">
+          {/* Windows Desktop Push Notification Alert Request */}
+          {notificationPermission === 'default' && (
+            <button
+              type="button"
+              onClick={async () => {
+                const res = await requestNotificationPermission();
+                setNotificationPermission(res);
+              }}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 rounded-2xl text-xs font-bold shadow-sm transition cursor-pointer"
+              title="Enable Windows desktop popups when technicians arrive"
+            >
+              <Bell className="w-3.5 h-3.5 text-amber-600 animate-bounce" />
+              <span>Enable Windows Alerts</span>
+            </button>
+          )}
+
+          {/* User Profile Card */}
+          <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/70 flex items-center justify-between">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-full bg-[#111317] text-amber-300 font-bold text-xs flex items-center justify-center shrink-0">
+                {currentUser.name.charAt(0)}
+              </div>
+              <div className="min-w-0">
+                <div className="font-bold text-xs text-slate-900 truncate">{currentUser.name}</div>
+                <div className="text-[10px] text-slate-500 capitalize">Client</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Switch to Admin View Button */}
+          <button
+            onClick={onToggleRole}
+            className="w-full py-2.5 px-3.5 rounded-2xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold flex items-center justify-between shadow-sm transition cursor-pointer group"
+          >
+            <span className="flex items-center gap-2">
+              <User className="w-3.5 h-3.5 text-amber-600" />
+              <span>Switch to Admin View</span>
+            </span>
+            <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition" />
+          </button>
+        </div>
+      </aside>
+
+      {/* MOBILE TOP BAR (visible only on <md) */}
+      <header className="md:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-3.5 py-2.5 flex items-center justify-between shadow-xs">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-1.5 -ml-1 rounded-xl text-slate-700 hover:bg-slate-100 cursor-pointer"
+            aria-label="Open Navigation Menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <BrandLogo size="xs" />
+          <span className="font-black text-xs text-slate-900 tracking-tight uppercase">RMVN CCTV</span>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          {/* Copy Report Pill on Mobile */}
+          <button
+            type="button"
+            onClick={onCopyReport}
+            className="p-1.5 rounded-xl text-slate-700 hover:bg-slate-100 cursor-pointer transition flex items-center gap-1"
+            title="Copy 1-minute email update"
+          >
+            {copied ? (
+              <ClipboardCheck className="w-4 h-4 text-emerald-600" />
+            ) : (
+              <Copy className="w-4 h-4 text-slate-600" />
+            )}
+          </button>
+
+          {notificationPermission === 'default' && (
+            <button
+              type="button"
+              onClick={async () => {
+                const res = await requestNotificationPermission();
+                setNotificationPermission(res);
+              }}
+              className="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-full shadow-xs transition cursor-pointer"
+              title="Enable Windows screen alerts"
+            >
+              <Bell className="w-3.5 h-3.5 text-amber-600 animate-bounce" />
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={onToggleRole}
+            className="p-1.5 rounded-full bg-[#111317] text-amber-300 font-bold text-[10px] size-7 flex items-center justify-center cursor-pointer ml-1"
+            title="Switch to Admin View"
+          >
+            {currentUser.name.charAt(0)}
+          </button>
+        </div>
+      </header>
+
+      {/* MOBILE SLIDE-OVER DRAWER */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-50 flex">
+          <div 
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity animate-in fade-in"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <aside className="relative w-72 max-w-[85vw] bg-white h-full shadow-2xl p-5 z-10 animate-in slide-in-from-left duration-200 flex flex-col justify-between overflow-y-auto">
+            <div className="space-y-6">
+              {/* Brand Header & Close Button */}
+              <div className="flex items-center justify-between">
+                <div 
+                  onClick={() => {
+                    setActiveNavTab('Dashboard');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 cursor-pointer group"
+                  title="Return to Dashboard"
+                >
+                  <BrandLogo size="sm" />
+                  <div>
+                    <div className="font-black text-sm text-slate-900 tracking-tight leading-none group-hover:text-amber-600 transition-colors">RMVN CCTV</div>
+                    <div className="text-[10px] text-slate-400 font-mono mt-0.5">Client Portal</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[10px] font-mono font-bold border border-amber-200">v2.5</span>
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+                    aria-label="Close navigation menu"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
-              {/* Project Switcher Pill */}
-              <button
-                type="button"
-                onClick={onOpenProjectSelector}
-                className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 bg-white/80 hover:bg-white backdrop-blur-sm rounded-full border border-slate-300/70 shadow-xs cursor-pointer transition text-left group min-w-0"
-                title="Click to select or switch project"
-              >
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                <div className="flex items-center gap-1 min-w-0">
-                  <span className="font-bold text-xs sm:text-sm text-slate-800 truncate max-w-[120px] sm:max-w-[180px] group-hover:text-amber-600 transition-colors">
-                    {project.name}
-                  </span>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 shrink-0" />
+              {/* Project Switcher Card in Mobile Sidenav */}
+              <div className="space-y-1.5">
+                <div className="text-[10px] uppercase font-bold text-slate-400 px-1 tracking-wider flex items-center justify-between">
+                  <span>Project</span>
+                  <span className="text-[9px] font-mono text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 font-semibold">Active</span>
                 </div>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenProjectSelector?.();
+                  }}
+                  className="w-full text-left p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 hover:border-slate-300 transition group cursor-pointer shadow-sm"
+                  title="Click to select or switch project"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-xs text-slate-900 truncate group-hover:text-amber-600 transition-colors">
+                        {project.name}
+                      </div>
+                      <div className="text-[10px] text-slate-500 truncate flex items-center gap-1 mt-0.5">
+                        <Building2 className="w-3 h-3 text-slate-400 shrink-0" />
+                        <span className="truncate">{project.location}</span>
+                      </div>
+                    </div>
+                    <div className="w-6 h-6 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-slate-700 shrink-0 shadow-sm">
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              {/* Main Nav Links */}
+              <div className="space-y-1">
+                <div className="text-[10px] uppercase font-bold text-slate-400 px-3 pb-1 tracking-wider">Navigation</div>
+                <button
+                  onClick={() => {
+                    setActiveNavTab('Dashboard');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
+                    activeNavTab === 'Dashboard' 
+                      ? 'bg-[#111317] text-white shadow-md' 
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span>Dashboard</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveNavTab('Checklist');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
+                    activeNavTab === 'Checklist' 
+                      ? 'bg-[#111317] text-white shadow-md' 
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <CheckSquare className="w-4 h-4" />
+                    <span>Checklist</span>
+                  </div>
+                  {activeBlockers.length > 0 && (
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-400 text-slate-950">
+                      {activeBlockers.length}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveNavTab('Cameras');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
+                    activeNavTab === 'Cameras' 
+                      ? 'bg-[#111317] text-white shadow-md' 
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Camera className="w-4 h-4" />
+                    <span>Cameras</span>
+                  </div>
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                    activeNavTab === 'Cameras' ? 'bg-slate-800 text-amber-300' : 'bg-slate-100 text-slate-700'
+                  }`}>
+                    {totalCameraCount}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled
+                  title="Timeline schedule is locked for client view"
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-medium text-slate-400 bg-slate-50/50 cursor-not-allowed opacity-60"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Lock className="w-4 h-4 text-slate-400" />
+                    <span>Timeline</span>
+                  </div>
+                  <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-600">
+                    Locked
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveNavTab('Report');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer ${
+                    activeNavTab === 'Report' 
+                      ? 'bg-[#111317] text-white shadow-md' 
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <FileText className="w-4 h-4" />
+                    <span>Report</span>
+                  </div>
+                </button>
+              </div>
             </div>
 
-            {/* Mobile Utility Controls (<sm) */}
-            <div className="flex items-center gap-1.5 sm:hidden">
+            {/* Bottom of Mobile Drawer */}
+            <div className="space-y-3 pt-4 border-t border-slate-100">
               {notificationPermission === 'default' && (
                 <button
                   type="button"
@@ -232,138 +594,67 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     const res = await requestNotificationPermission();
                     setNotificationPermission(res);
                   }}
-                  className="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-full shadow-xs transition cursor-pointer"
-                  title="Enable Windows screen alerts"
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 rounded-2xl text-xs font-bold shadow-sm transition cursor-pointer"
+                  title="Enable Windows desktop popups when technicians arrive"
                 >
                   <Bell className="w-3.5 h-3.5 text-amber-600 animate-bounce" />
+                  <span>Enable Windows Alerts</span>
                 </button>
               )}
 
-              <button
-                onClick={onToggleRole}
-                className="flex items-center gap-1 px-2.5 py-1 bg-white/80 hover:bg-white rounded-full border border-slate-300/70 text-[11px] font-medium text-slate-700 shadow-xs"
-                title="Switch View"
-              >
-                {isInstaller ? (
-                  <>
-                    <Wrench className="w-3 h-3 text-purple-600" />
-                    <span>Admin</span>
-                  </>
-                ) : (
-                  <>
-                    <User className="w-3 h-3 text-amber-600" />
-                    <span>Client</span>
-                  </>
-                )}
-              </button>
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/70 flex items-center justify-between">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-[#111317] text-amber-300 font-bold text-xs flex items-center justify-center shrink-0">
+                    {currentUser.name.charAt(0)}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-bold text-xs text-slate-900 truncate">{currentUser.name}</div>
+                    <div className="text-[10px] text-slate-500 capitalize">Client</div>
+                  </div>
+                </div>
+              </div>
 
               <button
                 onClick={() => {
-                  setShowProfileMenu(!showProfileMenu);
+                  onToggleRole();
+                  setMobileMenuOpen(false);
                 }}
-                className="w-8 h-8 rounded-full bg-[#1a1c22] hover:bg-slate-800 text-amber-300 flex items-center justify-center font-bold text-xs shadow-xs border border-white overflow-hidden"
+                className="w-full py-2.5 px-3.5 rounded-2xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 text-xs font-bold flex items-center justify-between shadow-sm transition cursor-pointer"
               >
-                {currentUser.name.charAt(0)}
+                <span className="flex items-center gap-2">
+                  <User className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Switch to Admin View</span>
+                </span>
+                <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
               </button>
             </div>
+          </aside>
+        </div>
+      )}
+
+      {/* MAIN CONTENT AREA */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto p-3.5 sm:p-6 lg:p-8 space-y-6 relative">
+        {/* Subtle Ambient Warm Yellow / Cream Corner Glows */}
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-amber-100/40 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Desktop Top Utility Bar */}
+        <div className="hidden sm:flex items-center justify-between gap-4 relative z-20 pb-1 border-b border-slate-200/60">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-bold text-slate-800">
+              {project.name}
+            </span>
+            <span className="text-slate-400 text-xs">•</span>
+            <span className="text-xs text-slate-500 font-mono">
+              {percentComplete}% Milestone Deployment Completion
+            </span>
           </div>
 
-          {/* Pill Navigation Links (Scrollable on mobile) */}
-          <nav className="flex items-center gap-1 bg-white/70 backdrop-blur-sm p-1 sm:p-1.5 rounded-full border border-slate-200/80 shadow-xs text-xs font-medium overflow-x-auto max-w-full no-scrollbar">
-            {(['Dashboard', 'Checklist', 'Cameras', 'Timeline', 'Report'] as const).map((tab) => {
-              const isActive = activeNavTab === tab;
-              const isTimeline = tab === 'Timeline';
-
-              if (isTimeline) {
-                return (
-                  <button
-                    key={tab}
-                    type="button"
-                    disabled
-                    title="Timeline schedule is locked for client view"
-                    className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full whitespace-nowrap text-slate-400 bg-slate-100/70 border border-slate-200/60 flex items-center gap-1.5 cursor-not-allowed opacity-60 text-xs font-medium"
-                  >
-                    <Lock className="w-3 h-3 text-slate-400" />
-                    <span>Timeline</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-600">
-                      Locked
-                    </span>
-                  </button>
-                );
-              }
-
-              return (
-                <button
-                  key={tab}
-                  onClick={() => {
-                    setActiveNavTab(tab);
-                    setShowProfileMenu(false);
-                  }}
-                  className={`px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full transition cursor-pointer whitespace-nowrap text-xs ${
-                    isActive 
-                      ? 'bg-[#1a1c22] text-white font-semibold shadow-sm' 
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-                  }`}
-                >
-                  {tab}
-                  {tab === 'Checklist' && activeBlockers.length > 0 && (
-                    <span className="ml-1.5 px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-400 text-slate-950">
-                      {activeBlockers.length}
-                    </span>
-                  )}
-                  {tab === 'Cameras' && (
-                    <span className="ml-1.5 px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700">
-                      {project.totalCameras}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Right Utility Controls (Desktop sm: and above) */}
-          <div className="hidden sm:flex items-center gap-2 relative">
-            {/* Windows Desktop Push Notification Request / Status */}
-            {notificationPermission === 'default' && (
-              <button
-                type="button"
-                onClick={async () => {
-                  const res = await requestNotificationPermission();
-                  setNotificationPermission(res);
-                }}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-full text-xs font-semibold shadow-xs transition cursor-pointer"
-                title="Enable Windows desktop popups when technicians arrive"
-              >
-                <Bell className="w-3.5 h-3.5 text-amber-600 animate-bounce" />
-                <span className="hidden md:inline">Enable Windows Alerts</span>
-                <span className="md:hidden">Alerts</span>
-              </button>
-            )}
-
-            {/* Role Switcher Pill */}
-            <button
-              onClick={onToggleRole}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-white/80 hover:bg-white rounded-full border border-slate-300/70 text-xs font-medium text-slate-700 shadow-xs transition cursor-pointer"
-              title="Toggle between Client View and Installer Admin View"
-            >
-              {isInstaller ? (
-                <>
-                  <Wrench className="w-3.5 h-3.5 text-purple-600" />
-                  <span>Admin</span>
-                </>
-              ) : (
-                <>
-                  <User className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Client</span>
-                </>
-              )}
-            </button>
-
-
-            {/* Copy Report Pill */}
+          <div className="flex items-center gap-2">
             <button
               onClick={onCopyReport}
-              className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1a1c22] hover:bg-slate-800 text-white rounded-full text-xs font-semibold shadow-xs transition cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1a1c22] hover:bg-slate-800 text-white rounded-full text-xs font-semibold shadow-xs transition cursor-pointer"
               title="Copy 1-minute email update"
             >
               {copied ? (
@@ -378,58 +669,8 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                 </>
               )}
             </button>
-
-            {/* Functional User Profile Avatar Button */}
-            <button
-              onClick={() => {
-                setShowProfileMenu(!showProfileMenu);
-              }}
-              className="w-9 h-9 rounded-full bg-[#1a1c22] hover:bg-slate-800 text-amber-300 flex items-center justify-center font-bold text-xs shadow-xs border border-white cursor-pointer transition overflow-hidden"
-              title="Profile & Project Settings"
-            >
-              {currentUser.name.charAt(0)}
-            </button>
-
-            {/* PROFILE & SETTINGS DROPDOWN POPOVER */}
-            {showProfileMenu && (
-              <div className="absolute right-0 top-12 w-64 bg-white rounded-2xl p-4 shadow-2xl border border-slate-200 z-50 animate-in fade-in space-y-3">
-                <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
-                  <div className="w-10 h-10 rounded-full bg-[#1a1c22] text-amber-300 font-bold flex items-center justify-center text-sm overflow-hidden">
-                    {currentUser.name.charAt(0)}
-                  </div>
-                  <div>
-                    <div className="font-bold text-xs text-slate-900">{currentUser.name}</div>
-                    <div className="text-[10px] text-slate-500">{currentUser.title}</div>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 text-xs">
-
-                  <div className="p-2 rounded-xl bg-slate-50 flex items-center justify-between">
-                    <span className="text-slate-600 font-medium">Workspace Role:</span>
-                    <span className="font-bold text-slate-900 capitalize">{currentUser.role}</span>
-                  </div>
-                  <div className="p-2 rounded-xl bg-slate-50 flex items-center justify-between">
-                    <span className="text-slate-600 font-medium">Current Project:</span>
-                    <span className="font-bold text-slate-900 truncate max-w-[120px]">{project.name}</span>
-                  </div>
-
-                </div>
-
-                <button
-                  onClick={() => {
-                    onToggleRole();
-                    setShowProfileMenu(false);
-                  }}
-                  className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5"
-                >
-                  <Wrench className="w-3.5 h-3.5 text-purple-600" />
-                  <span>Switch to {isInstaller ? 'Client View' : 'Admin View'}</span>
-                </button>
-              </div>
-            )}
           </div>
-        </header>
+        </div>
 
         {/* 2. TAB CONTENT ROUTER */}
 
@@ -1646,30 +1887,29 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
             </div>
           </div>
         )}
+      </main>
 
-        {/* Task Photo Evidence Requirement Modal */}
-        {evidenceTask && onCompleteTaskWithEvidence && isInstaller && (
-          <TaskPhotoEvidenceModal
-            task={evidenceTask}
-            isOpen={!!evidenceTask}
-            onClose={() => setEvidenceTask(null)}
-            currentUserRole={currentUser.role}
-            onConfirm={(taskId, photoEvidence, photoCaption) => {
-              onCompleteTaskWithEvidence(taskId, photoEvidence, photoCaption);
-              setEvidenceTask(null);
-            }}
-          />
-        )}
+      {/* Task Photo Evidence Requirement Modal */}
+      {evidenceTask && onCompleteTaskWithEvidence && isInstaller && (
+        <TaskPhotoEvidenceModal
+          task={evidenceTask}
+          isOpen={!!evidenceTask}
+          onClose={() => setEvidenceTask(null)}
+          currentUserRole={currentUser.role}
+          onConfirm={(taskId, photoEvidence, photoCaption) => {
+            onCompleteTaskWithEvidence(taskId, photoEvidence, photoCaption);
+            setEvidenceTask(null);
+          }}
+        />
+      )}
 
-        {/* Full-Screen Photo Lightbox Modal */}
-        {lightboxPhoto && (
-          <PhotoLightboxModal
-            photo={lightboxPhoto}
-            onClose={() => setLightboxPhoto(null)}
-          />
-        )}
-
-      </div>
+      {/* Full-Screen Photo Lightbox Modal */}
+      {lightboxPhoto && (
+        <PhotoLightboxModal
+          photo={lightboxPhoto}
+          onClose={() => setLightboxPhoto(null)}
+        />
+      )}
     </div>
   );
 };
