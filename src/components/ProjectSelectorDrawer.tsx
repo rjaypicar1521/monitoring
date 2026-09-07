@@ -209,7 +209,7 @@ export const ProjectSelectorDrawer: React.FC<ProjectSelectorDrawerProps> = ({
         </div>
 
         {/* 3. Scrollable List Body */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-slate-200">
+        <div className="flex-1 overflow-y-auto p-4 space-y-6 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-scrollbar-track [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-scrollbar-thumb hover:[&::-webkit-scrollbar-thumb]:bg-scrollbar-thumb-hover [&::-webkit-scrollbar-thumb:hover]:bg-scrollbar-thumb-hover">
           
           {/* SECTION A — Currently active project */}
           <div className="space-y-2.5">
