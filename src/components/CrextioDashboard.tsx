@@ -29,7 +29,8 @@ import {
   Building2,
   ArrowRight,
   Menu,
-  Activity
+  Activity,
+  Sparkles
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal, LightboxPhoto } from './TaskPhotoEvidenceModal';
@@ -142,11 +143,13 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
         (Boolean(event.technicianName?.includes('Rjay')) && baseLeadTech.name.includes('Rjay'));
 
       if (isLead) {
+        const isReset = event.remarks === 'Shift reset by Admin';
         setAttendanceOverride({
-          isTimedIn: event.type === 'TIME_IN',
+          isTimedIn: isReset ? false : event.type === 'TIME_IN',
           status: (event.status as TechnicianStatus) || (event.type === 'TIME_IN' ? 'On Site' : 'Off Duty'),
-          timeIn: event.type === 'TIME_IN' ? event.time : baseLeadTech.timeIn,
-          timeOut: event.type === 'TIME_OUT' ? event.time : undefined
+          timeIn: isReset ? undefined : (event.type === 'TIME_IN' ? event.time : baseLeadTech.timeIn),
+          timeOut: isReset ? undefined : (event.type === 'TIME_OUT' ? event.time : undefined),
+          currentRemarks: isReset ? undefined : event.remarks
         });
       }
 
@@ -983,6 +986,13 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                       </p>
                     </div>
                   </div>
+
+                  {isTechTimedIn && leadTech.currentRemarks && (
+                    <div className="text-[11px] text-amber-200/90 font-mono bg-amber-500/10 px-2.5 py-1.5 rounded-xl border border-amber-500/20 flex items-center gap-1.5">
+                      <Sparkles className="w-3 h-3 text-amber-400 shrink-0" />
+                      <span className="truncate">Activity: <strong className="text-amber-300 font-semibold">{leadTech.currentRemarks}</strong></span>
+                    </div>
+                  )}
 
                   <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between gap-2">
                     <span className="truncate">Zone: <strong className="text-slate-200">{leadTech.zone || 'Ground Floor & Perimeter'}</strong></span>

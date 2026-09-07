@@ -78,6 +78,7 @@ export interface TechnicianMember {
   timeIn?: string;
   timeOut?: string;
   attendanceDate?: string;
+  currentRemarks?: string;
 }
 
 export interface AttendanceEvent {
@@ -91,6 +92,7 @@ export interface AttendanceEvent {
   time: string;
   timestamp: number;
   status: TechnicianStatus;
+  remarks?: string;
 }
 
 export interface ProjectNote {

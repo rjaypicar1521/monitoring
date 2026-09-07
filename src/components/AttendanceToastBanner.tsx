@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Clock, X, Bell, ShieldCheck, MapPin } from 'lucide-react';
+import { Clock, X, Bell, ShieldCheck, MapPin, Sparkles } from 'lucide-react';
 import { AttendanceEvent } from '../types';
 import { requestNotificationPermission, getNotificationPermission, showDesktopPushNotification } from '../utils/attendanceService';
 
@@ -148,6 +148,15 @@ export const AttendanceToastBanner: React.FC<AttendanceToastBannerProps> = ({
               Project: <strong className="text-white">{event.projectName}</strong>
             </span>
           </div>
+
+          {event.remarks && event.remarks.trim() && (
+            <div className="mt-2 text-xs text-amber-300/90 bg-amber-500/10 rounded-xl px-3 py-1.5 border border-amber-500/20 flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="truncate font-mono">
+                Activity: <strong className="text-amber-200">{event.remarks.trim()}</strong>
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

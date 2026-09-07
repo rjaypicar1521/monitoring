@@ -48,9 +48,10 @@ export function postAttendanceChatMessage(event: AttendanceEvent): ChatMessageDa
   const displayName = `${titlePrefix} ${techName}`.trim();
 
   const isTimeIn = event.type === 'TIME_IN';
+  const remarksText = event.remarks && event.remarks.trim() ? ` [Remarks: "${event.remarks.trim()}"]` : '';
   const messageText = isTimeIn
-    ? `🕒 [System Notice]: ${displayName} has timed in (On Site) at ${timeFormatted}.`
-    : `🕒 [System Notice]: ${displayName} has timed out (Off Duty) at ${timeFormatted}.`;
+    ? `🕒 [System Notice]: ${displayName} has timed in (On Site) at ${timeFormatted}${remarksText}.`
+    : `🕒 [System Notice]: ${displayName} has timed out (Off Duty) at ${timeFormatted}${remarksText}.`;
 
   const newMsg: ChatMessageData = {
     id: messageId,
@@ -271,9 +272,10 @@ export function showDesktopPushNotification(event: AttendanceEvent): Notificatio
       ? `Technician On Site: ${event.technicianName}`
       : `Technician Timed Out: ${event.technicianName}`;
 
+    const remarksNote = event.remarks && event.remarks.trim() ? ` Note: "${event.remarks.trim()}".` : '';
     const body = isTimeIn
-      ? `${event.technicianName} timed in at ${event.time} for ${event.projectName}. Status updated to On Site.`
-      : `${event.technicianName} clocked out at ${event.time}. Status updated to Off Duty.`;
+      ? `${event.technicianName} timed in at ${event.time} for ${event.projectName}.${remarksNote} Status: On Site.`
+      : `${event.technicianName} clocked out at ${event.time}.${remarksNote} Status: Off Duty.`;
 
     const iconUrl = typeof window !== 'undefined' && window.location?.origin
       ? new URL('/rmvn-logo.png', window.location.origin).href

@@ -85,6 +85,7 @@ export const App: React.FC = () => {
             t.name === event.technicianName ||
             (Boolean(event.technicianName?.includes('Rjay')) && t.name.includes('Rjay'));
 
+          const isReset = event.remarks === 'Shift reset by Admin';
           const exists = currentTechs.some(matchesTech);
           if (!exists) {
             const newTech: TechnicianMember = {
@@ -94,9 +95,10 @@ export const App: React.FC = () => {
               status: (event.status as TechnicianStatus) || (event.type === 'TIME_IN' ? 'On Site' : 'Off Duty'),
               assigned: 'CCTV Architecture & Live Monitoring',
               email: 'rjay@rmvn.com',
-              isTimedIn: event.type === 'TIME_IN',
-              timeIn: event.type === 'TIME_IN' ? event.time : undefined,
-              timeOut: event.type === 'TIME_OUT' ? event.time : undefined
+              isTimedIn: isReset ? false : event.type === 'TIME_IN',
+              timeIn: isReset ? undefined : (event.type === 'TIME_IN' ? event.time : undefined),
+              timeOut: isReset ? undefined : (event.type === 'TIME_OUT' ? event.time : undefined),
+              currentRemarks: isReset ? undefined : event.remarks
             };
             return {
               ...p,
@@ -109,10 +111,11 @@ export const App: React.FC = () => {
               if (matchesTech(t)) {
                 return {
                   ...t,
-                  isTimedIn: event.type === 'TIME_IN',
+                  isTimedIn: isReset ? false : event.type === 'TIME_IN',
                   status: (event.status as TechnicianStatus) || (event.type === 'TIME_IN' ? 'On Site' : 'Off Duty'),
-                  timeIn: event.type === 'TIME_IN' ? event.time : t.timeIn,
-                  timeOut: event.type === 'TIME_OUT' ? event.time : undefined
+                  timeIn: isReset ? undefined : (event.type === 'TIME_IN' ? event.time : t.timeIn),
+                  timeOut: isReset ? undefined : (event.type === 'TIME_OUT' ? event.time : undefined),
+                  currentRemarks: isReset ? undefined : (event.remarks !== undefined ? event.remarks : t.currentRemarks)
                 };
               }
               return t;
