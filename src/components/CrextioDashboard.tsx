@@ -28,7 +28,8 @@ import {
   CheckSquare,
   Building2,
   ArrowRight,
-  Menu
+  Menu,
+  Activity
 } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { TaskPhotoEvidenceModal, PhotoLightboxModal, LightboxPhoto } from './TaskPhotoEvidenceModal';
@@ -394,6 +395,13 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
     if (checklistFilter === 'All') return true;
     return t.status === checklistFilter;
   });
+
+  // Real-time recent field activities & photographic updates
+  const recentFieldActivities = [
+    ...project.tasks.filter(t => Boolean(t.photoEvidence)),
+    ...project.tasks.filter(t => !t.photoEvidence && t.status === 'Done'),
+    ...project.tasks.filter(t => t.status === 'In progress')
+  ].slice(0, 3);
 
   const todayDateFormatted = new Date().toLocaleDateString('en-US', {
     weekday: 'short',
@@ -1327,63 +1335,148 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
                 </div>
 
-                {/* Calendar & Weekly Sync Schedule */}
+                {/* Recent Field Activity & Photo Updates */}
                 <div 
                   className="bg-white/90 backdrop-blur-sm rounded-[28px] p-5 border border-slate-200/80 shadow-xs space-y-3"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-400 font-semibold">August</span>
-                    <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-amber-600" />
-                      <span>September 2026</span>
+                  <div className="flex items-center justify-between pb-1 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center border border-amber-500/20">
+                        <Activity className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900 leading-tight">Field Activity & Evidence</h4>
+                        <p className="text-[10px] text-slate-400 font-medium">Real-time installation logs</p>
+                      </div>
                     </div>
-                    <span className="text-xs text-slate-400 font-semibold">October</span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-mono">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      {project.tasks.filter(t => t.photoEvidence).length} Verified
+                    </span>
                   </div>
 
-                  <div className="grid grid-cols-6 gap-2 text-center text-[11px] font-semibold text-slate-500 border-b border-slate-100 pb-2">
-                    <div>Mon<br/><span className="text-slate-900 font-bold">22</span></div>
-                    <div>Tue<br/><span className="text-slate-900 font-bold">23</span></div>
-                    <div className="text-amber-600 font-bold">Wed<br/><span>24</span></div>
-                    <div>Thu<br/><span className="text-slate-900 font-bold">25</span></div>
-                    <div>Fri<br/><span className="text-slate-900 font-bold">26</span></div>
-                    <div>Sat<br/><span className="text-slate-900 font-bold">27</span></div>
+                  <div className="space-y-2 text-xs pt-0.5">
+                    {recentFieldActivities.length === 0 ? (
+                      <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center">
+                        <p className="text-xs text-slate-500 font-medium">No field activity logged yet</p>
+                      </div>
+                    ) : (
+                      recentFieldActivities.map((task) => {
+                        const hasEvidence = Boolean(task.photoEvidence);
+                        return (
+                          <div
+                            key={task.id}
+                            onClick={() => {
+                              if (hasEvidence) {
+                                setLightboxPhoto({
+                                  url: task.photoEvidence!,
+                                  title: task.title,
+                                  caption: task.photoCaption,
+                                  area: task.area
+                                });
+                              } else {
+                                setActiveNavTab('Checklist');
+                              }
+                            }}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                if (hasEvidence) {
+                                  setLightboxPhoto({
+                                    url: task.photoEvidence!,
+                                    title: task.title,
+                                    caption: task.photoCaption,
+                                    area: task.area
+                                  });
+                                } else {
+                                  setActiveNavTab('Checklist');
+                                }
+                              }
+                            }}
+                            className={`p-2.5 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+                              hasEvidence
+                                ? 'bg-slate-50/80 hover:bg-amber-50/50 border-slate-200/80 hover:border-amber-300/80 cursor-pointer group shadow-2xs'
+                                : 'bg-slate-50/50 border-slate-200/60 hover:border-slate-300 cursor-pointer'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                              {hasEvidence ? (
+                                <div className="relative w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-slate-200/90 shadow-2xs group-hover:scale-105 transition-transform bg-slate-100">
+                                  <img
+                                    src={task.photoEvidence}
+                                    alt={task.title}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                  />
+                                  <div className="absolute inset-0 bg-black/25 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Camera className="w-3.5 h-3.5 text-white drop-shadow" />
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className={`w-10 h-10 rounded-xl shrink-0 flex items-center justify-center border ${
+                                  task.status === 'Done'
+                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                                    : 'bg-amber-50 text-amber-600 border-amber-200'
+                                }`}>
+                                  {task.status === 'Done' ? (
+                                    <CheckCircle2 className="w-4 h-4" />
+                                  ) : (
+                                    <Clock className="w-4 h-4" />
+                                  )}
+                                </div>
+                              )}
+
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs font-bold text-slate-800 truncate group-hover:text-amber-900 transition-colors">
+                                  {task.area ? task.area : task.title}
+                                </p>
+                                <p className="text-[11px] text-slate-500 truncate">
+                                  {task.title}
+                                </p>
+                                <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-slate-400 font-mono">
+                                  <span>{task.completedDate || task.targetDate || 'Recent'}</span>
+                                  <span>•</span>
+                                  <span className="text-slate-500">{task.owner || leadTech.name}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="shrink-0 flex flex-col items-end gap-1">
+                              {hasEvidence ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100/80 text-amber-900 border border-amber-200/80 group-hover:bg-amber-200 transition-colors">
+                                  <Camera className="w-3 h-3 text-amber-700" />
+                                  <span>Photo</span>
+                                </span>
+                              ) : (
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold border ${
+                                  task.status === 'Done'
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                    : 'bg-slate-100 text-slate-600 border-slate-200'
+                                }`}>
+                                  {task.status}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
 
-                  <div className="space-y-2 text-xs pt-1">
-                    <div className="bg-[#1e2025] text-white p-3 rounded-2xl flex items-center justify-between shadow-xs">
-                      <div className="space-y-0.5">
-                        <div className="font-bold text-xs flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-amber-400" />
-                          Weekly Client Sync • 9:00 am
-                        </div>
-                        <div className="text-[11px] text-slate-300">
-                          Walkthrough completed hallway cameras & test angles
-                        </div>
-                      </div>
-                      <div className="flex -space-x-1.5 shrink-0 ml-2">
-                        <div className="w-6 h-6 rounded-full bg-amber-400 text-slate-900 font-bold text-[10px] flex items-center justify-center border-2 border-[#1e2025]">
-                          M
-                        </div>
-                        <div className="w-6 h-6 rounded-full bg-sky-400 text-slate-900 font-bold text-[10px] flex items-center justify-center border-2 border-[#1e2025]">
-                          A
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-slate-50 border border-slate-200/80 p-3 rounded-2xl flex items-center justify-between text-slate-800">
-                      <div className="space-y-0.5">
-                        <div className="font-bold text-xs flex items-center gap-1.5 text-slate-900">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                          Outside Power Hookup • 10:30 am
-                        </div>
-                        <div className="text-[11px] text-slate-500">
-                          Electrician connecting exterior breaker box
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-mono font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">
-                        Sep 10
-                      </span>
-                    </div>
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => setActiveNavTab('Checklist')}
+                      className="text-xs font-bold text-slate-600 hover:text-amber-600 flex items-center gap-1.5 transition-colors group/btn py-0.5"
+                    >
+                      <span>View All Verified Evidence</span>
+                      <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
+                    </button>
+                    <span className="text-[10px] font-mono text-slate-400 font-semibold">
+                      {doneTasks.length}/{project.tasks.length} Done
+                    </span>
                   </div>
                 </div>
 
