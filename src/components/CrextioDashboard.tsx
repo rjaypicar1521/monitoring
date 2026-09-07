@@ -349,7 +349,40 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
   // Synchronized camera fleet from project data
   const cameraSpots = project.cameras || [];
-  const totalCameraCount = cameraSpots.length > 0 ? cameraSpots.length : project.totalCameras;
+  const totalCameraCount = Math.max(project.totalCameras || 0, cameraSpots.length);
+
+  // Cameras Online metrics & signal health
+  const onlineCount = cameraSpots.length > 0 
+    ? cameraSpots.filter(c => c.status === 'Mounted').length 
+    : project.installedCameras;
+  const onlinePercent = totalCameraCount > 0 
+    ? Math.min(Math.round((onlineCount / totalCameraCount) * 100), 100) 
+    : 0;
+  // Signal health / operational pacing: 0% if no online cameras, dynamically scaled if blockers exist, 100% when active
+  const signalHealthPercent = onlineCount === 0
+    ? 0
+    : activeBlockers.length > 0
+      ? Math.max(100 - activeBlockers.length * 15, 60)
+      : 100;
+
+  // Network & Hardware milestone status
+  const isNetworkActive = project.tasks.some(t => 
+    (t.category === 'Network & Cabling' || t.title.toLowerCase().includes('network') || t.title.toLowerCase().includes('nvr') || t.title.toLowerCase().includes('cabling')) && 
+    (t.status === 'Done' || t.status === 'In progress')
+  ) || doneTasks.length >= 2;
+
+  // Dynamic installation pacing status
+  const pacingStatus = activeBlockers.length > 0 
+    ? (activeBlockers.length === 1 ? '1 Action Required' : `${activeBlockers.length} Actions Required`)
+    : percentComplete >= 75 || taskPercent >= 60 
+      ? 'Pacing Ahead' 
+      : 'On Track';
+
+  const pacingBadgeStyle = activeBlockers.length > 0
+    ? 'bg-amber-500/20 text-amber-300 border-amber-400/40'
+    : percentComplete >= 75 || taskPercent >= 60 
+      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+      : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
 
   const filteredCameras = cameraSpots.filter(c => 
     c.name.toLowerCase().includes(cameraSearch.toLowerCase()) ||
@@ -901,11 +934,24 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                   </div>
 
                   {/* Live Cameras Stat Display */}
-                  <div className="stats shadow cursor-pointer" onClick={() => setActiveNavTab('Cameras')}>
+                  <div 
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setActiveNavTab('Cameras')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setActiveNavTab('Cameras');
+                      }
+                    }}
+                    aria-label={`Live Cameras: ${onlineCount} online of ${totalCameraCount} total endpoints (${onlinePercent}%). Click to inspect camera fleet.`}
+                    className="stats shadow cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition-transform active:scale-98"
+                    title="Click to inspect Camera fleet and live feeds"
+                  >
                     <div className="stat">
                       <div className="stat-title">Live Cameras</div>
-                      <div className="stat-value">{project.installedCameras}</div>
-                      <div className="stat-desc">{percentComplete}% online ({project.totalCameras} total cameras)</div>
+                      <div className="stat-value">{onlineCount}</div>
+                      <div className="stat-desc">{onlinePercent}% online ({totalCameraCount} total cameras)</div>
                     </div>
                   </div>
                 </div>
@@ -938,7 +984,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-labelledby="InstallationProgressLabel"
-                    aria-valuetext={`${percentComplete}% Mounted`}
+                    aria-valuetext={`${percentComplete}% Mounted, Status: ${pacingStatus}`}
                     className="space-y-2.5"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
@@ -946,54 +992,77 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                         <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
                         <span id="InstallationProgressLabel" className="font-bold text-white text-sm">Installation Progress</span>
                         <span className="text-[11px] font-medium text-slate-300">
-                          ({project.installedCameras} of {project.totalCameras} Endpoints Mounted)
+                          ({project.installedCameras} of {totalCameraCount} Endpoints Mounted)
                         </span>
                       </div>
-                      <div className="flex items-center gap-2.5 font-mono text-xs">
+                      <div className="flex items-center gap-2 font-mono text-xs">
+                        <span className={`font-bold px-2.5 py-0.5 rounded-full border text-[11px] flex items-center gap-1.5 shadow-2xs ${pacingBadgeStyle}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${activeBlockers.length > 0 ? 'bg-amber-400 animate-ping' : 'bg-emerald-400'}`} />
+                          {pacingStatus}
+                        </span>
                         <span className="font-bold bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
                           {percentComplete}% Mounted
                         </span>
-                        <span className="text-slate-300 text-[11px]">
+                        <span className="text-slate-300 text-[11px] hidden sm:inline">
                           Handover: <strong className="text-white">{project.targetLaunchDate || '2026-09-12'}</strong>
                         </span>
                       </div>
                     </div>
 
-                    {/* Main Visual Progress Track & Bar */}
+                    {/* Main Visual Progress Track & Bar (Neo-brutalist with animated gradient pulse & shimmer) */}
                     <div className="w-full border-2 border-white/90 bg-slate-950 p-1 shadow-[3px_3px_0_0_#f59e0b] rounded-sm overflow-hidden">
                       <div 
                         className="h-3.5 bg-gradient-to-r from-amber-400 via-emerald-400 to-emerald-500 rounded-2xs transition-all duration-700 relative overflow-hidden"
-                        style={{ width: `${Math.min(Math.max(percentComplete, 4), 100)}%` }}
+                        style={{ width: `${percentComplete > 0 ? Math.min(Math.max(percentComplete, 3), 100) : 0}%` }}
                       >
-                        <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                        <div className="absolute inset-0 bg-white/25 animate-pulse" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent -translate-x-full animate-shimmer animate-[shimmer_2s_infinite]" />
                       </div>
                     </div>
                   </div>
 
-                  {/* Progress Stages Footnotes */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-0.5 text-[11px]">
-                    <div className="flex items-center gap-1.5 text-slate-300">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  {/* Progress Stages - Interactive Milestone Chips */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px]">
+                    <button
+                      type="button"
+                      onClick={() => setActiveNavTab('Checklist')}
+                      className="flex items-center gap-1.5 text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 px-2.5 py-1.5 rounded-xl border border-white/10 transition cursor-pointer text-left group focus:outline-none focus:ring-1 focus:ring-amber-400"
+                      title="Wiring Milestone: 100% complete. Click to view checklist"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 group-hover:scale-110 transition-transform" />
                       <span>Wiring: <strong className="text-white">100%</strong></span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-slate-300">
-                      <Camera className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                      <span>Mounted: <strong className="text-white">{project.installedCameras}/{project.totalCameras}</strong></span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-slate-300 truncate">
-                      <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${activeBlockers.length > 0 ? 'text-amber-400' : 'text-emerald-400'}`} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveNavTab('Cameras')}
+                      className="flex items-center gap-1.5 text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 px-2.5 py-1.5 rounded-xl border border-white/10 transition cursor-pointer text-left group focus:outline-none focus:ring-1 focus:ring-cyan-400"
+                      title="Mounting Progress: Click to inspect camera fleet"
+                    >
+                      <Camera className="w-3.5 h-3.5 text-cyan-400 shrink-0 group-hover:scale-110 transition-transform" />
+                      <span>Mounting: <strong className="text-white">{percentComplete}%</strong></span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveNavTab('Checklist')}
+                      className="flex items-center gap-1.5 text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 px-2.5 py-1.5 rounded-xl border border-white/10 transition cursor-pointer text-left truncate group focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                      title={`Network & Hardware: ${isNetworkActive ? 'Active' : 'Pending'}. Click to view details in checklist`}
+                    >
+                      <ShieldCheck className={`w-3.5 h-3.5 shrink-0 group-hover:scale-110 transition-transform ${isNetworkActive ? 'text-emerald-400' : 'text-amber-400'}`} />
                       <span className="truncate">
-                        {activeBlockers.length > 0 ? (
-                          <span className="text-amber-300 font-semibold">{activeBlockers.length} Pending Blocker</span>
-                        ) : (
-                          <span className="text-emerald-300 font-semibold">Hardware Nominal</span>
-                        )}
+                        Network: <strong className={isNetworkActive ? 'text-white' : 'text-amber-300'}>
+                          {isNetworkActive ? 'Active' : 'Pending'}
+                        </strong>
                       </span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-slate-300 sm:justify-end">
-                      <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span>{taskPercent}% Tasks Done</span>
-                    </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveNavTab('Checklist')}
+                      className="flex items-center gap-1.5 text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 px-2.5 py-1.5 rounded-xl border border-white/10 transition cursor-pointer text-left sm:justify-end group focus:outline-none focus:ring-1 focus:ring-amber-400"
+                      title="Target Handover Date: Click to view tasks"
+                    >
+                      <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0 group-hover:scale-110 transition-transform" />
+                      <span>Handover: <strong className="text-white">Scheduled</strong></span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1200,69 +1269,108 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     </div>
                   </div>
 
-                  {/* Circular Launch Countdown Clock */}
+                  {/* Cameras Online Live Radial Gauge Card */}
                   <div 
-                    className="bg-white/90 backdrop-blur-sm rounded-[26px] p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setActiveNavTab('Cameras')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setActiveNavTab('Cameras');
+                      }
+                    }}
+                    aria-label={`Cameras Online: ${onlineCount} of ${totalCameraCount} cameras online (${onlinePercent}%). Click to inspect camera fleet.`}
+                    className="bg-white/90 backdrop-blur-sm rounded-[26px] p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between cursor-pointer group hover:border-emerald-300/80 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+                    title="Click to inspect Camera fleet and live feeds"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-900">Launch Clock</span>
-                      <div className="flex items-center gap-1 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/80" title="Schedule locked by engineering">
-                        <Lock className="w-2.5 h-2.5 text-slate-400" />
-                        <span>Locked</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/80 flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform">
+                          <Camera className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="text-xs font-bold text-slate-900">Cameras Online</span>
+                      </div>
+                      <div className={`flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full border shadow-2xs ${
+                        onlineCount > 0 
+                          ? 'text-emerald-700 bg-emerald-50 border-emerald-200/80' 
+                          : 'text-slate-600 bg-slate-100 border-slate-200/80'
+                      }`}>
+                        <span className={`w-2 h-2 rounded-full ${onlineCount > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+                        <span>{onlineCount > 0 ? 'Live Fleet' : 'Fleet Standby'}</span>
                       </div>
                     </div>
 
                     <div className="my-2 flex flex-col items-center justify-center relative">
                       <div className="w-24 h-24 rounded-full flex items-center justify-center relative">
                         <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                          {/* Outer Ring: Camera Progress */}
+                          {/* Outer Ring: Cameras Online / Mounted */}
                           <circle cx="50" cy="50" r="42" fill="none" stroke="#f1f5f9" strokeWidth="6" />
                           <circle 
                             cx="50" 
                             cy="50" 
                             r="42" 
                             fill="none" 
-                            stroke="#fcd34d" 
+                            stroke={onlinePercent > 0 ? "#10b981" : "transparent"} 
                             strokeWidth="6" 
                             strokeDasharray="264" 
-                            strokeDashoffset={264 - (264 * percentComplete) / 100}
+                            strokeDashoffset={264 - (264 * Math.min(Math.max(onlinePercent, 0), 100)) / 100}
                             strokeLinecap="round" 
+                            className="transition-all duration-700 ease-out"
                           />
-                          {/* Inner Ring: Tasks Progress */}
+                          {/* Inner Ring: Signal Health / Operational Pacing */}
                           <circle cx="50" cy="50" r="30" fill="none" stroke="#f1f5f9" strokeWidth="6" />
                           <circle 
                             cx="50" 
                             cy="50" 
                             r="30" 
                             fill="none" 
-                            stroke="#111317" 
+                            stroke={signalHealthPercent > 0 ? "#06b6d4" : "transparent"} 
                             strokeWidth="6" 
                             strokeDasharray="188" 
-                            strokeDashoffset={188 - (188 * taskPercent) / 100}
+                            strokeDashoffset={188 - (188 * Math.min(Math.max(signalHealthPercent, 0), 100)) / 100}
                             strokeLinecap="round" 
+                            className="transition-all duration-700 ease-out"
                           />
                         </svg>
                         <div className="absolute flex flex-col items-center text-center">
                           <span className="text-base font-black text-slate-900 font-mono leading-none">
-                            21d
+                            {onlineCount} / {totalCameraCount}
                           </span>
-                          <span className="text-[9px] text-slate-400 font-medium mt-0.5">To Launch</span>
+                          <span className={`text-[9px] font-bold mt-1 ${onlineCount > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                            {onlinePercent}% Online
+                          </span>
                         </div>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium px-1">
                       <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-[#fcd34d]" /> Cams {percentComplete}%
+                        <span className="w-2 h-2 rounded-full bg-[#10b981]" /> Online {onlinePercent}%
                       </span>
                       <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-[#111317]" /> Tasks {taskPercent}%
+                        <span className="w-2 h-2 rounded-full bg-[#06b6d4]" /> Signal {signalHealthPercent}%
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-center gap-1.5 pt-1 text-[11px] font-semibold text-slate-600">
-                      <Clock className="w-3.5 h-3.5 text-amber-500" />
-                      <span>Target: {project.targetLaunchDate || 'Sep 25'}</span>
+                    {/* Card Footnotes: Online count pill, recording status, and RTSP stream health */}
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-600 font-medium">
+                      <div className="flex items-center gap-1.5">
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-bold font-mono">
+                          {onlineCount} Online
+                        </span>
+                        <span className="text-slate-500 truncate text-[10px]">
+                          Rec: <strong className="text-slate-800 font-semibold">{onlineCount > 0 ? '24/7 NVR Live' : 'Standby'}</strong>
+                        </span>
+                      </div>
+                      <span className={`flex items-center gap-1 font-mono px-1.5 py-0.5 rounded-full border font-bold text-[10px] shrink-0 ${
+                        onlineCount > 0 
+                          ? 'text-cyan-700 bg-cyan-50 border-cyan-200/60' 
+                          : 'text-slate-500 bg-slate-50 border-slate-200/60'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${onlineCount > 0 ? 'bg-cyan-500' : 'bg-slate-400'}`} />
+                        {onlineCount > 0 ? (activeBlockers.length > 0 ? 'RTSP Pacing' : 'RTSP Healthy') : 'RTSP Standby'}
+                      </span>
                     </div>
                   </div>
 
@@ -1333,28 +1441,101 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               {/* RIGHT COLUMN: Installation Tasks */}
               <div className="lg:col-span-4 space-y-4 flex flex-col justify-between">
                 <div 
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setActiveNavTab('Checklist')}
-                  className="bg-white/90 backdrop-blur-sm rounded-[26px] p-5 border border-slate-200/80 shadow-xs space-y-2 cursor-pointer group"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setActiveNavTab('Checklist');
+                    }
+                  }}
+                  aria-label={`Priority Work: ${project.overallCompletion ?? percentComplete}% complete. Click to view Checklist.`}
+                  className="bg-white/90 backdrop-blur-sm rounded-[26px] p-5 border border-slate-200/80 shadow-xs space-y-3 cursor-pointer group hover:border-amber-300/80 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+                  title="Click to view Priority Work in Checklist"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-900">Onboarding Progress</span>
-                    <span className="text-sm font-black font-mono text-slate-900">{percentComplete}%</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-xl bg-amber-50 text-amber-700 border border-amber-200/80 flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform">
+                        <CheckSquare className="w-3.5 h-3.5" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-slate-900 block leading-tight">Priority Work</span>
+                        <span className="text-[10px] text-slate-500 font-medium">Milestone Delivery</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-black font-mono text-slate-900">
+                        {project.overallCompletion ?? percentComplete}%
+                      </span>
+                      <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 pt-1">
-                    <div className="bg-[#fcd34d] text-slate-900 font-bold text-[11px] px-3 py-1.5 rounded-full flex-1 text-center shadow-xs">
+                  {/* Interactive Priority Milestone Stage Chips */}
+                  <div className="grid grid-cols-3 gap-1.5 pt-0.5">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveNavTab('Checklist');
+                      }}
+                      className="bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold text-[11px] px-2 py-1.5 rounded-xl text-center shadow-2xs border border-amber-500/20 truncate transition cursor-pointer focus:outline-none focus:ring-1 focus:ring-slate-900 active:scale-95"
+                      title="Wiring Milestone: 100% complete. Click to view Checklist."
+                    >
                       Wiring 100%
-                    </div>
-                    <div className="bg-[#1e2025] text-white font-semibold text-[11px] px-3 py-1.5 rounded-full flex-1 text-center shadow-xs">
-                      Mount 50%
-                    </div>
-                    <div className="bg-slate-200 text-slate-500 font-medium text-[11px] px-2.5 py-1.5 rounded-full text-center">
-                      0%
-                    </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveNavTab('Cameras');
+                      }}
+                      className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-[11px] px-2 py-1.5 rounded-xl text-center shadow-2xs border border-slate-800 truncate transition cursor-pointer focus:outline-none focus:ring-1 focus:ring-slate-500 active:scale-95"
+                      title={`Mounting Milestone: ${percentComplete}% complete. Click to inspect Camera fleet.`}
+                    >
+                      Mounting {percentComplete}%
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveNavTab('Checklist');
+                      }}
+                      className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] px-2 py-1.5 rounded-xl text-center border border-slate-200 truncate transition cursor-pointer focus:outline-none focus:ring-1 focus:ring-slate-400 active:scale-95"
+                      title={`Network & Hardware (${isNetworkActive ? 'Active' : 'Pending'}). Click to view Checklist.`}
+                    >
+                      <span className="hidden xl:inline">Network & HW: </span>
+                      <span className="xl:hidden">Net: </span>
+                      {isNetworkActive ? 'Active' : 'Pending'}
+                    </button>
                   </div>
+
+                  {/* Blocker Warning Pill if activeBlockers.length > 0 */}
+                  {activeBlockers.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveNavTab('Checklist');
+                      }}
+                      className="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 rounded-xl text-[10px] text-amber-900 font-medium transition cursor-pointer text-left focus:outline-none focus:ring-1 focus:ring-amber-500 active:scale-98"
+                      title="Active blockers requiring attention. Click to view in Checklist."
+                    >
+                      <div className="flex items-center gap-1.5 truncate">
+                        <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />
+                        <span className="font-bold truncate">
+                          {activeBlockers.length} {activeBlockers.length === 1 ? 'Blocker' : 'Blockers'} Pending
+                        </span>
+                      </div>
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-amber-700 bg-amber-200/60 px-1.5 py-0.5 rounded shrink-0">
+                        Review →
+                      </span>
+                    </button>
+                  )}
                 </div>
 
-                {/* Bottom Big Dark Card: Onboarding Task List */}
+                {/* Bottom Big Dark Card: Priority Installation Task List */}
                 <div className="bg-[#1e2025] text-white rounded-[32px] p-6 shadow-xl space-y-4 flex-1 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between border-b border-slate-800 pb-3">
