@@ -518,7 +518,7 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black text-slate-100 relative selection:bg-white selection:text-black">
+    <div className="min-h-screen bg-black text-slate-100 relative selection:bg-white selection:text-black overflow-x-hidden">
       {/* Decoupled Hardware-Accelerated Fixed Grid Background Layer */}
       <div 
         className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
@@ -536,7 +536,7 @@ export const App: React.FC = () => {
       </div>
 
       {/* Main Scrollable Viewport Content */}
-      <div className="relative z-10 w-full min-h-screen">
+      <div className="relative z-10 w-full min-h-screen overflow-x-hidden">
         {!currentProject ? (
           <div className="min-h-screen flex items-center justify-center p-6">
             <div className="max-w-md w-full bg-white/90 backdrop-blur-md rounded-3xl border border-slate-200/80 p-8 text-center shadow-xl space-y-4">

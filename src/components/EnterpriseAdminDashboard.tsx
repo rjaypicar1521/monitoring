@@ -580,7 +580,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6] flex flex-col md:flex-row text-slate-800 font-sans selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-[#f3f4f6] flex flex-col md:flex-row text-slate-800 font-sans selection:bg-black selection:text-white overflow-x-hidden">
       {/* Toast feedback */}
       {actionSuccessMsg && (
         <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-xl border border-slate-700 flex items-center gap-2 animate-in fade-in">
@@ -590,7 +590,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
       )}
 
       {/* FIGMA SIDEBAR NAVIGATION (DESKTOP) */}
-      <aside className="hidden md:flex md:w-64 bg-white border-r border-slate-200/90 flex-col justify-between p-5 shrink-0 z-30 shadow-xs h-screen sticky top-0 overflow-y-auto">
+      <aside className="hidden md:flex md:w-64 bg-white border-r border-slate-200/90 flex-col justify-between p-5 shrink-0 z-30 shadow-xs h-screen sticky top-0 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
         <div className="space-y-6">
           {/* Brand Header */}
           <div className="flex items-center justify-between">
@@ -835,7 +835,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
             className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-in fade-in"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <aside className="relative w-72 max-w-[85vw] bg-white h-full shadow-2xl p-5 z-10 animate-in slide-in-from-left duration-200 flex flex-col justify-between overflow-y-auto">
+          <aside className="relative w-72 max-w-[85vw] bg-white h-full shadow-2xl p-5 z-10 animate-in slide-in-from-left duration-200 flex flex-col justify-between overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
             <div className="space-y-6">
               {/* Brand Header & Close Button */}
               <div className="flex items-center justify-between">
@@ -1064,7 +1064,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
       )}
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto p-3.5 sm:p-6 lg:p-8 space-y-6">
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar p-3.5 sm:p-6 lg:p-8 space-y-6">
         {/* Top Header Bar */}
         <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200/80 pb-4">
           <div>
@@ -2197,7 +2197,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
 
             {/* Enterprise Table Container */}
             <div className="bg-white rounded-[24px] border border-slate-200/90 shadow-xs overflow-hidden">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto scroll-smooth no-scrollbar">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
                     <tr>
@@ -2682,7 +2682,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
         {/* MODAL 1: ADD MILESTONE TASK */}
         {showAddTaskModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-            <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
+            <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                   <Plus className="w-4 h-4 text-cyan-700" />
@@ -2768,7 +2768,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
         {/* MODAL 2: ADD CAMERA ENDPOINT */}
         {showAddCameraModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-            <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
+            <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                   <Camera className="w-4 h-4 text-emerald-600" />
@@ -2897,7 +2897,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
         {/* MODAL 2.5: EDIT CAMERA ENDPOINT */}
         {editingCamera && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-            <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
+            <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
                   <Edit3 className="w-4 h-4 text-cyan-700" />
@@ -3062,7 +3062,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
         {/* MODAL 3: ADD BLOCKER / ISSUE */}
         {showAddBlockerModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-            <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
+            <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-rose-600" />
@@ -3133,7 +3133,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
         {/* MODAL 4: ADD TECHNICIAN */}
         {showAddTechModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-            <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
+            <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                   <UserPlus className="w-4 h-4 text-purple-600" />
@@ -3227,7 +3227,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                       Select All
                     </button>
                   </div>
-                  <div className="max-h-32 overflow-y-auto border border-slate-200 rounded-xl p-2 bg-slate-50 grid grid-cols-2 gap-1.5">
+                  <div className="max-h-32 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar border border-slate-200 rounded-xl p-2 bg-slate-50 grid grid-cols-2 gap-1.5">
                     {cameraList.map((c) => {
                       const isSelected = newTechAssignedCameras.includes(c.id);
                       return (
@@ -3275,7 +3275,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
         {/* MODAL: MAP TECHNICIAN TO CAMERAS & ZONE */}
         {mappingTech && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-            <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4">
+            <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
@@ -3327,7 +3327,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                     </div>
                   </div>
 
-                  <div className="max-h-60 overflow-y-auto border border-slate-200 rounded-xl p-2 bg-slate-50 space-y-1">
+                  <div className="max-h-60 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar border border-slate-200 rounded-xl p-2 bg-slate-50 space-y-1">
                     {cameraList.map((c) => {
                       const isSelected = selectedMappingCameras.includes(c.id);
                       return (
@@ -3396,7 +3396,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
         {/* MODAL 5: BULK CAMERA DELETION CONFIRMATION */}
         {showBatchDeleteModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-            <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
+            <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5 text-rose-600" />
@@ -3414,7 +3414,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                   Are you sure you want to permanently delete <strong>{selectedCameraIds.length}</strong> selected camera endpoints?
                 </p>
 
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl max-h-40 overflow-y-auto space-y-1.5">
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl max-h-40 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar space-y-1.5">
                   {selectedCameraIds.map(id => {
                     const c = cameraList.find(x => x.id === id);
                     return (

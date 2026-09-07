@@ -98,7 +98,7 @@ function NotificationList({
       whileHover="expanded"
       onClick={() => setIsExpanded((prev) => !prev)}
     >
-      <div className="pt-1 max-h-[380px] overflow-y-auto overflow-x-hidden pr-0.5">
+      <div className="pt-1 max-h-[380px] overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar pr-0.5">
         {displayList.map((notification, i) => (
           <motion.div
             key={notification.id}

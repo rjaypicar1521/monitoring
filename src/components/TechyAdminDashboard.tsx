@@ -351,7 +351,7 @@ export const TechyAdminDashboard: React.FC<TechyAdminDashboardProps> = ({
           </div>
 
           {/* Terminal Console Box */}
-          <div className="bg-black/60 rounded-xl p-3 border border-slate-900 text-[11px] font-mono space-y-1.5 h-56 overflow-y-auto leading-relaxed">
+          <div className="bg-black/60 rounded-xl p-3 border border-slate-900 text-[11px] font-mono space-y-1.5 h-56 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar leading-relaxed">
             {consoleLogs.map((log, idx) => {
               const isWarn = log.includes('SYS-WARN') || log.includes('timeout');
               return (

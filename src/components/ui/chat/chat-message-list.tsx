@@ -38,7 +38,7 @@ export const ChatMessageList: React.FC<ChatMessageListProps> = ({
   return (
     <div
       ref={scrollRef}
-      className={`overflow-y-auto px-1 py-3 space-y-1 min-h-[160px] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-scrollbar-track [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-scrollbar-thumb hover:[&::-webkit-scrollbar-thumb]:bg-scrollbar-thumb-hover [&::-webkit-scrollbar-thumb:hover]:bg-scrollbar-thumb-hover ${
+      className={`overflow-y-auto overflow-x-hidden px-1 py-3 space-y-1 min-h-[160px] scroll-smooth no-scrollbar ${
         className.includes('max-h-') ? '' : 'max-h-[380px]'
       } ${className}`}
     >

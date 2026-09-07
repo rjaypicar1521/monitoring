@@ -189,7 +189,7 @@ export const ImportProjectModal: React.FC<ImportProjectModalProps> = ({
         </div>
 
         {/* Body */}
-        <div className="p-6 overflow-y-auto space-y-4 flex-1">
+        <div className="p-6 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar space-y-4 flex-1">
           {error && (
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl flex items-center gap-2 text-xs text-rose-700">
               <AlertCircle className="w-4 h-4 shrink-0" />

@@ -106,7 +106,7 @@ export const AssistantBar: React.FC<AssistantBarProps> = ({ project }) => {
 
       {/* Expandable Output Area */}
       {isExpanded && response && (
-        <div className="p-4 bg-slate-950/80 border-b border-slate-800 max-h-72 overflow-y-auto">
+        <div className="p-4 bg-slate-950/80 border-b border-slate-800 max-h-72 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
           <div className="font-mono text-xs text-slate-200 whitespace-pre-wrap leading-relaxed bg-slate-900/90 p-3.5 rounded-lg border border-slate-800">
             {response}
           </div>

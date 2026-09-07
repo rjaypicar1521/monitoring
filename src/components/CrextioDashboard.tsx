@@ -375,7 +375,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   });
 
   return (
-    <div className="min-h-screen bg-[#fbf9f2] flex flex-col md:flex-row text-slate-800 font-sans selection:bg-black selection:text-white relative">
+    <div className="min-h-screen bg-[#fbf9f2] flex flex-col md:flex-row text-slate-800 font-sans selection:bg-black selection:text-white relative overflow-x-hidden">
       {/* Top-Right Floating Attendance Toast Banner */}
       <AttendanceToastBanner
         event={attendanceNotification}
@@ -383,7 +383,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
       />
 
       {/* FIGMA SIDEBAR NAVIGATION (DESKTOP) */}
-      <aside className="hidden md:flex md:w-64 bg-white border-r border-slate-200/90 flex-col justify-between p-5 shrink-0 z-30 shadow-xs h-screen sticky top-0 overflow-y-auto">
+      <aside className="hidden md:flex md:w-64 bg-white border-r border-slate-200/90 flex-col justify-between p-5 shrink-0 z-30 shadow-xs h-screen sticky top-0 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
         <div className="space-y-4 lg:space-y-5">
           {/* Brand Header */}
           <div className="flex items-center justify-between">
@@ -623,7 +623,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
             className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity animate-in fade-in"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <aside className="relative w-72 max-w-[85vw] bg-white h-full shadow-2xl p-5 z-10 animate-in slide-in-from-left duration-200 flex flex-col justify-between overflow-y-auto">
+          <aside className="relative w-72 max-w-[85vw] bg-white h-full shadow-2xl p-5 z-10 animate-in slide-in-from-left duration-200 flex flex-col justify-between overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
             <div className="space-y-4">
               {/* Brand Header & Close Button */}
               <div className="flex items-center justify-between">
@@ -819,7 +819,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
       )}
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto p-3.5 sm:p-6 lg:p-8 space-y-6 relative">
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar p-3.5 sm:p-6 lg:p-8 space-y-6 relative">
         {/* Subtle Ambient Warm Yellow / Cream Corner Glows */}
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-amber-100/40 rounded-full blur-3xl pointer-events-none" />

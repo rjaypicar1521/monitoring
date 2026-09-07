@@ -96,7 +96,7 @@ export const TaskPhotoEvidenceModal: React.FC<TaskPhotoEvidenceModalProps> = ({
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in">
-        <div className="bg-white w-full max-w-lg rounded-[32px] p-6 sm:p-7 shadow-2xl border border-slate-200/90 relative space-y-5">
+        <div className="bg-white w-full max-w-lg rounded-[32px] p-6 sm:p-7 shadow-2xl border border-slate-200/90 relative space-y-5 max-h-[90vh] overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
           {/* Close button */}
           <button
             onClick={onClose}
@@ -235,7 +235,7 @@ export const TaskPhotoEvidenceModal: React.FC<TaskPhotoEvidenceModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-white w-full max-w-lg rounded-[32px] p-6 sm:p-7 shadow-2xl border border-slate-200/90 relative space-y-5">
+      <div className="bg-white w-full max-w-lg rounded-[32px] p-6 sm:p-7 shadow-2xl border border-slate-200/90 relative space-y-5 max-h-[90vh] overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
         
         {/* Close button */}
         <button
@@ -491,7 +491,7 @@ export const PhotoLightboxModal: React.FC<PhotoLightboxModalProps> = ({
     >
       <div 
         onClick={(e) => e.stopPropagation()} 
-        className="bg-[#111317] text-white max-w-2xl w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-800 cursor-default animate-in zoom-in-95"
+        className="bg-[#111317] text-white max-w-2xl w-full rounded-3xl shadow-2xl border border-slate-800 cursor-default animate-in zoom-in-95 max-h-[90vh] overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar"
       >
         <div className="p-4 flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-2">

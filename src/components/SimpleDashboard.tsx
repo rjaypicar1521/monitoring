@@ -293,7 +293,7 @@ export const SimpleDashboard: React.FC<SimpleDashboardProps> = ({
         </div>
 
         {showEmailPreview && (
-          <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800/80 text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed animate-in fade-in max-h-72 overflow-y-auto">
+          <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800/80 text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed animate-in fade-in max-h-72 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
 {`Project: ${project.name}
 Period: Sep 1-7, 2026
 

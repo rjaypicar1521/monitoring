@@ -284,7 +284,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             disabled={disabled}
-            className="flex-1 bg-transparent border-0 focus:ring-0 focus:outline-none text-xs text-slate-800 placeholder-slate-400 resize-none py-1.5 min-h-[28px] max-h-[120px]"
+            className="flex-1 bg-transparent border-0 focus:ring-0 focus:outline-none text-xs text-slate-800 placeholder-slate-400 resize-none py-1.5 min-h-[28px] max-h-[120px] overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar"
           />
 
           <button
