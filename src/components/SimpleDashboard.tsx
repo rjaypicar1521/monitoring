@@ -49,31 +49,33 @@ export const SimpleDashboard: React.FC<SimpleDashboardProps> = ({
   const activeBlockers = project.blockers.filter(b => !b.resolved);
 
   // 4 Simple Stages for clean client comprehension
-  const simpleStages = [
+  const simpleStages: { id: string; title: string; detail: string; status: 'Done' | 'In progress' | 'Upcoming' }[] = [
     {
       id: 'stg-1',
       title: '1. Survey & Clean Indoor Wiring',
       detail: 'Hallways and conduit completed',
-      status: 'Done' as const,
+      status: 'Done',
     },
     {
       id: 'stg-2',
       title: `2. Mounting & Aiming Cameras (${project.installedCameras}/${project.totalCameras})`,
-      detail: 'Halfway through mounting spots',
-      status: 'In progress' as const,
+      detail: project.installedCameras >= project.totalCameras 
+        ? 'All cameras mounted and verified' 
+        : `${project.installedCameras} of ${project.totalCameras} cameras mounted`,
+      status: project.installedCameras >= project.totalCameras ? 'Done' : 'In progress',
     },
     {
       id: 'stg-3',
       title: '3. Video Recording Box Setup',
       detail: 'Storage hard drives and monitor feeds',
-      status: 'Upcoming' as const,
+      status: 'Upcoming',
     },
     {
       id: 'stg-4',
       title: '4. Angle Check & Staff Training',
       detail: 'Final walkthrough and mobile app setup',
-      status: 'Upcoming' as const,
-    }
+      status: 'Upcoming',
+    },
   ];
 
   return (
@@ -304,11 +306,12 @@ Period: Sep 1-7, 2026
 2) Progress:
 - Completed site walkthrough and spots
 - Finished hallway conduit wiring
-- Mounted 12 of 24 cameras (50% complete)
+- Mounted ${project.installedCameras} of ${project.totalCameras} cameras (${percentComplete}% complete)
 
 3) Current Focus (Next 7 days):
-- Connect outside breaker power with electrician
-- Mount remaining 12 cameras
+${project.installedCameras < project.totalCameras 
+  ? `- Mount remaining ${project.totalCameras - project.installedCameras} cameras\n- Verify live telemetry on central monitor`
+  : `- All ${project.totalCameras} cameras mounted & streaming live\n- Final handover walkthrough & client sign-off`}
 - Set up central recording box
 
 4) Risks / Blockers:

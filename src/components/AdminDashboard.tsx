@@ -61,6 +61,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [editInstalledCameras, setEditInstalledCameras] = useState(project.installedCameras);
   const [editTargetDate, setEditTargetDate] = useState(project.targetLaunchDate || '2026-09-25');
 
+  React.useEffect(() => {
+    setEditTotalCameras(project.totalCameras);
+    setEditInstalledCameras(project.installedCameras);
+    setEditTargetDate(project.targetLaunchDate || '2026-09-25');
+  }, [project.id, project.totalCameras, project.installedCameras, project.targetLaunchDate]);
+
   const showNotification = (msg: string) => {
     setActionSuccessMsg(msg);
     setTimeout(() => setActionSuccessMsg(null), 3000);

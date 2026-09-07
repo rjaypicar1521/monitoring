@@ -52,7 +52,11 @@ export const UserDashboard: React.FC<UserDashboardProps> = ({
   const phases = [
     { title: '1. Walkthrough & Spots', status: 'Done', note: 'All camera spots confirmed' },
     { title: '2. Indoor Wiring', status: 'Done', note: 'Clean conduit routing finished' },
-    { title: '3. Camera Mounting', status: 'In progress', note: '12 of 24 mounted & aimed' },
+    { 
+      title: '3. Camera Mounting', 
+      status: project.installedCameras >= project.totalCameras ? 'Done' : 'In progress', 
+      note: `${project.installedCameras} of ${project.totalCameras} mounted & aimed` 
+    },
     { title: '4. Recording Box', status: 'In progress', note: 'Storage hard drives configured' },
     { title: '5. Screen View Check', status: 'Upcoming', note: 'Signal & video clarity test' },
     { title: '6. Staff Handover', status: 'Upcoming', note: 'Viewing angle walk & app training' },

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { CCTVProject, ExecutiveStatus, AuthUser, TaskStatus, CCTVTask, CameraEndpoint, TechnicianMember, TechnicianStatus, BlockerItem, AttendanceEvent } from '../types';
 import { 
   broadcastAttendance, 
@@ -334,7 +334,9 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
     e.preventDefault();
     if (!newCamName.trim()) return;
 
-    const nextIdNum = (project.cameras?.length || project.totalCameras) + 1;
+    const existingNums = (project.cameras || []).map(c => parseInt(c.id.replace(/\D/g, ''), 10)).filter(n => !isNaN(n));
+    const maxNum = existingNums.length > 0 ? Math.max(...existingNums) : (project.totalCameras || 0);
+    const nextIdNum = maxNum + 1;
     const newCamera: CameraEndpoint = {
       id: `CAM-${String(nextIdNum).padStart(2, '0')}`,
       name: newCamName.trim(),
@@ -450,11 +452,37 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
 
   // Synchronized camera fleet list
   const cameraList = project.cameras || [];
-  const filteredCameras = cameraList.filter(c => 
-    c.name.toLowerCase().includes(cameraSearch.toLowerCase()) ||
-    c.zone.toLowerCase().includes(cameraSearch.toLowerCase()) ||
-    c.id.toLowerCase().includes(cameraSearch.toLowerCase())
-  );
+  const totalFleetCount = Math.max(project.totalCameras || 0, cameraList.length);
+  const mountedCount = cameraList.length > 0 
+    ? cameraList.filter(c => c.status === 'Mounted').length 
+    : project.installedCameras;
+  const pendingCount = Math.max(0, totalFleetCount - mountedCount);
+  const [cameraStatusFilter, setCameraStatusFilter] = useState<'All' | 'Mounted' | 'Pending Power'>('All');
+  const [cameraPage, setCameraPage] = useState<number>(1);
+  const [cameraPageSize, setCameraPageSize] = useState<number>(20);
+
+  const filteredCameras = useMemo(() => {
+    const q = cameraSearch.toLowerCase();
+    return cameraList.filter(c => {
+      const matchesSearch = !q ||
+        c.name.toLowerCase().includes(q) ||
+        c.zone.toLowerCase().includes(q) ||
+        c.id.toLowerCase().includes(q) ||
+        c.ip.toLowerCase().includes(q) ||
+        c.port.toLowerCase().includes(q) ||
+        c.lens.toLowerCase().includes(q);
+      const matchesStatus = cameraStatusFilter === 'All' || c.status === cameraStatusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [cameraList, cameraSearch, cameraStatusFilter]);
+
+  const totalCameraPages = cameraPageSize === -1 ? 1 : Math.max(1, Math.ceil(filteredCameras.length / cameraPageSize));
+  const safeCameraPage = Math.min(cameraPage, totalCameraPages);
+  const paginatedCameras = useMemo(() => {
+    if (cameraPageSize === -1) return filteredCameras;
+    const start = (safeCameraPage - 1) * cameraPageSize;
+    return filteredCameras.slice(start, start + cameraPageSize);
+  }, [filteredCameras, safeCameraPage, cameraPageSize]);
 
   // Multi-Selection State for Cameras
   const [selectedCameraIds, setSelectedCameraIds] = useState<string[]>([]);
@@ -1303,7 +1331,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
 
                 <div className="flex items-baseline justify-between">
                   <div className="text-4xl sm:text-5xl font-black font-mono tracking-tight text-white">
-                    {cameraList.length}
+                    {totalFleetCount}
                   </div>
                   <div className={`px-2.5 py-1 rounded-full text-xs font-bold font-mono ${
                     activeBlockers.length > 0 
@@ -1318,11 +1346,11 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 <div className="grid grid-cols-3 gap-1.5 sm:gap-2 pt-2 border-t border-slate-800/80">
                   <div className="bg-white/10 rounded-2xl p-1.5 sm:p-2 xl:p-2.5 text-center">
                     <div className="text-[9px] sm:text-[10px] text-slate-400 font-medium truncate">Mounted</div>
-                    <div className="text-sm sm:text-base font-bold font-mono text-emerald-400">{project.installedCameras}</div>
+                    <div className="text-sm sm:text-base font-bold font-mono text-emerald-400">{mountedCount}</div>
                   </div>
                   <div className="bg-white/10 rounded-2xl p-1.5 sm:p-2 xl:p-2.5 text-center">
                     <div className="text-[9px] sm:text-[10px] text-slate-400 font-medium truncate">Pending</div>
-                    <div className="text-sm sm:text-base font-bold font-mono text-amber-400">{Math.max(0, cameraList.length - project.installedCameras)}</div>
+                    <div className="text-sm sm:text-base font-bold font-mono text-amber-400">{pendingCount}</div>
                   </div>
                   <div className="bg-white/10 rounded-2xl p-1.5 sm:p-2 xl:p-2.5 text-center">
                     <div className="text-[9px] sm:text-[10px] text-slate-400 font-medium truncate">Pacing</div>
@@ -2201,9 +2229,12 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                   <input
                     type="text"
-                    placeholder="Filter by zone or spot..."
+                    placeholder="Search node, zone, IP, port..."
                     value={cameraSearch}
-                    onChange={(e) => setCameraSearch(e.target.value)}
+                    onChange={(e) => {
+                      setCameraSearch(e.target.value);
+                      setCameraPage(1);
+                    }}
                     className="pl-9 pr-4 py-1.5 rounded-full text-xs bg-white border border-slate-300 focus:outline-none focus:border-cyan-600 text-slate-800 placeholder-slate-400 w-full sm:w-56 shadow-xs"
                   />
                 </div>
@@ -2227,6 +2258,68 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                   <Plus className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Add Camera</span>
                 </button>
+              </div>
+            </div>
+
+            {/* Filter Chips & Fleet Controls Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-2.5">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {(['All', 'Mounted', 'Pending Power'] as const).map((status) => {
+                  const isActive = cameraStatusFilter === status;
+                  const count = status === 'All'
+                    ? cameraList.length
+                    : cameraList.filter(c => c.status === status).length;
+                  return (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() => {
+                        setCameraStatusFilter(status);
+                        setCameraPage(1);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
+                        isActive
+                          ? 'bg-[#1a1c22] text-white shadow-xs'
+                          : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200/90'
+                      }`}
+                    >
+                      {status === 'Mounted' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
+                      {status === 'Pending Power' && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                      <span>{status === 'Pending Power' ? 'Pending' : status}</span>
+                      <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
+                        isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Page Size Selector */}
+              <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                <span className="text-[11px] text-slate-400">Rows:</span>
+                {[10, 20, -1].map((size) => {
+                  const label = size === -1 ? 'All' : String(size);
+                  const isCurrent = cameraPageSize === size;
+                  return (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => {
+                        setCameraPageSize(size);
+                        setCameraPage(1);
+                      }}
+                      className={`px-2 py-0.5 rounded-md font-mono text-xs transition cursor-pointer ${
+                        isCurrent
+                          ? 'bg-[#1a1c22] text-white font-bold'
+                          : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -2300,86 +2393,156 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {filteredCameras.map((cam) => {
-                      const isMounted = cam.status === 'Mounted';
-                      const isSelected = selectedCameraIds.includes(cam.id);
+                    {filteredCameras.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="py-12 text-center text-slate-500">
+                          <div className="text-3xl mb-1.5">📹</div>
+                          <div className="font-bold text-sm text-slate-800">No camera endpoints found</div>
+                          <p className="text-xs text-slate-400 mt-1">Try clearing your search query or status filter.</p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCameraSearch('');
+                              setCameraStatusFilter('All');
+                              setCameraPage(1);
+                            }}
+                            className="mt-3 px-3.5 py-1.5 bg-[#1a1c22] hover:bg-slate-800 text-white text-xs font-semibold rounded-xl cursor-pointer transition shadow-2xs"
+                          >
+                            Reset Filters
+                          </button>
+                        </td>
+                      </tr>
+                    ) : (
+                      paginatedCameras.map((cam) => {
+                        const isMounted = cam.status === 'Mounted';
+                        const isSelected = selectedCameraIds.includes(cam.id);
 
-                      return (
-                        <tr 
-                          key={cam.id} 
-                          className={`transition ${isSelected ? 'bg-cyan-50/70 hover:bg-cyan-50' : 'hover:bg-slate-50/80'}`}
-                        >
-                          <td className="py-3 px-4 text-center">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => handleToggleSelectCamera(cam.id)}
-                              className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 cursor-pointer accent-[#1a1c22]"
-                            />
-                          </td>
-                          <td className="py-3 px-4 font-mono font-bold text-slate-900">
-                            {cam.id}
-                          </td>
-                          <td className="py-3 px-4 font-semibold text-slate-900">
-                            {cam.name}
-                          </td>
-                          <td className="py-3 px-4 text-slate-600 font-medium">
-                            <div>{cam.zone}</div>
-                            {technicianList.find(t => t.assignedCameras?.includes(cam.id)) && (
-                              <div className="text-[10px] text-indigo-700 font-semibold flex items-center gap-1 mt-0.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                                {technicianList.find(t => t.assignedCameras?.includes(cam.id))?.name}
+                        return (
+                          <tr 
+                            key={cam.id} 
+                            className={`transition ${isSelected ? 'bg-cyan-50/70 hover:bg-cyan-50' : 'hover:bg-slate-50/80'}`}
+                          >
+                            <td className="py-3 px-4 text-center">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleToggleSelectCamera(cam.id)}
+                                className="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 cursor-pointer accent-[#1a1c22]"
+                              />
+                            </td>
+                            <td className="py-3 px-4 font-mono font-bold text-slate-900 whitespace-nowrap">
+                              {cam.id}
+                            </td>
+                            <td className="py-3 px-4 font-semibold text-slate-900 whitespace-nowrap">
+                              {cam.name}
+                            </td>
+                            <td className="py-3 px-4 text-slate-600 font-medium">
+                              <div className="whitespace-nowrap">{cam.zone}</div>
+                              {technicianList.find(t => t.assignedCameras?.includes(cam.id)) && (
+                                <div className="text-[10px] text-indigo-700 font-semibold flex items-center gap-1 mt-0.5 whitespace-nowrap">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                  {technicianList.find(t => t.assignedCameras?.includes(cam.id))?.name}
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-3 px-4 text-slate-600 font-mono whitespace-nowrap">
+                              {cam.lens}
+                            </td>
+                            <td className="py-3 px-4 font-mono text-slate-600 whitespace-nowrap">
+                              {cam.port} • <span className="text-cyan-800 font-semibold">{cam.ip}</span>
+                            </td>
+                            <td className="py-3 px-4 whitespace-nowrap">
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                                isMounted ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                              }`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${isMounted ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                                {cam.status}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  onClick={() => handleOpenEditCamera(cam)}
+                                  className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[11px] font-semibold transition flex items-center gap-1 cursor-pointer shadow-2xs"
+                                  title={`Edit details for ${cam.id}`}
+                                >
+                                  <Edit3 className="w-3 h-3 text-cyan-700" />
+                                  <span>Edit</span>
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    onUpdateCamera({
+                                      ...cam,
+                                      status: isMounted ? 'Pending Power' : 'Mounted'
+                                    });
+                                    showNotification(`Toggled state for ${cam.id}`);
+                                  }}
+                                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
+                                    isMounted 
+                                      ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' 
+                                      : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-2xs'
+                                  }`}
+                                >
+                                  {isMounted ? 'Unmount' : 'Mount'}
+                                </button>
                               </div>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 text-slate-600 font-mono">
-                            {cam.lens}
-                          </td>
-                          <td className="py-3 px-4 font-mono text-slate-600">
-                            {cam.port} • <span className="text-cyan-800">{cam.ip}</span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                              isMounted ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                            }`}>
-                              <span className={`w-1.5 h-1.5 rounded-full ${isMounted ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                              {cam.status}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                onClick={() => handleOpenEditCamera(cam)}
-                                className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[11px] font-semibold transition flex items-center gap-1 cursor-pointer shadow-2xs"
-                                title={`Edit details for ${cam.id}`}
-                              >
-                                <Edit3 className="w-3 h-3 text-cyan-700" />
-                                <span>Edit</span>
-                              </button>
-
-                              <button
-                                onClick={() => {
-                                  onUpdateCamera({
-                                    ...cam,
-                                    status: isMounted ? 'Pending Power' : 'Mounted'
-                                  });
-                                  showNotification(`Toggled state for ${cam.id}`);
-                                }}
-                                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer ${
-                                  isMounted 
-                                    ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' 
-                                    : 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                                }`}
-                              >
-                                {isMounted ? 'Unmount' : 'Mount'}
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Table Footer with Summary & Pagination */}
+              <div className="p-3.5 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-slate-600">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">
+                    Showing <strong className="text-slate-900 font-mono">{filteredCameras.length === 0 ? 0 : (cameraPageSize === -1 ? 1 : (safeCameraPage - 1) * cameraPageSize + 1)} - {cameraPageSize === -1 ? filteredCameras.length : Math.min(filteredCameras.length, safeCameraPage * cameraPageSize)}</strong> of <strong className="text-slate-900 font-mono">{filteredCameras.length}</strong> endpoints
+                  </span>
+                  <span className="text-slate-300">•</span>
+                  <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    {cameraList.filter(c => c.status === 'Mounted').length} Mounted ({cameraList.length > 0 ? Math.round((cameraList.filter(c => c.status === 'Mounted').length / cameraList.length) * 100) : 0}%)
+                  </span>
+                  {cameraList.some(c => c.status === 'Pending Power') && (
+                    <>
+                      <span className="text-slate-300">•</span>
+                      <span className="text-amber-700 font-semibold flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                        {cameraList.filter(c => c.status === 'Pending Power').length} Pending
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {totalCameraPages > 1 && (
+                  <div className="flex items-center gap-2 self-end sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={() => setCameraPage(p => Math.max(1, p - 1))}
+                      disabled={safeCameraPage <= 1}
+                      className="p-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-slate-700"
+                      title="Previous page"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <span className="text-xs font-mono font-semibold text-slate-700 px-1">
+                      Page {safeCameraPage} of {totalCameraPages}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setCameraPage(p => Math.min(totalCameraPages, p + 1))}
+                      disabled={safeCameraPage >= totalCameraPages}
+                      className="p-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer text-slate-700"
+                      title="Next page"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -2702,7 +2865,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
               <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
                 <div>
                   <div className="font-bold text-slate-900">Reset Sample Data</div>
-                  <div className="text-[11px] text-slate-500">Restore the initial 24 cameras and 8 default milestones.</div>
+                  <div className="text-[11px] text-slate-500">Restore the initial 18 cameras and default project milestones.</div>
                 </div>
                 {onResetProjectData && (
                   <button

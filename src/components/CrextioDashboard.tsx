@@ -83,6 +83,8 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   const [lightboxPhoto, setLightboxPhoto] = useState<LightboxPhoto | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cameraSearch, setCameraSearch] = useState('');
+  const [cameraStatusFilter, setCameraStatusFilter] = useState<'All' | 'Mounted' | 'Pending Power'>('All');
+  const [cameraZoneFilter, setCameraZoneFilter] = useState<string>('All');
   const [checklistFilter, setChecklistFilter] = useState<'All' | 'Done' | 'In progress' | 'Blocked'>('All');
   const [evidenceZoneFilter, setEvidenceZoneFilter] = useState<string>('All');
 
@@ -230,11 +232,25 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
       ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
       : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
 
-  const filteredCameras = cameraSpots.filter(c => 
-    c.name.toLowerCase().includes(cameraSearch.toLowerCase()) ||
-    c.zone.toLowerCase().includes(cameraSearch.toLowerCase()) ||
-    c.id.toLowerCase().includes(cameraSearch.toLowerCase())
-  );
+  const rawCameraZones = Array.from(new Set(cameraSpots.map(c => {
+    const parts = c.zone.split(' - ');
+    return parts[0] || c.zone;
+  }))).filter(Boolean);
+  const cameraZoneCategories = ['All', ...rawCameraZones];
+
+  const filteredCameras = cameraSpots.filter(c => {
+    const q = cameraSearch.toLowerCase();
+    const matchesSearch = !q ||
+      c.name.toLowerCase().includes(q) ||
+      c.zone.toLowerCase().includes(q) ||
+      c.id.toLowerCase().includes(q) ||
+      c.ip.toLowerCase().includes(q) ||
+      c.lens.toLowerCase().includes(q) ||
+      c.port.toLowerCase().includes(q);
+    const matchesStatus = cameraStatusFilter === 'All' || c.status === cameraStatusFilter;
+    const matchesZone = cameraZoneFilter === 'All' || c.zone.toLowerCase().startsWith(cameraZoneFilter.toLowerCase());
+    return matchesSearch && matchesStatus && matchesZone;
+  });
 
   const filteredTasks = project.tasks.filter(t => {
     if (checklistFilter === 'All') return true;
@@ -1298,7 +1314,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                             4K
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-slate-900 truncate">Hikvision 4K Dome</div>
+                            <div className="font-semibold text-slate-900 truncate">Hikvision 4K UltraHD Fleet (Dome, Bullet, Turret)</div>
                             <div className="text-[10px] text-slate-500">
                               {project.totalCameras} Units ({project.installedCameras} Mounted) • PoE
                             </div>
@@ -1322,7 +1338,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
                     {expandedSection === 'specs' && (
                       <div className="pt-1 text-[11px] text-slate-600 space-y-1">
-                        <div>• 16-Channel Central NVR Unit</div>
+                        <div>• 32-Channel Central Enterprise NVR Unit</div>
                         <div>• 30-Day Continuous Storage</div>
                       </div>
                     )}
@@ -1920,62 +1936,148 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               <div>
                 <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                   <Camera className="w-6 h-6 text-amber-600" />
-                  Camera Spots Directory ({project.totalCameras} Total)
+                  Camera Spots Directory ({totalCameraCount} Total)
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  {project.installedCameras} Mounted & Tested • {Math.max(0, project.totalCameras - project.installedCameras)} Pending Installation / Power
+                  {onlineCount} Mounted & Tested • {Math.max(0, totalCameraCount - onlineCount)} Pending Installation / Power
                 </p>
               </div>
 
               {/* Search Bar */}
-              <div className="relative">
+              <div className="relative w-full sm:w-auto">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                 <input
                   type="text"
-                  placeholder="Search room or floor..."
+                  placeholder="Search node, room, IP..."
                   value={cameraSearch}
                   onChange={(e) => setCameraSearch(e.target.value)}
-                  className="pl-9 pr-4 py-1.5 rounded-full text-xs bg-white border border-slate-300 focus:outline-none focus:border-amber-500 text-slate-800 placeholder-slate-400 w-56"
+                  className="pl-9 pr-4 py-1.5 rounded-full text-xs bg-white border border-slate-300 focus:outline-none focus:border-amber-500 text-slate-800 placeholder-slate-400 w-full sm:w-60 shadow-2xs"
                 />
               </div>
             </div>
 
-            {/* 24 Camera Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3 sm:gap-4">
-              {filteredCameras.map((cam) => {
-                const isMounted = cam.status === 'Mounted';
+            {/* Filter Chips Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-2.5">
+              {/* Status Chips */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                {(['All', 'Mounted', 'Pending Power'] as const).map((status) => {
+                  const isActive = cameraStatusFilter === status;
+                  const count = status === 'All' 
+                    ? cameraSpots.length 
+                    : cameraSpots.filter(c => c.status === status).length;
+                  return (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() => setCameraStatusFilter(status)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
+                        isActive
+                          ? 'bg-[#1a1c22] text-white shadow-xs'
+                          : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200/90'
+                      }`}
+                    >
+                      {status === 'Mounted' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
+                      {status === 'Pending Power' && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                      <span>{status === 'Pending Power' ? 'Pending' : status}</span>
+                      <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
+                        isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                      }`}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
 
-                return (
-                  <div 
-                    key={cam.id}
-                    className={`p-3.5 rounded-2xl border transition flex flex-col justify-between gap-2 shadow-2xs ${
-                      isMounted 
-                        ? 'bg-white border-slate-200 hover:border-emerald-500/60' 
-                        : 'bg-slate-50/80 border-slate-200/80 opacity-80'
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-mono font-bold text-slate-400">{cam.id}</span>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          isMounted ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                        }`}>
-                          {cam.status}
-                        </span>
-                      </div>
-                      <div className="font-bold text-xs text-slate-900 mt-1 leading-snug">
-                        {cam.name}
-                      </div>
-                    </div>
-
-                    <div className="text-[10px] text-slate-500 pt-2 border-t border-slate-100 flex items-center justify-between font-mono">
-                      <span>{cam.zone}</span>
-                      <span>{cam.lens}</span>
-                    </div>
-                  </div>
-                );
-              })}
+              {/* Zone Filter Chips */}
+              {cameraZoneCategories.length > 1 && (
+                <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto scroll-smooth no-scrollbar py-0.5">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Zone:</span>
+                  {cameraZoneCategories.map((zone) => {
+                    const isActive = cameraZoneFilter === zone;
+                    return (
+                      <button
+                        key={zone}
+                        type="button"
+                        onClick={() => setCameraZoneFilter(zone)}
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition cursor-pointer ${
+                          isActive
+                            ? 'bg-amber-500 text-slate-950 font-bold shadow-2xs'
+                            : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200/80'
+                        }`}
+                      >
+                        {zone}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
+
+            {/* 18 Camera Cards Grid or Empty State */}
+            {filteredCameras.length === 0 ? (
+              <div className="p-10 text-center bg-white rounded-3xl border border-slate-200/90 shadow-2xs space-y-3">
+                <div className="text-3xl">📹</div>
+                <div className="font-bold text-sm text-slate-800">No cameras found</div>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  No camera endpoints match your current search query or filter selection.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCameraSearch('');
+                    setCameraStatusFilter('All');
+                    setCameraZoneFilter('All');
+                  }}
+                  className="px-4 py-1.5 bg-[#1a1c22] hover:bg-slate-800 text-white text-xs font-semibold rounded-xl cursor-pointer transition shadow-2xs"
+                >
+                  Reset All Filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3 sm:gap-4">
+                {filteredCameras.map((cam) => {
+                  const isMounted = cam.status === 'Mounted';
+
+                  return (
+                    <div 
+                      key={cam.id}
+                      className={`p-3.5 rounded-2xl border transition-all flex flex-col justify-between gap-2.5 shadow-2xs hover:shadow-xs ${
+                        isMounted 
+                          ? 'bg-white border-slate-200/90 hover:border-emerald-500/50' 
+                          : 'bg-slate-50/80 border-slate-200/80 opacity-80'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-mono font-bold text-slate-400">{cam.id}</span>
+                          <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            isMounted ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${isMounted ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                            {cam.status}
+                          </span>
+                        </div>
+                        <div className="font-bold text-xs text-slate-900 mt-1.5 leading-snug">
+                          {cam.name}
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span className="text-slate-600 font-medium truncate max-w-[130px]" title={cam.zone}>{cam.zone}</span>
+                          <span className="text-slate-400 font-mono shrink-0">{cam.lens.split(' ')[0]}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
+                          <span>{cam.port}</span>
+                          <span className="text-cyan-700 font-semibold">{cam.ip}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 

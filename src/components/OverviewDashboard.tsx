@@ -145,7 +145,7 @@ export const OverviewDashboard: React.FC<OverviewDashboardProps> = ({
 
           <div className="text-[11px] text-slate-400 flex items-center justify-between">
             <span>{percentComplete}% of cameras mounted</span>
-            <span className="text-emerald-400 font-medium">12 Online</span>
+            <span className="text-emerald-400 font-medium">{project.installedCameras} Online</span>
           </div>
         </div>
 

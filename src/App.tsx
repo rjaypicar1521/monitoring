@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CCTVProject, CCTVTask, TaskStatus, RiskItem, AuthUser, ExecutiveStatus, CameraEndpoint, TechnicianMember, BlockerItem, ProjectNote, AttendanceEvent, TechnicianStatus } from './types';
-import { loadProjects, saveProjects, cleanMojibake, INITIAL_PROJECTS } from './utils/storage';
+import { loadProjects, saveProjects, cleanMojibake, INITIAL_PROJECTS, STORAGE_KEY, resetProjectsStorage } from './utils/storage';
 import { subscribeToAttendance } from './utils/attendanceService';
 import { FolderCheck } from 'lucide-react';
 import { computeExecutiveStatus, computeHealthScore, generateProjectMonitoringUpdate } from './utils/assistantEngine';
@@ -65,7 +65,7 @@ export const App: React.FC = () => {
   // Listen for cross-tab project changes (e.g. technician attendance from other tabs)
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
-      if ((e.key === 'cctv_monitoring_projects_v6' || e.key === 'cctv_attendance_event') && e.newValue) {
+      if ((e.key === STORAGE_KEY || e.key === 'cctv_monitoring_projects_v6' || e.key === 'cctv_attendance_event') && e.newValue) {
         setProjects(loadProjects());
       }
     };
@@ -481,7 +481,7 @@ export const App: React.FC = () => {
   };
 
   const handleResetProjectData = () => {
-    localStorage.removeItem('cctv_monitoring_projects_v1');
+    resetProjectsStorage();
     const fresh = loadProjects();
     setProjects(fresh);
   };

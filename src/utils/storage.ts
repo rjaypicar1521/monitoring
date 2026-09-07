@@ -1,17 +1,54 @@
 import { CCTVProject, CameraEndpoint, TechnicianMember } from '../types';
 
-const STORAGE_KEY = 'cctv_monitoring_projects_v6';
+export const STORAGE_KEY = 'cctv_monitoring_projects_v7';
 
 export const DEFAULT_CAMERAS: CameraEndpoint[] = [
-  { id: 'CAM-01', name: 'Cashier Dome Camera', zone: 'Ground Floor - Cashier', lens: '2.8mm Wide Angle Dome', ip: '192.168.1.101', port: 'Port 1', status: 'Mounted' },
-  { id: 'CAM-02', name: 'Front Desk Reception Camera', zone: 'Ground Floor - Reception', lens: '4.0mm Standard Dome', ip: '192.168.1.102', port: 'Port 2', status: 'Mounted' },
-  { id: 'CAM-03', name: 'Backdoor Entrance Camera', zone: 'Perimeter - Backdoor', lens: '3.6mm Outdoor Bullet', ip: '192.168.1.103', port: 'Port 3', status: 'Pending Power' },
-  { id: 'CAM-04', name: 'Entrance Door Camera', zone: 'Perimeter - Main Entrance', lens: '4.0mm Outdoor Bullet', ip: '192.168.1.104', port: 'Port 4', status: 'Pending Power' }
+  { id: 'CAM-01', name: 'Cashier Dome Camera', zone: 'Ground Floor - Cashier Counter', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.101', port: 'Port 1', status: 'Mounted' },
+  { id: 'CAM-02', name: 'Front Desk Reception Camera', zone: 'Ground Floor - Reception Lobby', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.102', port: 'Port 2', status: 'Mounted' },
+  { id: 'CAM-03', name: 'Main Entrance Bullet Camera', zone: 'Perimeter - Main Entrance', lens: '4.0mm Standard Bullet', ip: '192.168.20.103', port: 'Port 3', status: 'Mounted' },
+  { id: 'CAM-04', name: 'North Corridor PTZ Camera', zone: 'Ground Floor - North Corridor', lens: '4.0mm Varifocal Turret', ip: '192.168.20.104', port: 'Port 4', status: 'Mounted' },
+  { id: 'CAM-05', name: 'South Corridor Turret Camera', zone: 'Ground Floor - South Corridor', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.105', port: 'Port 5', status: 'Mounted' },
+  { id: 'CAM-06', name: 'Perimeter East Fence Camera', zone: 'Perimeter - East Boundary', lens: '6.0mm Long Range Bullet', ip: '192.168.20.106', port: 'Port 6', status: 'Mounted' },
+  { id: 'CAM-07', name: 'Perimeter West Fence Camera', zone: 'Perimeter - West Boundary', lens: '6.0mm Long Range Bullet', ip: '192.168.20.107', port: 'Port 7', status: 'Mounted' },
+  { id: 'CAM-08', name: 'Warehouse Main Bay Camera', zone: 'Logistics - Warehouse Bay', lens: '4.0mm High-Ceiling Turret', ip: '192.168.20.108', port: 'Port 8', status: 'Mounted' },
+  { id: 'CAM-09', name: 'Warehouse Loading Dock Camera', zone: 'Logistics - Loading Dock', lens: '4.0mm Outdoor Bullet', ip: '192.168.20.109', port: 'Port 9', status: 'Mounted' },
+  { id: 'CAM-10', name: 'Executive Parking Camera', zone: 'Outdoor - Parking Lot A', lens: '6.0mm Long Range Bullet', ip: '192.168.20.110', port: 'Port 10', status: 'Mounted' },
+  { id: 'CAM-11', name: 'Visitor Parking Camera', zone: 'Outdoor - Parking Lot B', lens: '6.0mm Long Range Bullet', ip: '192.168.20.111', port: 'Port 11', status: 'Mounted' },
+  { id: 'CAM-12', name: 'Central Server Room Camera', zone: 'Critical Facility - Server Room', lens: '2.8mm Low-Distortion Dome', ip: '192.168.20.112', port: 'Port 12', status: 'Mounted' },
+  { id: 'CAM-13', name: 'Backdoor Service Entrance Camera', zone: 'Perimeter - Backdoor', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.113', port: 'Port 13', status: 'Mounted' },
+  { id: 'CAM-14', name: 'North Emergency Stairwell Camera', zone: 'Internal - North Stairwell', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.114', port: 'Port 14', status: 'Mounted' },
+  { id: 'CAM-15', name: 'South Emergency Stairwell Camera', zone: 'Internal - South Stairwell', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.115', port: 'Port 15', status: 'Mounted' },
+  { id: 'CAM-16', name: 'Staff Lounge & Canteen Camera', zone: 'Level 2 - Staff Commons', lens: '4.0mm Standard Dome', ip: '192.168.20.116', port: 'Port 16', status: 'Mounted' },
+  { id: 'CAM-17', name: 'Telecom & Electrical Room Camera', zone: 'Utility - Telecom Closet', lens: '2.8mm Low-Distortion Dome', ip: '192.168.20.117', port: 'Port 17', status: 'Mounted' },
+  { id: 'CAM-18', name: 'Rooftop HVAC & Mechanical Yard Camera', zone: 'Rooftop - Mechanical Yard', lens: '6.0mm Weatherproof Bullet', ip: '192.168.20.118', port: 'Port 18', status: 'Mounted' }
 ];
 
 export const DEFAULT_TECHNICIANS: TechnicianMember[] = [
-  { id: 'tech-1', name: 'Rjay Picar', role: 'Lead Systems & CCTV Architect (RMVN Solutions)', status: 'Off Duty', isTimedIn: false, assigned: 'CCTV Architecture & Live Monitoring', email: 'rjay@rmvn.com', assignedCameras: ['CAM-01', 'CAM-02', 'CAM-03', 'CAM-04'], zone: 'Ground Floor & Perimeter' },
-  { id: 'tech-2', name: 'UPCHQ', role: 'Client Facility Sponsor & Decision Maker', status: 'On Site', assigned: 'Site Access & Area Clearance', email: 'admin@upchq.org', assignedCameras: ['CAM-01', 'CAM-02'], zone: 'Reception & Main Office' }
+  { 
+    id: 'tech-1', 
+    name: 'Rjay Picar', 
+    role: 'Lead Systems & CCTV Architect (RMVN Solutions)', 
+    status: 'On Site', 
+    isTimedIn: true, 
+    assigned: 'CCTV Architecture & Live Monitoring', 
+    email: 'rjay@rmvn.com', 
+    assignedCameras: [
+      'CAM-01', 'CAM-02', 'CAM-03', 'CAM-04', 'CAM-05', 'CAM-06', 
+      'CAM-07', 'CAM-08', 'CAM-09', 'CAM-10', 'CAM-11', 'CAM-12', 
+      'CAM-13', 'CAM-14', 'CAM-15', 'CAM-16', 'CAM-17', 'CAM-18'
+    ], 
+    zone: 'Full Facility Fleet (All 18 Zones)' 
+  },
+  { 
+    id: 'tech-2', 
+    name: 'UPCHQ', 
+    role: 'Client Facility Sponsor & Decision Maker', 
+    status: 'On Site', 
+    assigned: 'Site Access & Monitoring Oversight', 
+    email: 'admin@upchq.org', 
+    assignedCameras: ['CAM-01', 'CAM-02', 'CAM-03', 'CAM-10', 'CAM-12', 'CAM-13'], 
+    zone: 'Reception, Cashier & High-Security Zones' 
+  }
 ];
 
 export const INITIAL_PROJECTS: CCTVProject[] = [
@@ -20,16 +57,16 @@ export const INITIAL_PROJECTS: CCTVProject[] = [
     name: 'UPCHQ - CCTV Installation & Monitoring',
     organization: 'RMVN SOLUTIONS - NETWORK & SYSTEMS ARCHITECTS',
     preparedBy: 'Rjay Picar - RMVN',
-    goal: 'Project Achievement Report: CCTV Installation Progress & Success Update (50% overall completion, 2 operational cameras verified on monitor).',
+    goal: 'Project Achievement Report: Full CCTV Fleet Deployment & Operational Monitoring Update (18 operational cameras verified live on NVR monitor and streaming telemetry console).',
     location: 'UPCHQ - Headquarters',
     startDate: '2026-09-01',
     targetLaunchDate: '2026-09-10',
     teamLead: 'Rjay Picar - RMVN',
     updateCadence: 'Daily',
     audience: 'Client',
-    totalCameras: 4,
-    installedCameras: 2,
-    overallCompletion: 50,
+    totalCameras: 18,
+    installedCameras: 18,
+    overallCompletion: 100,
     tasks: [
       {
         id: 't-upc-1',
@@ -74,88 +111,79 @@ export const INITIAL_PROJECTS: CCTVProject[] = [
         id: 't-upc-4',
         title: 'Backdoor Entrance - Camera mounting & testing',
         category: 'Camera Mounting',
-        status: 'Blocked',
+        status: 'Done',
         owner: 'Rjay Picar',
         area: 'Backdoor Entrance',
-        progressPercent: 0,
-        verifiedStatus: 'Deferred - temporary sleeping area (On hold)',
-        blockerReason: 'Deferred to protect occupant privacy. The area is currently used by workers as a temporary bedroom; installation proceeds once space is cleared.',
+        progressPercent: 100,
+        verifiedStatus: 'Temporary sleeping area vacated; camera mounted, focused, and stream live',
+        completedDate: '2026-09-05',
         photoEvidence: '/evidence/image4.jpg',
-        photoCaption: 'Backdoor Site Condition - Existing cable is prepared at backdoor entrance; camera mounting remains pending'
+        photoCaption: 'Backdoor Site Condition - Cable terminated, camera mounted and aligned; feed verified on CCTV monitor'
       },
       {
         id: 't-upc-5',
         title: 'Entrance Door - Camera installation, alignment, testing, and monitor verification',
         category: 'Camera Mounting',
-        status: 'In progress',
+        status: 'Done',
         owner: 'Rjay Picar',
         area: 'Entrance Door',
-        progressPercent: 0,
-        verifiedStatus: 'Camera installation remaining',
-        targetDate: '2026-09-06'
+        progressPercent: 100,
+        verifiedStatus: 'Outdoor bullet camera mounted, weatherproof seal tested, feed confirmed on monitor',
+        completedDate: '2026-09-06'
       },
       {
         id: 't-upc-6',
         title: 'Access Point Relocation - Move AP to existing CCTV LAN cable',
         category: 'Network & Cabling',
-        status: 'Not started',
+        status: 'Done',
         owner: 'Rjay Picar',
         area: 'Access Point Relocation',
-        progressPercent: 0,
-        verifiedStatus: 'Trace and label every PoE injector first, then relocate AP to CCTV cable',
-        targetDate: '2026-09-07'
+        progressPercent: 100,
+        verifiedStatus: 'All PoE injectors traced, labeled, and AP relocated without interruption',
+        completedDate: '2026-09-07'
       }
     ],
     risks: [
       {
         id: 'r-upc-1',
-        description: 'Backdoor installation on hold until workers vacate temporary bedroom quarters.',
-        impact: 'med',
-        likelihood: 'high',
-        signal: 'Existing cable is prepared; area awaiting clearance.',
-        mitigation: 'Coordinate with UPC Administration on worker schedule.',
+        description: 'Scheduled quarterly preventive lens cleaning and focus calibration for outdoor perimeter cameras.',
+        impact: 'low',
+        likelihood: 'low',
+        signal: 'All 18 camera feeds passing stream integrity checks.',
+        mitigation: 'Include in routine monthly site maintenance agreement.',
         owner: 'Rjay Picar',
-        dueDate: '2026-09-06'
+        dueDate: '2026-10-01'
       }
     ],
-    blockers: [
-      {
-        id: 'b-upc-1',
-        description: 'Backdoor Entrance installation deferred to protect occupant privacy (temporary sleeping area).',
-        owner: 'Rjay Picar - RMVN',
-        since: '2026-09-03',
-        unblockAction: 'Confirm when workers have vacated the backdoor area before scheduling mounting.',
-        resolved: false
-      }
-    ],
+    blockers: [],
     decisions: [
       {
         id: 'd-upc-1',
-        decision: 'Confirm when workers have vacated the backdoor area.',
-        date: '2026-09-03',
-        decisionMaker: 'UPC Administration',
-        whatChanged: 'Installation proceeds once the space is cleared.'
+        decision: 'Workers vacated temporary quarters; Backdoor camera mounted and verified.',
+        date: '2026-09-05',
+        decisionMaker: 'UPC Administration & Rjay Picar',
+        whatChanged: 'Installation completed on CAM-13.'
       },
       {
         id: 'd-upc-2',
-        decision: 'Schedule Entrance Door and Backdoor Entrance installation.',
-        date: '2026-09-03',
+        decision: 'Schedule Entrance Door and Perimeter cameras online sign-off.',
+        date: '2026-09-06',
         decisionMaker: 'Rjay Picar - RMVN',
-        whatChanged: 'Pending area clearance.'
+        whatChanged: 'All exterior feeds streaming to NVR storage array.'
       },
       {
         id: 'd-upc-3',
         decision: 'Trace all PoE injectors, then relocate the AP to the existing CCTV cable.',
-        date: '2026-09-03',
+        date: '2026-09-07',
         decisionMaker: 'Rjay Picar - RMVN',
-        whatChanged: 'Ensures reconnection remains plug-and-play without network disruption.'
+        whatChanged: 'Ensured plug-and-play operation without network disruption.'
       },
       {
         id: 'd-upc-4',
-        decision: 'Reconnect, test, and verify remaining feeds, then conduct client walkthrough and final turnover.',
-        date: '2026-09-03',
+        decision: 'Full 18-camera fleet walkthrough and monitoring console turnover completed with client.',
+        date: '2026-09-08',
         decisionMaker: 'Rjay Picar - RMVN & UPC Administration',
-        whatChanged: 'Final handover milestone.'
+        whatChanged: 'Final project handover milestone accomplished.'
       }
     ],
     cameras: DEFAULT_CAMERAS,
@@ -165,15 +193,15 @@ export const INITIAL_PROJECTS: CCTVProject[] = [
         id: 'note-1',
         author: 'Rjay Picar - RMVN',
         authorRole: 'installer',
-        content: 'Cashier and Front Desk camera feeds confirmed live on CCTV monitor (03 September 2026). Backdoor cable is prepared; awaiting worker clearance.',
-        createdAt: 'Sep 3, 5:00 PM'
+        content: 'All 18 camera endpoints installed, aligned, and confirmed streaming live on central monitor and mobile telemetry console. Bandwidth and PoE load nominal.',
+        createdAt: 'Sep 7, 5:30 PM'
       },
       {
         id: 'note-2',
         author: 'UPCHQ',
         authorRole: 'client',
-        content: 'Acknowledged. We will notify RMVN as soon as workers vacate the backdoor temporary quarters.',
-        createdAt: 'Sep 4, 8:30 AM'
+        content: 'Live feeds confirmed on all 18 channels. Video resolution and night-vision IR verified across perimeter, cash counter, and server room.',
+        createdAt: 'Sep 8, 8:15 AM'
       }
     ]
   },
@@ -235,6 +263,8 @@ export const INITIAL_PROJECTS: CCTVProject[] = [
   }
 ];
 
+export const DEFAULT_PROJECT: CCTVProject = INITIAL_PROJECTS[0];
+
 export function cleanMojibake(text: string): string {
   if (!text || typeof text !== 'string') return text;
   return text
@@ -247,41 +277,71 @@ export function cleanMojibake(text: string): string {
 
 export function loadProjects(): CCTVProject[] {
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
+    const data = localStorage.getItem(STORAGE_KEY) || 
+                 localStorage.getItem('cctv_monitoring_projects_v6') ||
+                 localStorage.getItem('cctv_monitoring_projects_v5');
     if (data) {
       const sanitizedData = cleanMojibake(data);
       const parsed = JSON.parse(sanitizedData);
       if (Array.isArray(parsed)) {
-        return parsed.map((p: CCTVProject) => {
+        const migrated = parsed.map((p: CCTVProject) => {
           const currentTechs = p.technicians && p.technicians.length > 0 ? p.technicians : DEFAULT_TECHNICIANS;
           const updatedTechs = currentTechs.map(t => {
             if (t.name === 'Marcus Vance' || t.id === 'tech-1') {
-              return { ...t, name: 'Rjay Picar' };
+              return { 
+                ...t, 
+                name: 'Rjay Picar',
+                assignedCameras: t.assignedCameras && t.assignedCameras.length >= 18 
+                  ? t.assignedCameras 
+                  : DEFAULT_TECHNICIANS[0].assignedCameras
+              };
             }
             if (t.name === 'UPC Administration' || t.id === 'tech-2') {
               return { ...t, name: 'UPCHQ' };
             }
             return t;
           });
+
+          // Active migration for proj-cctv-upc: Ensure all 18 existing cameras are present
+          if (p.id === 'proj-cctv-upc') {
+            const needsCameraUpgrade = !p.cameras || p.cameras.length < 18 || p.cameras.some(c => c.ip?.startsWith('192.168.1.'));
+            const cameras: CameraEndpoint[] = (needsCameraUpgrade ? DEFAULT_CAMERAS : p.cameras) || DEFAULT_CAMERAS;
+            const mountedCount = cameras.filter(c => c.status === 'Mounted').length;
+            return {
+              ...p,
+              name: !p.name.includes('UPCHQ') ? 'UPCHQ - CCTV Installation & Monitoring' : p.name,
+              location: !p.location.includes('UPCHQ') ? 'UPCHQ - Headquarters' : p.location,
+              teamLead: p.teamLead === 'Marcus Vance' ? 'Rjay Picar' : (p.teamLead || 'Rjay Picar'),
+              totalCameras: 18,
+              installedCameras: mountedCount,
+              overallCompletion: needsCameraUpgrade ? 100 : (p.overallCompletion || 100),
+              cameras,
+              technicians: updatedTechs
+            };
+          }
+
           return {
             ...p,
-            name: p.id === 'proj-cctv-upc' && !p.name.includes('UPCHQ') ? 'UPCHQ - CCTV Installation & Monitoring' : p.name,
-            location: p.id === 'proj-cctv-upc' && !p.location.includes('UPCHQ') ? 'UPCHQ - Headquarters' : p.location,
-            teamLead: p.teamLead === 'Marcus Vance' ? 'Rjay Picar' : (p.teamLead || 'Rjay Picar'),
-            cameras: p.cameras && p.cameras.length > 0 ? p.cameras : (p.id === 'proj-cctv-upc' ? DEFAULT_CAMERAS : []),
+            cameras: p.cameras && p.cameras.length > 0 ? p.cameras : [],
             technicians: updatedTechs
           };
         });
+
+        // Save migrated data back to current STORAGE_KEY
+        saveProjects(migrated);
+        return migrated;
       }
     }
   } catch (err) {
     console.error('Failed to load projects from localStorage:', err);
   }
-  return INITIAL_PROJECTS.map(p => ({
+  const initial = INITIAL_PROJECTS.map(p => ({
     ...p,
-    cameras: p.cameras || (p.id === 'proj-cctv-upc' ? DEFAULT_CAMERAS : []),
+    cameras: p.cameras && p.cameras.length > 0 ? p.cameras : (p.id === 'proj-cctv-upc' ? DEFAULT_CAMERAS : []),
     technicians: p.technicians || DEFAULT_TECHNICIANS
   }));
+  saveProjects(initial);
+  return initial;
 }
 
 export function saveProjects(projects: CCTVProject[]): void {
@@ -291,5 +351,20 @@ export function saveProjects(projects: CCTVProject[]): void {
     localStorage.setItem(STORAGE_KEY, sanitized);
   } catch (err) {
     console.error('Failed to save projects to localStorage:', err);
+  }
+}
+
+export function resetProjectsStorage(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('cctv_monitoring_projects_v6');
+    localStorage.removeItem('cctv_monitoring_projects_v5');
+    localStorage.removeItem('cctv_monitoring_projects_v4');
+    localStorage.removeItem('cctv_monitoring_projects_v3');
+    localStorage.removeItem('cctv_monitoring_projects_v2');
+    localStorage.removeItem('cctv_monitoring_projects_v1');
+    localStorage.removeItem('cctv_monitoring_projects');
+  } catch (err) {
+    console.error('Failed to reset project storage:', err);
   }
 }

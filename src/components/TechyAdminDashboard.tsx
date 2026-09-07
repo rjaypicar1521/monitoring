@@ -58,23 +58,27 @@ export const TechyAdminDashboard: React.FC<TechyAdminDashboardProps> = ({
   const [isPinging, setIsPinging] = useState(false);
   const [pingSuccess, setPingSuccess] = useState(false);
   const [consoleLogs, setConsoleLogs] = useState<string[]>([
-    '[00:48:12] [NVR-DAEMON] RTSP stream CAM-12 established (3840x2160@30fps, 4096kbps)',
-    '[00:48:10] [POE-SWITCH-G24] Port 12 802.3at power negotiation: 12.4W delivered',
-    '[00:48:02] [DHCP-SRV] Assigned 192.168.20.112 to MAC 74:83:C2:59:B1:0C (CAM-12)',
-    '[00:47:55] [NOC-MONITOR] Ping probe 192.168.20.101-112 latency avg: 14.2ms (0% loss)',
-    '[00:47:30] [SYS-WARN] Ports 13-24: Link DOWN (Waiting on external 220V breaker connection)',
-    '[00:46:15] [RAID-CONTROLLER] Array 0 (RAID-6) Verify complete: 8/8 disks SMART OK, 36.5°C'
+    '[00:48:12] [NVR-DAEMON] RTSP streams CAM-01 through CAM-18 verified active (3840x2160@30fps, H.265+)',
+    '[00:48:10] [POE-SWITCH-G24] Ports 1-18: 802.3at PoE+ power active (224.2W delivered across 18 cameras)',
+    '[00:48:02] [DHCP-SRV] Assigned static leases 192.168.20.101-118 on VLAN 20',
+    '[00:47:55] [NOC-MONITOR] Ping sweep 192.168.20.101-118 latency avg: 12.8ms (0% packet loss)',
+    '[00:47:30] [POE-SWITCH-G24] Ports 19-24: Link DOWN (Auxiliary standby ports)',
+    '[00:46:15] [RAID-CONTROLLER] Array 0 (RAID-6 48TB) Verify complete: 8/8 disks SMART OK, 36.5°C'
   ]);
 
-  // Simulated 24 Camera Nodes
+  // Simulated 24-Port Switch Telemetry with 18 Cameras
   const [cameras, setCameras] = useState<CameraTelemetry[]>(() => {
+    const projCams = project.cameras || [];
     return Array.from({ length: 24 }, (_, idx) => {
       const num = idx + 1;
-      const isOnline = num <= project.installedCameras;
+      const matchingCam = projCams.find(c => c.port === `Port ${num}` || c.id === `CAM-${String(num).padStart(2, '0')}`);
+      const isOnline = matchingCam ? matchingCam.status === 'Mounted' : num <= project.installedCameras;
+      const camName = matchingCam ? matchingCam.name : (num <= 18 ? `CCTV Node #${num}` : `Aux Switch Port #${num}`);
+      const camIp = matchingCam ? matchingCam.ip : `192.168.20.${100 + num}`;
       return {
         id: `CAM-${String(num).padStart(2, '0')}`,
-        name: num <= 12 ? `Indoor Corridor #${num}` : `Exterior Perimeter #${num}`,
-        ip: `192.168.20.${100 + num}`,
+        name: camName,
+        ip: camIp,
         mac: `74:83:C2:${String(num * 3).padStart(2, '0')}:${String(num * 7).padStart(2, '0')}:${String(num * 2).padStart(2, '0')}`,
         vlan: 20,
         port: num,
@@ -88,6 +92,28 @@ export const TechyAdminDashboard: React.FC<TechyAdminDashboardProps> = ({
     });
   });
 
+  React.useEffect(() => {
+    const projCams = project.cameras || [];
+    setCameras(prev => prev.map(c => {
+      const matchingCam = projCams.find(cam => cam.port === `Port ${c.port}` || cam.id === `CAM-${String(c.port).padStart(2, '0')}`);
+      if (!matchingCam) {
+        const isOnline = c.port <= project.installedCameras;
+        return { ...c, status: isOnline ? 'ONLINE' : 'NO_POWER' };
+      }
+      const isOnline = matchingCam.status === 'Mounted';
+      return {
+        ...c,
+        name: matchingCam.name,
+        ip: matchingCam.ip,
+        status: isOnline ? 'ONLINE' : 'NO_POWER',
+        bitrate: isOnline ? (c.bitrate > 0 ? c.bitrate : 4096 + (c.port % 5) * 120) : 0,
+        fps: isOnline ? 30 : 0,
+        poeWattage: isOnline ? (c.poeWattage > 0 ? c.poeWattage : 11.8 + (c.port % 4) * 0.4) : 0,
+        ping: isOnline ? (c.ping > 0 ? c.ping : 12 + (c.port % 6)) : 0
+      };
+    }));
+  }, [project.cameras, project.installedCameras]);
+
   const activeCamsCount = cameras.filter(c => c.status === 'ONLINE').length;
   const totalPowerDraw = cameras.reduce((acc, c) => acc + c.poeWattage, 0).toFixed(1);
   const totalThroughput = (cameras.reduce((acc, c) => acc + c.bitrate, 0) / 1024).toFixed(1);
@@ -97,8 +123,9 @@ export const TechyAdminDashboard: React.FC<TechyAdminDashboardProps> = ({
     setTimeout(() => {
       setIsPinging(false);
       setPingSuccess(true);
+      const activeCount = cameras.filter(c => c.status === 'ONLINE').length;
       setConsoleLogs(prev => [
-        `[${new Date().toLocaleTimeString()}] [PING-SWEEP] Scanned 24 hosts on 192.168.20.0/24: 12 responded, 12 timeout`,
+        `[${new Date().toLocaleTimeString()}] [PING-SWEEP] Scanned 24 hosts on 192.168.20.0/24: ${activeCount} responded, ${24 - activeCount} standby`,
         ...prev
       ]);
       setTimeout(() => setPingSuccess(false), 3000);
@@ -199,10 +226,10 @@ export const TechyAdminDashboard: React.FC<TechyAdminDashboardProps> = ({
 
           <div className="flex items-center gap-3 text-xs">
             <span className="flex items-center gap-1.5 text-emerald-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" /> 12 Linked (PoE 1000M)
+              <span className="w-2 h-2 rounded-full bg-emerald-400" /> {activeCamsCount} Linked (PoE 1000M)
             </span>
             <span className="flex items-center gap-1.5 text-amber-400">
-              <span className="w-2 h-2 rounded-full bg-amber-400" /> 12 Standby (Breaker Off)
+              <span className="w-2 h-2 rounded-full bg-amber-400" /> {Math.max(0, 24 - activeCamsCount)} Standby (Aux Ports)
             </span>
             <button
               onClick={handlePingAll}
