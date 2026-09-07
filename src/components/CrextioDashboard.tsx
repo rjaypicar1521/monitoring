@@ -932,31 +932,41 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
                 {/* Visual Installation Progress Bar */}
                 <div className="bg-slate-900/80 backdrop-blur-md rounded-2xl p-3.5 border border-white/15 shadow-xs space-y-2.5 text-white">
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="font-bold text-white text-sm">Installation Progress</span>
-                      <span className="text-[11px] font-medium text-slate-300">
-                        ({project.installedCameras} of {project.totalCameras} Endpoints Mounted)
-                      </span>
+                  <div 
+                    role="progressbar"
+                    aria-valuenow={Math.min(Math.max(percentComplete, 0), 100)}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-labelledby="InstallationProgressLabel"
+                    aria-valuetext={`${percentComplete}% Mounted`}
+                    className="space-y-2.5"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span id="InstallationProgressLabel" className="font-bold text-white text-sm">Installation Progress</span>
+                        <span className="text-[11px] font-medium text-slate-300">
+                          ({project.installedCameras} of {project.totalCameras} Endpoints Mounted)
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2.5 font-mono text-xs">
+                        <span className="font-bold bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                          {percentComplete}% Mounted
+                        </span>
+                        <span className="text-slate-300 text-[11px]">
+                          Handover: <strong className="text-white">{project.targetLaunchDate || '2026-09-12'}</strong>
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2.5 font-mono text-xs">
-                      <span className="font-bold bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-                        {percentComplete}% Mounted
-                      </span>
-                      <span className="text-slate-300 text-[11px]">
-                        Handover: <strong className="text-white">{project.targetLaunchDate || '2026-09-12'}</strong>
-                      </span>
-                    </div>
-                  </div>
 
-                  {/* Main Visual Progress Track & Bar */}
-                  <div className="relative w-full bg-slate-800/80 rounded-full h-3.5 overflow-hidden border border-white/10 shadow-inner">
-                    <div 
-                      className="h-full bg-gradient-to-r from-amber-400 via-emerald-400 to-emerald-500 rounded-full transition-all duration-700 relative shadow-xs"
-                      style={{ width: `${Math.max(percentComplete, 4)}%` }}
-                    >
-                      <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                    {/* Main Visual Progress Track & Bar */}
+                    <div className="w-full border-2 border-white/90 bg-slate-950 p-1 shadow-[3px_3px_0_0_#f59e0b] rounded-sm overflow-hidden">
+                      <div 
+                        className="h-3.5 bg-gradient-to-r from-amber-400 via-emerald-400 to-emerald-500 rounded-2xs transition-all duration-700 relative overflow-hidden"
+                        style={{ width: `${Math.min(Math.max(percentComplete, 4), 100)}%` }}
+                      >
+                        <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                      </div>
                     </div>
                   </div>
 
