@@ -182,17 +182,17 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
   const weekDayLabels = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
   return (
-    <div className={`bg-slate-50/95 border border-slate-200/80 rounded-2xl p-3 shadow-2xs space-y-2.5 ${className}`}>
+    <div className={`bg-slate-50/95 border border-slate-200/80 rounded-2xl p-2.5 shadow-2xs space-y-2 overflow-hidden ${className}`}>
       {/* Live Digital Clock Instrument Panel */}
       {showClock && (
         <div 
-          className="bg-[#0e1117] border border-slate-800/90 rounded-xl p-2.5 text-white select-none shadow-2xs relative overflow-hidden"
+          className="bg-[#0e1117] border border-slate-800/90 rounded-xl p-2 text-white select-none shadow-2xs relative overflow-hidden"
           title={`Live system clock (${is24Hour ? '24-hour' : '12-hour'}). Click 12H/24H badge to switch format`}
         >
           {/* Top Status Row: Live Beacon, Timezone & Interactive Format Toggle */}
-          <div className="flex items-center justify-between text-[10px] mb-1.5">
-            <div className="flex items-center gap-1.5">
-              <span className="relative flex h-2 w-2" aria-hidden="true">
+          <div className="flex items-center justify-between text-[10px] mb-1">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
                 <span className="motion-reduce:hidden animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
               </span>
@@ -200,7 +200,7 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
                 LIVE
               </span>
               <span className="text-slate-600 font-mono text-[9px]">•</span>
-              <span className="font-mono font-medium tracking-wider text-slate-400 text-[10px]">
+              <span className="font-mono font-medium tracking-wider text-slate-400 text-[10px] truncate">
                 {timeZoneLabel}
               </span>
             </div>
@@ -208,7 +208,7 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
             <button
               type="button"
               onClick={toggleTimeFormat}
-              className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white border border-slate-700/60 transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-amber-400"
+              className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white border border-slate-700/60 transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-amber-400 shrink-0"
               title={`Switch to ${is24Hour ? '12-hour (AM/PM)' : '24-hour'} format`}
               aria-label={`Time format toggle. Currently ${is24Hour ? '24-hour' : '12-hour'}. Click to switch.`}
             >
@@ -219,27 +219,27 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
           {/* Time Display with Tabular Monospace Digits */}
           <time 
             dateTime={currentTime.toISOString()}
-            className="flex items-baseline justify-between pt-0.5 block"
+            className="flex items-baseline justify-between pt-0.5 block min-w-0"
           >
-            <div className="flex items-baseline font-mono tabular-nums tracking-wider">
-              <span className="text-2xl font-black text-white">
+            <div className="flex items-baseline font-mono tabular-nums tracking-wider min-w-0">
+              <span className="text-xl font-black text-white tracking-tight">
                 {displayHours}:{minutes}
               </span>
-              <span className="text-xs font-bold text-amber-400 ml-1">
+              <span className="text-[11px] font-bold text-amber-400 ml-0.5">
                 :{seconds}
               </span>
               {!is24Hour && (
-                <span className="text-[9px] font-mono font-black text-amber-300 uppercase ml-1.5 px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-400/30">
+                <span className="text-[8px] font-mono font-black text-amber-300 uppercase ml-1 px-1 py-0.2 rounded bg-amber-500/15 border border-amber-400/30 shrink-0">
                   {period}
                 </span>
               )}
             </div>
 
-            <div className="text-right shrink-0 pl-1.5">
-              <div className="text-[11px] font-bold text-slate-200 leading-tight">
+            <div className="text-right shrink-0 pl-1">
+              <div className="text-[10px] font-bold text-slate-200 leading-tight">
                 {weekdayFull.slice(0, 3)}
               </div>
-              <div className="text-[10px] text-slate-400 font-mono whitespace-nowrap">
+              <div className="text-[9px] text-slate-400 font-mono whitespace-nowrap">
                 {monthDayYear}
               </div>
             </div>
@@ -298,7 +298,7 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
       )}
 
       {/* Weekday headers */}
-      <div className="grid grid-cols-7 gap-1 text-center" aria-hidden="true">
+      <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-center" aria-hidden="true">
         {weekDayLabels.map((lbl, idx) => (
           <span
             key={lbl + idx}
@@ -310,7 +310,7 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
       </div>
 
       {/* Days Grid */}
-      <div className="grid grid-cols-7 gap-1 text-center" role="grid" aria-label={`Calendar grid for ${monthName}`}>
+      <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-center" role="grid" aria-label={`Calendar grid for ${monthName}`}>
         {days.map((item, idx) => {
           const cellKey = `${viewYear}-${viewMonth}-${idx}-${item.day}`;
           const isSelected = selectedDate ? (
@@ -325,7 +325,7 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
                 key={cellKey}
                 type="button"
                 onClick={() => onSelectDate?.(item.dateObj)}
-                className={`h-6 w-full flex items-center justify-center text-[10px] font-mono font-black rounded-lg bg-amber-400 text-slate-950 shadow-2xs ring-2 ring-amber-500/50 transition ${
+                className={`h-6.5 w-full flex items-center justify-center text-[10px] font-mono font-black rounded-lg bg-amber-400 text-slate-950 shadow-2xs ring-2 ring-amber-500/50 transition ${
                   onSelectDate ? 'cursor-pointer hover:bg-amber-300' : 'cursor-default'
                 }`}
                 title={`Today: ${fullDateFormatted}`}
@@ -343,7 +343,7 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
                 key={cellKey}
                 type="button"
                 onClick={() => onSelectDate?.(item.dateObj)}
-                className="h-6 w-full flex items-center justify-center text-[10px] font-mono font-black rounded-lg bg-slate-900 text-white shadow-2xs ring-1 ring-slate-700 cursor-pointer"
+                className="h-6.5 w-full flex items-center justify-center text-[10px] font-mono font-black rounded-lg bg-slate-900 text-white shadow-2xs ring-1 ring-slate-700 cursor-pointer"
                 aria-selected="true"
                 aria-label={item.dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               >
@@ -358,7 +358,7 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
               type="button"
               onClick={() => onSelectDate?.(item.dateObj)}
               disabled={!onSelectDate && !item.isCurrentMonth}
-              className={`h-6 w-full flex items-center justify-center text-[10px] font-mono rounded-lg transition ${
+              className={`h-6.5 w-full flex items-center justify-center text-[10px] font-mono rounded-lg transition ${
                 onSelectDate ? 'cursor-pointer hover:bg-slate-200/70' : 'cursor-default'
               } ${
                 item.isCurrentMonth

@@ -600,7 +600,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
       )}
 
       {/* FIGMA SIDEBAR NAVIGATION (DESKTOP) */}
-      <aside className="hidden md:flex md:w-64 bg-white border-r border-slate-200/90 flex-col justify-between p-5 shrink-0 z-30 shadow-xs h-screen sticky top-0 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
+      <aside className="hidden md:flex md:w-60 lg:w-64 bg-white border-r border-slate-200/90 flex-col justify-between p-4 lg:p-5 shrink-0 z-30 shadow-xs h-screen sticky top-0 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
         <div className="space-y-6">
           {/* Brand Header */}
           <div className="flex items-center justify-between">
@@ -1081,8 +1081,10 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
 
       {/* MAIN CONTENT AREA */}
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar p-3.5 sm:p-6 lg:p-8 space-y-6">
-        {/* Top Header Bar */}
-        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200/80 pb-4">
+        {/* Centered Constrained Container for Large & Ultrawide Displays */}
+        <div className="w-full max-w-[1600px] mx-auto space-y-5 sm:space-y-6 lg:space-y-7 min-w-0">
+          {/* Top Header Bar */}
+          <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200/80 pb-4">
           <div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               Hi, {currentUser.name.split(' ')[0]}!
@@ -1286,9 +1288,9 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
         {activeTab === 'Dashboard' && (
           <div className="space-y-6 animate-in fade-in">
             {/* ROW 1: 3 TOP HERO CARDS */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-12 gap-4 md:gap-5 lg:gap-6">
               {/* Card 1: High-Contrast Dark Hero Box (Col 4) */}
-              <div className="md:col-span-4 bg-[#111317] text-white rounded-[28px] p-6 shadow-xl flex flex-col justify-between space-y-4">
+              <div className="sm:col-span-1 xl:col-span-4 bg-[#111317] text-white rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col justify-between space-y-4">
                 <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
                   <span className="flex items-center gap-2">
                     <Camera className="w-4 h-4 text-cyan-400" />
@@ -1300,7 +1302,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 </div>
 
                 <div className="flex items-baseline justify-between">
-                  <div className="text-5xl font-black font-mono tracking-tight text-white">
+                  <div className="text-4xl sm:text-5xl font-black font-mono tracking-tight text-white">
                     {cameraList.length}
                   </div>
                   <div className={`px-2.5 py-1 rounded-full text-xs font-bold font-mono ${
@@ -1313,30 +1315,30 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 </div>
 
                 {/* 3 Mini-Stat Capsules */}
-                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/80">
-                  <div className="bg-white/10 rounded-2xl p-2.5 text-center">
-                    <div className="text-[10px] text-slate-400 font-medium">Mounted</div>
-                    <div className="text-base font-bold font-mono text-emerald-400">{project.installedCameras}</div>
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2 pt-2 border-t border-slate-800/80">
+                  <div className="bg-white/10 rounded-2xl p-1.5 sm:p-2 xl:p-2.5 text-center">
+                    <div className="text-[9px] sm:text-[10px] text-slate-400 font-medium truncate">Mounted</div>
+                    <div className="text-sm sm:text-base font-bold font-mono text-emerald-400">{project.installedCameras}</div>
                   </div>
-                  <div className="bg-white/10 rounded-2xl p-2.5 text-center">
-                    <div className="text-[10px] text-slate-400 font-medium">Pending</div>
-                    <div className="text-base font-bold font-mono text-amber-400">{Math.max(0, cameraList.length - project.installedCameras)}</div>
+                  <div className="bg-white/10 rounded-2xl p-1.5 sm:p-2 xl:p-2.5 text-center">
+                    <div className="text-[9px] sm:text-[10px] text-slate-400 font-medium truncate">Pending</div>
+                    <div className="text-sm sm:text-base font-bold font-mono text-amber-400">{Math.max(0, cameraList.length - project.installedCameras)}</div>
                   </div>
-                  <div className="bg-white/10 rounded-2xl p-2.5 text-center">
-                    <div className="text-[10px] text-slate-400 font-medium">Pacing</div>
-                    <div className="text-base font-bold font-mono text-cyan-400">{percentComplete}%</div>
+                  <div className="bg-white/10 rounded-2xl p-1.5 sm:p-2 xl:p-2.5 text-center">
+                    <div className="text-[9px] sm:text-[10px] text-slate-400 font-medium truncate">Pacing</div>
+                    <div className="text-sm sm:text-base font-bold font-mono text-cyan-400">{percentComplete}%</div>
                   </div>
                 </div>
               </div>
 
               {/* Card 2: Weekly Velocity Spline Chart (Col 5) */}
-              <div className="md:col-span-5 bg-white rounded-[28px] p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-bold text-slate-900 block">Weekly overview</span>
-                    <span className="text-[10px] text-slate-400">Pace vs Target terminations</span>
+              <div className="sm:col-span-1 xl:col-span-5 bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+                  <div className="min-w-0">
+                    <span className="text-xs font-bold text-slate-900 block truncate">Weekly overview</span>
+                    <span className="text-[10px] text-slate-400 truncate block">Pace vs Target terminations</span>
                   </div>
-                  <div className="flex items-center gap-3 text-[10px] font-semibold text-slate-500">
+                  <div className="flex items-center gap-2.5 text-[10px] font-semibold text-slate-500 shrink-0">
                     <span className="flex items-center gap-1">
                       <span className="w-2 h-2 rounded-full bg-[#111317]" /> Cables
                     </span>
@@ -1398,14 +1400,14 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
               </div>
 
               {/* Card 3: Concentric Radial Progress Rings (Col 3) */}
-              <div className="md:col-span-3 bg-white rounded-[28px] p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between items-center text-center space-y-3">
-                <div className="w-full flex items-center justify-between text-xs">
+              <div className="sm:col-span-2 xl:col-span-3 bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row xl:flex-col justify-between items-center text-center sm:text-left xl:text-center gap-4 sm:gap-6 xl:gap-3">
+                <div className="w-full flex items-center justify-between text-xs sm:hidden xl:flex">
                   <span className="font-bold text-slate-900">Total Progress</span>
                   <span className="text-[10px] font-mono text-cyan-700 font-bold">{percentComplete}%</span>
                 </div>
 
                 {/* Concentric Multi-Ring Radial Gauge */}
-                <div className="relative w-32 h-32 flex items-center justify-center my-1">
+                <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center my-1 shrink-0">
                   <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                     {/* Outer Ring Background */}
                     <circle cx="50" cy="50" r="42" fill="none" stroke="#f1f5f9" strokeWidth="6" />
@@ -1445,19 +1447,31 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                   </div>
                 </div>
 
-                <button
-                  onClick={() => setShowAddTaskModal(true)}
-                  className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition cursor-pointer"
-                >
-                  + Add Target
-                </button>
+                <div className="w-full flex-1 flex flex-col justify-center space-y-2">
+                  <div className="hidden sm:block xl:hidden">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-900 text-sm">Deployment Velocity</span>
+                      <span className="text-xs font-mono text-cyan-700 font-bold bg-cyan-50 border border-cyan-200 px-2 py-0.5 rounded-full">{percentComplete}% Complete</span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      {project.installedCameras} endpoints mounted • {doneTasks.length} of {project.tasks.length} milestones complete
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => setShowAddTaskModal(true)}
+                    className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition cursor-pointer"
+                  >
+                    + Add Target
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* ROW 2: MIDDLE OPERATIONAL CARDS */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-12 gap-4 md:gap-5 lg:gap-6">
               {/* Card 1: Key Goals / Milestones Checklist (Col 5) */}
-              <div className="md:col-span-5 bg-white rounded-[28px] p-6 border border-slate-200/90 shadow-2xs space-y-4 flex flex-col justify-between">
+              <div className="sm:col-span-1 xl:col-span-5 bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs space-y-4 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <span className="font-bold text-xs text-slate-900 tracking-wide uppercase flex items-center gap-2">
@@ -1538,7 +1552,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
               </div>
 
               {/* Card 2: Field Technicians Team Cards (Col 4) */}
-              <div className="md:col-span-4 bg-white rounded-[28px] p-6 border border-slate-200/90 shadow-2xs space-y-4 flex flex-col justify-between">
+              <div className="sm:col-span-1 xl:col-span-4 bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs space-y-4 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <span className="font-bold text-xs text-slate-900 tracking-wide uppercase flex items-center gap-2">
@@ -1602,10 +1616,10 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
               </div>
 
               {/* Card 3: Quick Action Box (Col 3) */}
-              <div className="md:col-span-3 flex flex-col gap-2.5">
+              <div className="col-span-1 sm:col-span-2 xl:col-span-3 flex flex-col sm:flex-row xl:flex-col gap-3 sm:gap-3.5">
                 <div 
                   onClick={() => setShowAddCameraModal(true)}
-                  className="flex-1 border-2 border-dashed border-slate-300 hover:border-slate-400 bg-white/40 hover:bg-white rounded-[22px] p-3.5 flex items-center gap-3 cursor-pointer transition shadow-2xs group"
+                  className="flex-1 border-2 border-dashed border-slate-300 hover:border-slate-400 bg-white/40 hover:bg-white rounded-2xl p-4 flex items-center gap-3 cursor-pointer transition shadow-2xs group"
                 >
                   <div className="w-10 h-10 rounded-xl bg-slate-100 group-hover:bg-[#111317] group-hover:text-white transition flex items-center justify-center text-slate-700 shrink-0">
                     <Plus className="w-5 h-5" />
@@ -1623,7 +1637,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 {onOpenImportModal && (
                   <div 
                     onClick={onOpenImportModal}
-                    className="flex-1 border-2 border-amber-200/90 hover:border-amber-300 bg-gradient-to-r from-amber-50/70 to-orange-50/50 hover:bg-amber-100/50 rounded-[22px] p-3.5 flex items-center gap-3 cursor-pointer transition shadow-2xs group"
+                    className="flex-1 border-2 border-amber-200/90 hover:border-amber-300 bg-gradient-to-r from-amber-50/70 to-orange-50/50 hover:bg-amber-100/50 rounded-2xl p-4 flex items-center gap-3 cursor-pointer transition shadow-2xs group"
                     title="Import CCTV Achievement Report (.docx / .json)"
                   >
                     <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 group-hover:bg-amber-500 group-hover:text-white transition flex items-center justify-center shrink-0 shadow-2xs">
@@ -1644,8 +1658,8 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
             </div>
 
             {/* ROW 3: REPORTED AREA STATUS CAPSULES */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-[#111317] text-white rounded-[24px] p-5 shadow-lg flex items-center justify-between">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+              <div className="bg-[#111317] text-white rounded-3xl p-5 shadow-lg flex items-center justify-between">
                 <div className="space-y-1">
                   <div className="text-[10px] font-mono uppercase text-cyan-400 font-bold">Area 1 & 2 • Complete</div>
                   <div className="font-bold text-sm">Cashier & Front Desk</div>
@@ -1654,7 +1668,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
               </div>
 
-              <div className="bg-[#111317] text-white rounded-[24px] p-5 shadow-lg flex items-center justify-between">
+              <div className="bg-[#111317] text-white rounded-3xl p-5 shadow-lg flex items-center justify-between">
                 <div className="space-y-1">
                   <div className="text-[10px] font-mono uppercase text-amber-400 font-bold">Area 3 • On Hold</div>
                   <div className="font-bold text-sm">Backdoor Entrance</div>
@@ -1663,7 +1677,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
               </div>
 
-              <div className="bg-[#111317] text-white rounded-[24px] p-5 shadow-lg flex items-center justify-between">
+              <div className="bg-[#111317] text-white rounded-3xl p-5 shadow-lg flex items-center justify-between">
                 <div className="space-y-1">
                   <div className="text-[10px] font-mono uppercase text-slate-400 font-bold">Area 4 & 5 • Pending</div>
                   <div className="font-bold text-sm">Entrance Door & AP Relocation</div>
@@ -1674,7 +1688,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
             </div>
 
             {/* COMPLETED WORK - DYNAMIC PHOTOGRAPHIC EVIDENCE GALLERY */}
-            <div className="bg-white rounded-[28px] p-6 border border-slate-200/90 shadow-2xs space-y-4">
+            <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200/90 shadow-2xs space-y-4 sm:space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
                 <div className="flex items-start sm:items-center gap-3">
                   <div className="w-9 h-9 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center font-bold border border-amber-200 shrink-0">
@@ -1703,7 +1717,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
 
               {/* Zone / Area Filter Tabs */}
               {evidenceZones.length > 2 && (
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1 shrink-0">Zone:</span>
                   {evidenceZones.map(zone => {
                     const count = zone === 'All'
@@ -1752,7 +1766,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                   )}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                   {filteredEvidenceTasks.map((task) => {
                     const isDone = task.status === 'Done';
                     const isBlocked = task.status === 'Blocked';
@@ -1863,7 +1877,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
         {/* 3. TAB 1: INTERACTIVE KANBAN BOARD */}
         {activeTab === 'Board' && (
           <div className="space-y-4 animate-in fade-in">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="text-xl font-bold text-slate-900 tracking-tight">
                   Field Operations Kanban Board
@@ -1873,7 +1887,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {onOpenImportModal && (
                   <button
                     type="button"
@@ -1931,7 +1945,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
             </div>
 
             {/* Kanban Columns (Single stage on mobile, 4-col grid on tablet/desktop) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5 items-start">
               {columns.map((col) => {
                 const columnTasks = project.tasks.filter(t => t.status === col.status);
                 const isSelected = kanbanStageFilter !== 'All' && col.status === kanbanStageFilter;
@@ -1941,7 +1955,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 return (
                   <div 
                     key={col.status}
-                    className={`${isHiddenOnMobile ? 'hidden md:flex' : 'flex'} bg-white/80 backdrop-blur-sm rounded-[24px] p-4 border shadow-xs space-y-3 min-h-[460px] flex-col justify-between transition-all duration-300 ${
+                    className={`${isHiddenOnMobile ? 'hidden md:flex' : 'flex'} bg-white/80 backdrop-blur-sm rounded-3xl p-4 sm:p-5 border shadow-2xs space-y-3 min-h-[460px] flex-col justify-between transition-all duration-300 ${
                       isSelected
                         ? 'border-blue-500 ring-2 ring-blue-400/50 shadow-md scale-[1.01]'
                         : isDimmed
@@ -2181,16 +2195,16 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 {/* Search Bar */}
-                <div className="relative">
+                <div className="relative flex-1 sm:flex-initial min-w-[180px]">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                   <input
                     type="text"
                     placeholder="Filter by zone or spot..."
                     value={cameraSearch}
                     onChange={(e) => setCameraSearch(e.target.value)}
-                    className="pl-9 pr-4 py-1.5 rounded-full text-xs bg-white border border-slate-300 focus:outline-none focus:border-cyan-600 text-slate-800 placeholder-slate-400 w-56 shadow-xs"
+                    className="pl-9 pr-4 py-1.5 rounded-full text-xs bg-white border border-slate-300 focus:outline-none focus:border-cyan-600 text-slate-800 placeholder-slate-400 w-full sm:w-56 shadow-xs"
                   />
                 </div>
 
@@ -2262,7 +2276,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
             )}
 
             {/* Enterprise Table Container */}
-            <div className="bg-white rounded-[24px] border border-slate-200/90 shadow-xs overflow-hidden">
+            <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xs overflow-hidden">
               <div className="overflow-x-auto scroll-smooth no-scrollbar">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
@@ -2374,7 +2388,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
         {/* 5. TAB 3: TEAM MANAGEMENT */}
         {activeTab === 'Team' && (
           <div className="space-y-4 animate-in fade-in">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="text-xl font-bold text-slate-900 tracking-tight">
                   Technician Roster & Workload Assignments ({technicianList.length} Members)
@@ -2386,16 +2400,16 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
 
               <button
                 onClick={() => setShowAddTechModal(true)}
-                className="px-3.5 py-1.5 bg-[#1a1c22] hover:bg-slate-800 text-white rounded-full text-xs font-semibold shadow-xs flex items-center gap-1.5 transition cursor-pointer"
+                className="px-3.5 py-1.5 bg-[#1a1c22] hover:bg-slate-800 text-white rounded-full text-xs font-semibold shadow-xs flex items-center gap-1.5 transition cursor-pointer shrink-0 self-start sm:self-auto"
               >
                 <UserPlus className="w-3.5 h-3.5 text-purple-400" />
                 <span>Add Technician</span>
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
               {technicianList.map((member) => (
-                <div key={member.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3 flex flex-col justify-between">
+                <div key={member.id} className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-2xs space-y-3 flex flex-col justify-between">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
@@ -2744,8 +2758,10 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
             </div>
           </div>
         )}
+        </div>
+      </main>
 
-        {/* MODAL 1: ADD MILESTONE TASK */}
+      {/* MODAL 1: ADD MILESTONE TASK */}
         {showAddTaskModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
             <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
@@ -3548,7 +3564,6 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
           photo={lightboxPhoto}
           onClose={() => setLightboxPhoto(null)}
         />
-      </main>
-    </div>
-  );
-};
+      </div>
+    );
+  };

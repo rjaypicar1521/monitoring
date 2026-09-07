@@ -274,7 +274,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
       />
 
       {/* FIGMA SIDEBAR NAVIGATION (DESKTOP) */}
-      <aside className="hidden md:flex md:w-64 bg-white border-r border-slate-200/90 flex-col justify-between p-5 shrink-0 z-30 shadow-xs h-screen sticky top-0 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
+      <aside className="hidden md:flex md:w-60 lg:w-64 bg-white border-r border-slate-200/90 flex-col justify-between p-4 lg:p-5 shrink-0 z-30 shadow-xs h-screen sticky top-0 overflow-y-auto overflow-x-hidden scroll-smooth no-scrollbar">
         <div className="space-y-4 lg:space-y-5">
           {/* Brand Header */}
           <div className="flex items-center justify-between">
@@ -715,45 +715,47 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-amber-100/40 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Desktop Top Utility Bar */}
-        <div className="hidden md:flex items-center justify-between gap-4 relative z-20 pb-1 border-b border-slate-200/60">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-bold text-slate-800">
-              {project.name}
-            </span>
-            <span className="text-slate-400 text-xs">•</span>
-            <span className="text-xs text-slate-500 font-mono">
-              {percentComplete}% Milestone Deployment Completion
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Compact Today's Date Pill */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200/90 rounded-full text-xs font-semibold text-slate-800 shadow-xs">
-              <Calendar className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span>{todayDateFormatted}</span>
+        {/* Centered Constrained Container for Large & Ultrawide Displays */}
+        <div className="w-full max-w-[1600px] mx-auto space-y-5 sm:space-y-6 lg:space-y-7 min-w-0 relative z-10">
+          {/* Desktop Top Utility Bar */}
+          <div className="hidden md:flex flex-wrap lg:flex-nowrap items-center justify-between gap-3 relative z-20 pb-1.5 border-b border-slate-200/60 min-w-0">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <span className="text-xs font-bold text-slate-800 truncate">
+                {project.name}
+              </span>
+              <span className="text-slate-400 text-xs shrink-0">•</span>
+              <span className="text-xs text-slate-500 font-mono truncate">
+                {percentComplete}% Milestone Deployment Completion
+              </span>
             </div>
 
-            <button
-              onClick={onCopyReport}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1a1c22] hover:bg-slate-800 text-white rounded-full text-xs font-semibold shadow-xs transition cursor-pointer"
-              title="Copy 1-minute email update"
-            >
-              {copied ? (
-                <>
-                  <ClipboardCheck className="w-3.5 h-3.5 text-emerald-300" />
-                  <span>Copied</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Copy Update</span>
-                </>
-              )}
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Compact Today's Date Pill */}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200/90 rounded-full text-xs font-semibold text-slate-800 shadow-xs">
+                <Calendar className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                <span>{todayDateFormatted}</span>
+              </div>
+
+              <button
+                onClick={onCopyReport}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1a1c22] hover:bg-slate-800 text-white rounded-full text-xs font-semibold shadow-xs transition cursor-pointer"
+                title="Copy 1-minute email update"
+              >
+                {copied ? (
+                  <>
+                    <ClipboardCheck className="w-3.5 h-3.5 text-emerald-300" />
+                    <span>Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5 text-amber-300" />
+                    <span>Copy Update</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
-        </div>
 
         {/* 2. TAB CONTENT ROUTER */}
 
@@ -926,13 +928,13 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               </div>
             </section>
 
-            {/* 3-COLUMN BALANCED GRID */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+            {/* BALANCED 2-COLUMN GRID (ADAPTIVE ACROSS MOBILE, TABLET & DESKTOP) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 relative z-10">
               
-              {/* LEFT COLUMN: Profile Card & Accordion Details */}
-              <div className="lg:col-span-3 space-y-4 flex flex-col justify-between">
+              {/* LEFT COLUMN: Technician Status, Fleet Telemetry & Field Activity */}
+              <div className="lg:col-span-6 space-y-4 sm:space-y-5 flex flex-col">
                 {/* On Duty / Off Duty Technician Card (No Photo) */}
-                <div className="bg-[#191b20] text-white rounded-[24px] p-4 border border-slate-700/70 shadow-sm space-y-3">
+                <div className="bg-[#191b20] text-white rounded-3xl p-5 border border-slate-700/70 shadow-sm space-y-3.5">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className={`w-2 h-2 rounded-full shrink-0 ${
@@ -1003,76 +1005,12 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                   </div>
                 </div>
 
-                <div className="bg-white/80 backdrop-blur-sm rounded-[24px] p-4 border border-slate-200/80 shadow-xs space-y-2">
-                  <div className="border-b border-slate-100 pb-2">
-                    <button
-                      onClick={() => setExpandedSection(expandedSection === 'devices' ? null : 'devices')}
-                      className="w-full flex items-center justify-between text-xs font-bold text-slate-800 py-1 cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Camera className="w-3.5 h-3.5 text-amber-600" />
-                        <span>Hardware Specs</span>
-                      </div>
-                      {expandedSection === 'devices' ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                    </button>
-
-                    {expandedSection === 'devices' && (
-                      <div className="pt-2 pb-1 space-y-1.5 animate-in fade-in">
-                        <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-xl border border-slate-100 text-xs">
-                          <div className="w-6 h-6 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-[10px]">
-                            4K
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-slate-900 truncate">Hikvision 4K Dome</div>
-                            <div className="text-[10px] text-slate-500">
-                              {project.totalCameras} Units ({project.installedCameras} Mounted) • PoE
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="border-b border-slate-100 pb-2">
-                    <button
-                      onClick={() => setExpandedSection(expandedSection === 'specs' ? null : 'specs')}
-                      className="w-full flex items-center justify-between text-xs font-bold text-slate-800 py-1 cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2">
-                        <HardDrive className="w-3.5 h-3.5 text-slate-600" />
-                        <span>Recording Server Box</span>
-                      </div>
-                      {expandedSection === 'specs' ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                    </button>
-
-                    {expandedSection === 'specs' && (
-                      <div className="pt-1 text-[11px] text-slate-600 space-y-1">
-                        <div>• 16-Channel Central NVR Unit</div>
-                        <div>• 30-Day Continuous Storage</div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <button
-                      onClick={() => setActiveNavTab('Cameras')}
-                      className="w-full flex items-center justify-between text-xs font-bold text-amber-600 py-1 hover:underline cursor-pointer"
-                    >
-                      <span>View All {project.totalCameras} Camera Spots</span>
-                      <span>&rarr;</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* CENTER COLUMN: Bar Chart + Countdown Timer + Calendar */}
-              <div className="lg:col-span-5 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  
+                {/* Mid-Row: Dual Progress & Live Cameras Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
                   {/* Progress Card with Bar Chart */}
                   <div 
                     onClick={() => setActiveNavTab('Cameras')}
-                    className="bg-white/90 backdrop-blur-sm rounded-[26px] p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between cursor-pointer group"
+                    className="bg-white/90 backdrop-blur-sm rounded-3xl p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between cursor-pointer group hover:border-slate-300 transition-colors"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-slate-900">Progress</span>
@@ -1082,7 +1020,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     </div>
 
                     <div className="my-2">
-                      <div className="text-3xl font-black text-slate-900 tracking-tight font-mono">
+                      <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">
                         {project.installedCameras} / {project.totalCameras}
                       </div>
                       <p className="text-[11px] text-slate-500 font-medium mt-0.5">
@@ -1139,7 +1077,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                       }
                     }}
                     aria-label={`Cameras Online: ${onlineCount} of ${totalCameraCount} cameras online (${onlinePercent}%). Click to view cameras.`}
-                    className="bg-white/90 backdrop-blur-sm rounded-[26px] p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between cursor-pointer group hover:border-emerald-300/80 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+                    className="bg-white/90 backdrop-blur-sm rounded-3xl p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between cursor-pointer group hover:border-emerald-300/80 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
                     title="Click to view Cameras Online"
                   >
                     <div className="flex items-center justify-between">
@@ -1156,7 +1094,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
                     <div className="my-3">
                       <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-slate-900 tracking-tight font-mono">
+                        <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">
                           {onlineCount}
                         </span>
                         <span className="text-sm font-bold text-slate-400 font-mono">
@@ -1182,12 +1120,11 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                       </div>
                     </div>
                   </div>
-
                 </div>
 
                 {/* Recent Field Activity & Photo Updates */}
                 <div 
-                  className="bg-white/90 backdrop-blur-sm rounded-[28px] p-5 border border-slate-200/80 shadow-xs space-y-3"
+                  className="bg-white/90 backdrop-blur-sm rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-3"
                 >
                   <div className="flex items-center justify-between pb-1 border-b border-slate-100">
                     <div className="flex items-center gap-2">
@@ -1330,10 +1267,71 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                   </div>
                 </div>
 
+                {/* Hardware Specs & Server Accordion */}
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-2.5">
+                  <div className="border-b border-slate-100 pb-2">
+                    <button
+                      onClick={() => setExpandedSection(expandedSection === 'devices' ? null : 'devices')}
+                      className="w-full flex items-center justify-between text-xs font-bold text-slate-800 py-1 cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Camera className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Hardware Specs</span>
+                      </div>
+                      {expandedSection === 'devices' ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    </button>
+
+                    {expandedSection === 'devices' && (
+                      <div className="pt-2 pb-1 space-y-1.5 animate-in fade-in">
+                        <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                          <div className="w-6 h-6 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-[10px]">
+                            4K
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-slate-900 truncate">Hikvision 4K Dome</div>
+                            <div className="text-[10px] text-slate-500">
+                              {project.totalCameras} Units ({project.installedCameras} Mounted) • PoE
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border-b border-slate-100 pb-2">
+                    <button
+                      onClick={() => setExpandedSection(expandedSection === 'specs' ? null : 'specs')}
+                      className="w-full flex items-center justify-between text-xs font-bold text-slate-800 py-1 cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        <HardDrive className="w-3.5 h-3.5 text-slate-600" />
+                        <span>Recording Server Box</span>
+                      </div>
+                      {expandedSection === 'specs' ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    </button>
+
+                    {expandedSection === 'specs' && (
+                      <div className="pt-1 text-[11px] text-slate-600 space-y-1">
+                        <div>• 16-Channel Central NVR Unit</div>
+                        <div>• 30-Day Continuous Storage</div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <button
+                      onClick={() => setActiveNavTab('Cameras')}
+                      className="w-full flex items-center justify-between text-xs font-bold text-amber-600 py-1 hover:underline cursor-pointer"
+                    >
+                      <span>View All {project.totalCameras} Camera Spots</span>
+                      <span>&rarr;</span>
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              {/* RIGHT COLUMN: Installation Tasks */}
-              <div className="lg:col-span-4 space-y-4 flex flex-col justify-between">
+              {/* RIGHT COLUMN: Priority Work & Installation Tasks */}
+              <div className="lg:col-span-6 space-y-4 sm:space-y-5 flex flex-col">
                 <div 
                   role="button"
                   tabIndex={0}
@@ -1430,7 +1428,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                 </div>
 
                 {/* Bottom Big Dark Card: Priority Installation Task List */}
-                <div className="bg-[#1e2025] text-white rounded-[32px] p-6 shadow-xl space-y-4 flex-1 flex flex-col justify-between">
+                <div className="bg-[#1e2025] text-white rounded-3xl p-5 sm:p-6 shadow-xl space-y-4 flex-1 flex flex-col justify-between border border-slate-800">
                   <div>
                     <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                       <span className="font-bold text-sm tracking-wide text-white">
@@ -1581,7 +1579,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
             </div>
 
             {/* COMPLETED WORK - DYNAMIC PHOTOGRAPHIC EVIDENCE GALLERY */}
-            <div className="bg-white/90 backdrop-blur-sm rounded-[32px] p-6 border border-slate-200/90 shadow-sm space-y-4">
+            <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-5 sm:p-7 border border-slate-200/90 shadow-sm space-y-4 sm:space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
                 <div className="flex items-start sm:items-center gap-3">
                   <div className="w-9 h-9 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold border border-amber-500/20 shrink-0">
@@ -1610,7 +1608,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
               {/* Zone / Area Filter Tabs */}
               {evidenceZones.length > 2 && (
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
                   <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1 shrink-0">Zone:</span>
                   {evidenceZones.map(zone => {
                     const count = zone === 'All'
@@ -1659,7 +1657,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                   )}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                   {filteredEvidenceTasks.map((task) => {
                     const isDone = task.status === 'Done';
                     const isBlocked = task.status === 'Blocked';
@@ -1933,7 +1931,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
             </div>
 
             {/* 24 Camera Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3 sm:gap-4">
               {filteredCameras.map((cam) => {
                 const isMounted = cam.status === 'Mounted';
 
@@ -2085,6 +2083,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
             </div>
           </div>
         )}
+        </div>
       </main>
 
       {/* Task Photo Evidence Requirement Modal */}
