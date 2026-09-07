@@ -54,6 +54,7 @@ import { TaskPhotoEvidenceModal, PhotoLightboxModal } from './TaskPhotoEvidenceM
 import { Button as StatefulButton } from './ui/stateful-button';
 import { NotificationList, NotificationItem } from './ui/notification-list';
 import { KanbanProgress } from './ui/kanban-progress';
+import { MiniCalendar } from './MiniCalendar';
 
 interface EnterpriseAdminDashboardProps {
   project: CCTVProject;
@@ -743,6 +744,9 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
               </span>
             </button>
           </div>
+
+          {/* Mini Calendar Widget with Real-Time Digital Clock */}
+          <MiniCalendar />
         </div>
 
         {/* Bottom of Sidebar */}
@@ -1015,6 +1019,9 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                   </button>
                 )}
               </div>
+
+              {/* Mini Calendar Widget with Real-Time Digital Clock */}
+              <MiniCalendar />
             </div>
 
             {/* Bottom of Mobile Drawer */}
