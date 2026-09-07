@@ -242,6 +242,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cameraSearch, setCameraSearch] = useState('');
   const [checklistFilter, setChecklistFilter] = useState<'All' | 'Done' | 'In progress' | 'Blocked'>('All');
+  const [evidenceZoneFilter, setEvidenceZoneFilter] = useState<string>('All');
 
   const [attendanceNotification, setAttendanceNotification] = useState<AttendanceEvent | null>(null);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | 'unsupported'>('default');
@@ -402,6 +403,14 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
     ...project.tasks.filter(t => !t.photoEvidence && t.status === 'Done'),
     ...project.tasks.filter(t => t.status === 'In progress')
   ].slice(0, 3);
+
+  // Dynamic photographic field evidence
+  const tasksWithEvidence = project.tasks.filter(t => Boolean(t.photoEvidence));
+  const rawEvidenceZones = Array.from(new Set(tasksWithEvidence.map(t => t.area || t.category).filter(Boolean))) as string[];
+  const evidenceZones = ['All', ...rawEvidenceZones];
+  const filteredEvidenceTasks = evidenceZoneFilter === 'All'
+    ? tasksWithEvidence
+    : tasksWithEvidence.filter(t => (t.area || t.category) === evidenceZoneFilter);
 
   const todayDateFormatted = new Date().toLocaleDateString('en-US', {
     weekday: 'short',
@@ -1730,137 +1739,187 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
             </div>
 
-            {/* COMPLETED WORK - PHOTOGRAPHIC EVIDENCE GALLERY */}
+            {/* COMPLETED WORK - DYNAMIC PHOTOGRAPHIC EVIDENCE GALLERY */}
             <div className="bg-white/90 backdrop-blur-sm rounded-[32px] p-6 border border-slate-200/90 shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center font-bold">
-                    <Camera className="w-4 h-4 text-amber-700" />
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3.5">
+                <div className="flex items-start sm:items-center gap-3">
+                  <div className="w-9 h-9 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold border border-amber-500/20 shrink-0">
+                    <Camera className="w-4 h-4 text-amber-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                    <h3 className="font-bold text-sm text-slate-900 flex flex-wrap items-center gap-2">
                       <span>Completed Work - Photographic Evidence</span>
-                      <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">
-                        Physical Proof Attached
+                      <span className="text-[10px] font-mono font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3 text-emerald-700" />
+                        Verified Proof
                       </span>
                     </h3>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-slate-500 mt-0.5">
                       Physical inspection photos from the official installation report for {project.name}. Click any photo to inspect high-resolution evidence.
                     </p>
                   </div>
                 </div>
 
-                <span className="text-xs font-mono font-bold text-slate-500">
-                  {project.tasks.filter(t => t.photoEvidence).length} Verified Area{project.tasks.filter(t => t.photoEvidence).length === 1 ? '' : 's'}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Photo 1: Cashier */}
-                <div
-                  onClick={() => setLightboxPhoto({
-                    url: '/evidence/image1.jpg',
-                    title: 'Cashier Area (100% Complete)',
-                    caption: 'Dome camera installed and aligned; video feed verified on CCTV monitor',
-                    area: 'Cashier'
-                  })}
-                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
-                >
-                  <div className="relative h-36 overflow-hidden">
-                    <img
-                      src="/evidence/image1.jpg"
-                      alt="Cashier Dome Camera"
-                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
-                    />
-                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white font-mono font-bold text-[10px]">
-                      Cashier 100%
-                    </div>
-                  </div>
-                  <div className="p-3 bg-white space-y-1">
-                    <div className="font-bold text-xs text-slate-900">Dome camera installed & aligned</div>
-                    <div className="text-[11px] text-emerald-600 font-semibold">Installed, tested, and working</div>
-                  </div>
-                </div>
-
-                {/* Photo 2: Front Desk */}
-                <div
-                  onClick={() => setLightboxPhoto({
-                    url: '/evidence/image2.jpg',
-                    title: 'Front Desk Reception (100% Complete)',
-                    caption: 'Camera installed above reception signage; video feed verified on CCTV monitor',
-                    area: 'Front Desk'
-                  })}
-                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
-                >
-                  <div className="relative h-36 overflow-hidden">
-                    <img
-                      src="/evidence/image2.jpg"
-                      alt="Front Desk Camera"
-                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
-                    />
-                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white font-mono font-bold text-[10px]">
-                      Front Desk 100%
-                    </div>
-                  </div>
-                  <div className="p-3 bg-white space-y-1">
-                    <div className="font-bold text-xs text-slate-900">Camera above reception</div>
-                    <div className="text-[11px] text-emerald-600 font-semibold">Installed, tested, and working</div>
-                  </div>
-                </div>
-
-                {/* Photo 3: CCTV Monitor Feeds */}
-                <div
-                  onClick={() => setLightboxPhoto({
-                    url: '/evidence/image3.jpg',
-                    title: 'Live Monitoring Confirmation (NVR Display)',
-                    caption: 'Cashier and Front Desk camera feeds confirmed live on CCTV monitor (03 September 2026)',
-                    area: 'NVR Station'
-                  })}
-                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
-                >
-                  <div className="relative h-36 overflow-hidden">
-                    <img
-                      src="/evidence/image3.jpg"
-                      alt="CCTV Monitor Feed"
-                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
-                    />
-                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-mono font-bold text-[10px] flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-pulse" />
-                      Live Feeds
-                    </div>
-                  </div>
-                  <div className="p-3 bg-white space-y-1">
-                    <div className="font-bold text-xs text-slate-900">NVR Multi-View Display</div>
-                    <div className="text-[11px] text-emerald-600 font-semibold">Two Feeds Confirmed Live</div>
-                  </div>
-                </div>
-
-                {/* Photo 4: Backdoor Site Condition */}
-                <div
-                  onClick={() => setLightboxPhoto({
-                    url: '/evidence/image4.jpg',
-                    title: 'Backdoor Site Condition (Deferred)',
-                    caption: 'Existing cable is prepared at backdoor entrance; mounting deferred for occupant privacy',
-                    area: 'Backdoor'
-                  })}
-                  className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 cursor-pointer shadow-xs hover:shadow-md transition"
-                >
-                  <div className="relative h-36 overflow-hidden">
-                    <img
-                      src="/evidence/image4.jpg"
-                      alt="Backdoor Camera Site Condition"
-                      className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
-                    />
-                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-mono font-bold text-[10px]">
-                      Deferred / On Hold
-                    </div>
-                  </div>
-                  <div className="p-3 bg-white space-y-1">
-                    <div className="font-bold text-xs text-slate-900">Cable prepared at entrance</div>
-                    <div className="text-[11px] text-amber-700 font-semibold">Temporary sleeping quarters</div>
-                  </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-xs font-mono font-bold text-slate-500 bg-slate-100/80 px-2.5 py-1 rounded-xl border border-slate-200/60">
+                    {tasksWithEvidence.length} Verified {tasksWithEvidence.length === 1 ? 'Area' : 'Areas'}
+                  </span>
                 </div>
               </div>
+
+              {/* Zone / Area Filter Tabs */}
+              {evidenceZones.length > 2 && (
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1 shrink-0">Zone:</span>
+                  {evidenceZones.map(zone => {
+                    const count = zone === 'All'
+                      ? tasksWithEvidence.length
+                      : tasksWithEvidence.filter(t => (t.area || t.category) === zone).length;
+                    const isActive = evidenceZoneFilter === zone;
+                    return (
+                      <button
+                        key={zone}
+                        type="button"
+                        onClick={() => setEvidenceZoneFilter(zone)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium transition-all shrink-0 ${
+                          isActive
+                            ? 'bg-[#111317] text-white shadow-xs font-bold'
+                            : 'bg-slate-100/80 hover:bg-slate-200/70 text-slate-600 border border-slate-200/60'
+                        }`}
+                      >
+                        <span>{zone}</span>
+                        <span className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full ${
+                          isActive ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-600'
+                        }`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Dynamic Gallery Grid */}
+              {filteredEvidenceTasks.length === 0 ? (
+                <div className="p-8 rounded-2xl bg-slate-50 border border-slate-200/70 text-center space-y-2">
+                  <Camera className="w-8 h-8 text-slate-300 mx-auto" />
+                  <h4 className="text-sm font-bold text-slate-700">No photographic evidence in this category</h4>
+                  <p className="text-xs text-slate-500 max-w-md mx-auto">
+                    Technicians upload photographic verification as installation milestones are completed.
+                  </p>
+                  {evidenceZoneFilter !== 'All' && (
+                    <button
+                      type="button"
+                      onClick={() => setEvidenceZoneFilter('All')}
+                      className="mt-1 text-xs font-bold text-amber-600 hover:text-amber-700 underline"
+                    >
+                      Reset filter to All
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {filteredEvidenceTasks.map((task) => {
+                    const isDone = task.status === 'Done';
+                    const isBlocked = task.status === 'Blocked';
+                    const isLive = task.area?.toLowerCase().includes('nvr') || task.title.toLowerCase().includes('live');
+
+                    return (
+                      <div
+                        key={task.id}
+                        onClick={() => setLightboxPhoto({
+                          url: task.photoEvidence!,
+                          title: `${task.area || task.category} (${isDone ? '100% Complete' : task.status})`,
+                          caption: task.photoCaption || task.verifiedStatus || task.title,
+                          area: task.area || task.category
+                        })}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            setLightboxPhoto({
+                              url: task.photoEvidence!,
+                              title: `${task.area || task.category} (${isDone ? '100% Complete' : task.status})`,
+                              caption: task.photoCaption || task.verifiedStatus || task.title,
+                              area: task.area || task.category
+                            });
+                          }
+                        }}
+                        className="group/card rounded-2xl overflow-hidden border border-slate-200 bg-white cursor-pointer shadow-xs hover:shadow-md hover:border-amber-400/80 transition-all flex flex-col justify-between"
+                      >
+                        <div>
+                          {/* Image Thumbnail Frame */}
+                          <div className="relative h-36 overflow-hidden bg-slate-900">
+                            <img
+                              src={task.photoEvidence}
+                              alt={task.title}
+                              className="w-full h-full object-cover group-hover/card:scale-105 transition duration-300"
+                              loading="lazy"
+                            />
+                            
+                            {/* Badges on top of photo */}
+                            <div className="absolute top-2.5 left-2.5 flex flex-wrap items-center gap-1.5 max-w-[90%]">
+                              <div className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white font-mono font-bold text-[10px] truncate">
+                                {task.area || task.category}
+                              </div>
+                              {isLive ? (
+                                <div className="px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-mono font-bold text-[10px] flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-pulse" />
+                                  Live Feeds
+                                </div>
+                              ) : isDone ? (
+                                <div className="px-2 py-0.5 rounded-full bg-emerald-500/90 text-white font-mono font-bold text-[10px]">
+                                  100%
+                                </div>
+                              ) : isBlocked ? (
+                                <div className="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-mono font-bold text-[10px]">
+                                  Deferred / On Hold
+                                </div>
+                              ) : null}
+                            </div>
+
+                            {/* Hover overlay hint */}
+                            <div className="absolute inset-0 bg-slate-950/20 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity">
+                              <div className="px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md text-white text-[11px] font-semibold flex items-center gap-1.5 shadow-md border border-white/20">
+                                <Camera className="w-3 h-3 text-amber-400" />
+                                <span>Inspect</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Card Text Content */}
+                          <div className="p-3 bg-white space-y-1">
+                            <div className="font-bold text-xs text-slate-900 group-hover/card:text-amber-900 transition-colors line-clamp-1">
+                              {task.title}
+                            </div>
+                            <div className={`text-[11px] font-semibold line-clamp-1 ${
+                              isDone 
+                                ? 'text-emerald-600' 
+                                : isBlocked 
+                                  ? 'text-amber-700' 
+                                  : 'text-slate-600'
+                            }`}>
+                              {task.verifiedStatus || (isDone ? 'Installed, tested, and working' : task.status)}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Card Footer with Lead Tech Signature */}
+                        <div className="px-3 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[10px] font-mono text-slate-500">
+                          <div className="flex items-center gap-1 truncate mr-1">
+                            <ShieldCheck className="w-3 h-3 text-emerald-600 shrink-0" />
+                            <span className="truncate">{task.owner || leadTech.name}</span>
+                          </div>
+                          <span className="shrink-0 text-slate-400">
+                            {task.completedDate || 'Verified'}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
 
