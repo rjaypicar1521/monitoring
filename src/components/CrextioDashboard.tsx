@@ -1269,7 +1269,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     </div>
                   </div>
 
-                  {/* Cameras Online Live Radial Gauge Card */}
+                  {/* Cameras Online Simple Clean Card */}
                   <div 
                     role="button"
                     tabIndex={0}
@@ -1280,9 +1280,9 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                         setActiveNavTab('Cameras');
                       }
                     }}
-                    aria-label={`Cameras Online: ${onlineCount} of ${totalCameraCount} cameras online (${onlinePercent}%). Click to inspect camera fleet.`}
+                    aria-label={`Cameras Online: ${onlineCount} of ${totalCameraCount} cameras online (${onlinePercent}%). Click to view cameras.`}
                     className="bg-white/90 backdrop-blur-sm rounded-[26px] p-5 border border-slate-200/80 shadow-xs flex flex-col justify-between cursor-pointer group hover:border-emerald-300/80 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
-                    title="Click to inspect Camera fleet and live feeds"
+                    title="Click to view Cameras Online"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -1291,86 +1291,37 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                         </div>
                         <span className="text-xs font-bold text-slate-900">Cameras Online</span>
                       </div>
-                      <div className={`flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full border shadow-2xs ${
-                        onlineCount > 0 
-                          ? 'text-emerald-700 bg-emerald-50 border-emerald-200/80' 
-                          : 'text-slate-600 bg-slate-100 border-slate-200/80'
-                      }`}>
+                      <div className="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-emerald-600 group-hover:text-white transition flex items-center justify-center text-slate-700">
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </div>
+                    </div>
+
+                    <div className="my-3">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-3xl font-black text-slate-900 tracking-tight font-mono">
+                          {onlineCount}
+                        </span>
+                        <span className="text-sm font-bold text-slate-400 font-mono">
+                          / {totalCameraCount}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 font-medium mt-0.5 flex items-center gap-1.5">
                         <span className={`w-2 h-2 rounded-full ${onlineCount > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
-                        <span>{onlineCount > 0 ? 'Live Fleet' : 'Fleet Standby'}</span>
-                      </div>
+                        <span>{onlineCount > 0 ? 'Cameras Online & Streaming' : 'All Cameras Standby'}</span>
+                      </p>
                     </div>
 
-                    <div className="my-2 flex flex-col items-center justify-center relative">
-                      <div className="w-24 h-24 rounded-full flex items-center justify-center relative">
-                        <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                          {/* Outer Ring: Cameras Online / Mounted */}
-                          <circle cx="50" cy="50" r="42" fill="none" stroke="#f1f5f9" strokeWidth="6" />
-                          <circle 
-                            cx="50" 
-                            cy="50" 
-                            r="42" 
-                            fill="none" 
-                            stroke={onlinePercent > 0 ? "#10b981" : "transparent"} 
-                            strokeWidth="6" 
-                            strokeDasharray="264" 
-                            strokeDashoffset={264 - (264 * Math.min(Math.max(onlinePercent, 0), 100)) / 100}
-                            strokeLinecap="round" 
-                            className="transition-all duration-700 ease-out"
-                          />
-                          {/* Inner Ring: Signal Health / Operational Pacing */}
-                          <circle cx="50" cy="50" r="30" fill="none" stroke="#f1f5f9" strokeWidth="6" />
-                          <circle 
-                            cx="50" 
-                            cy="50" 
-                            r="30" 
-                            fill="none" 
-                            stroke={signalHealthPercent > 0 ? "#06b6d4" : "transparent"} 
-                            strokeWidth="6" 
-                            strokeDasharray="188" 
-                            strokeDashoffset={188 - (188 * Math.min(Math.max(signalHealthPercent, 0), 100)) / 100}
-                            strokeLinecap="round" 
-                            className="transition-all duration-700 ease-out"
-                          />
-                        </svg>
-                        <div className="absolute flex flex-col items-center text-center">
-                          <span className="text-base font-black text-slate-900 font-mono leading-none">
-                            {onlineCount} / {totalCameraCount}
-                          </span>
-                          <span className={`text-[9px] font-bold mt-1 ${onlineCount > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
-                            {onlinePercent}% Online
-                          </span>
-                        </div>
+                    <div className="space-y-1.5 pt-1">
+                      <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                        <div 
+                          className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                          style={{ width: `${onlinePercent}%` }}
+                        />
                       </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium px-1">
-                      <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-[#10b981]" /> Online {onlinePercent}%
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-[#06b6d4]" /> Signal {signalHealthPercent}%
-                      </span>
-                    </div>
-
-                    {/* Card Footnotes: Online count pill, recording status, and RTSP stream health */}
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-600 font-medium">
-                      <div className="flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-bold font-mono">
-                          {onlineCount} Online
-                        </span>
-                        <span className="text-slate-500 truncate text-[10px]">
-                          Rec: <strong className="text-slate-800 font-semibold">{onlineCount > 0 ? '24/7 NVR Live' : 'Standby'}</strong>
-                        </span>
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 font-semibold font-mono">
+                        <span className="text-emerald-700">{onlinePercent}% Live</span>
+                        <span>{onlineCount} of {totalCameraCount} Active</span>
                       </div>
-                      <span className={`flex items-center gap-1 font-mono px-1.5 py-0.5 rounded-full border font-bold text-[10px] shrink-0 ${
-                        onlineCount > 0 
-                          ? 'text-cyan-700 bg-cyan-50 border-cyan-200/60' 
-                          : 'text-slate-500 bg-slate-50 border-slate-200/60'
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${onlineCount > 0 ? 'bg-cyan-500' : 'bg-slate-400'}`} />
-                        {onlineCount > 0 ? (activeBlockers.length > 0 ? 'RTSP Pacing' : 'RTSP Healthy') : 'RTSP Standby'}
-                      </span>
                     </div>
                   </div>
 
