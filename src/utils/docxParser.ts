@@ -339,7 +339,8 @@ export async function parseDocxReport(file: File | Blob | ArrayBuffer): Promise<
     lens: idx === 0 ? '2.8mm Wide Angle Dome' : idx === 1 ? '4.0mm Standard Dome' : '3.6mm Outdoor Bullet',
     ip: `192.168.1.${101 + idx}`,
     port: `Port ${idx + 1}`,
-    status: a.progress >= 100 ? 'Mounted' : 'Pending Power'
+    status: a.progress >= 100 ? 'Mounted' : 'Pending Power',
+    scope: 'project'
   }));
 
   const installedCameras = cameras.filter(c => c.status === 'Mounted').length;

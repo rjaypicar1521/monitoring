@@ -154,6 +154,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
   const [newCamPort, setNewCamPort] = useState(`Port ${(project.cameras?.length || project.totalCameras) + 1}`);
   const [newCamIp, setNewCamIp] = useState(`192.168.20.${101 + (project.cameras?.length || project.totalCameras)}`);
   const [newCamStatus, setNewCamStatus] = useState<'Mounted' | 'Pending Power'>('Mounted');
+  const [newCamScope, setNewCamScope] = useState<'existing' | 'project'>('existing');
 
   // Form States - Blocker
   const [newBlockerDesc, setNewBlockerDesc] = useState('');
@@ -202,6 +203,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
   const [editCamPort, setEditCamPort] = useState('');
   const [editCamIp, setEditCamIp] = useState('');
   const [editCamStatus, setEditCamStatus] = useState<'Mounted' | 'Pending Power'>('Mounted');
+  const [editCamScope, setEditCamScope] = useState<'existing' | 'project'>('existing');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const [cameraSearch, setCameraSearch] = useState('');
@@ -272,6 +274,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
     setEditCamPort(cam.port);
     setEditCamIp(cam.ip);
     setEditCamStatus(cam.status);
+    setEditCamScope(cam.scope || 'existing');
     setShowDeleteConfirm(false);
   };
 
@@ -286,7 +289,8 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
       lens: editCamLens,
       port: editCamPort.trim() || editingCamera.port,
       ip: editCamIp.trim() || editingCamera.ip,
-      status: editCamStatus
+      status: editCamStatus,
+      scope: editCamScope
     };
 
     onUpdateCamera(updated);
@@ -344,12 +348,14 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
       lens: newCamLens,
       ip: newCamIp.trim() || `192.168.20.${100 + nextIdNum}`,
       port: newCamPort.trim() || `Port ${nextIdNum}`,
-      status: newCamStatus
+      status: newCamStatus,
+      scope: newCamScope
     };
 
     onAddCamera(newCamera);
     setShowAddCameraModal(false);
     setNewCamName('');
+    setNewCamScope('existing');
     showNotification(`Added Camera: ${newCamera.id} (${newCamera.name})`);
   };
 
@@ -457,7 +463,11 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
     ? cameraList.filter(c => c.status === 'Mounted').length 
     : project.installedCameras;
   const pendingCount = Math.max(0, totalFleetCount - mountedCount);
+  const existingFleetCount = cameraList.filter(c => (c.scope || 'existing') === 'existing').length;
+  const projectFleetCount = cameraList.filter(c => c.scope === 'project').length;
+
   const [cameraStatusFilter, setCameraStatusFilter] = useState<'All' | 'Mounted' | 'Pending Power'>('All');
+  const [cameraScopeFilter, setCameraScopeFilter] = useState<'All' | 'existing' | 'project'>('All');
   const [cameraPage, setCameraPage] = useState<number>(1);
   const [cameraPageSize, setCameraPageSize] = useState<number>(20);
 
@@ -472,9 +482,10 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
         c.port.toLowerCase().includes(q) ||
         c.lens.toLowerCase().includes(q);
       const matchesStatus = cameraStatusFilter === 'All' || c.status === cameraStatusFilter;
-      return matchesSearch && matchesStatus;
+      const matchesScope = cameraScopeFilter === 'All' || (c.scope || 'existing') === cameraScopeFilter;
+      return matchesSearch && matchesStatus && matchesScope;
     });
-  }, [cameraList, cameraSearch, cameraStatusFilter]);
+  }, [cameraList, cameraSearch, cameraStatusFilter, cameraScopeFilter]);
 
   const totalCameraPages = cameraPageSize === -1 ? 1 : Math.max(1, Math.ceil(filteredCameras.length / cameraPageSize));
   const safeCameraPage = Math.min(cameraPage, totalCameraPages);
@@ -1330,8 +1341,13 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 </div>
 
                 <div className="flex items-baseline justify-between">
-                  <div className="text-4xl sm:text-5xl font-black font-mono tracking-tight text-white">
-                    {totalFleetCount}
+                  <div>
+                    <div className="text-4xl sm:text-5xl font-black font-mono tracking-tight text-white">
+                      {totalFleetCount}
+                    </div>
+                    <div className="text-[11px] text-slate-400 font-medium mt-0.5">
+                      {existingFleetCount} Existing Site Fleet • {projectFleetCount} Project Scope
+                    </div>
                   </div>
                   <div className={`px-2.5 py-1 rounded-full text-xs font-bold font-mono ${
                     activeBlockers.length > 0 
@@ -1689,29 +1705,33 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
               <div className="bg-[#111317] text-white rounded-3xl p-5 shadow-lg flex items-center justify-between">
                 <div className="space-y-1">
-                  <div className="text-[10px] font-mono uppercase text-cyan-400 font-bold">Area 1 & 2 • Complete</div>
-                  <div className="font-bold text-sm">Cashier & Front Desk</div>
-                  <div className="text-xs text-slate-400 font-mono">2 Cameras • Feeds Live Verified 100%</div>
+                  <div className="text-[10px] font-mono uppercase text-cyan-400 font-bold">Existing Site Fleet • {existingFleetCount} Endpoints</div>
+                  <div className="font-bold text-sm">Pre-Installed Facility Cameras</div>
+                  <div className="text-xs text-slate-400 font-mono">{cameraList.filter(c => (c.scope || 'existing') === 'existing' && c.status === 'Mounted').length} / {existingFleetCount} Mounted & Operational (100%)</div>
                 </div>
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
               </div>
 
               <div className="bg-[#111317] text-white rounded-3xl p-5 shadow-lg flex items-center justify-between">
                 <div className="space-y-1">
-                  <div className="text-[10px] font-mono uppercase text-amber-400 font-bold">Area 3 • On Hold</div>
-                  <div className="font-bold text-sm">Backdoor Entrance</div>
-                  <div className="text-xs text-slate-400 font-mono">Deferred for privacy • Cable prepared</div>
+                  <div className="text-[10px] font-mono uppercase text-amber-400 font-bold">Project Deployment Scope • {projectFleetCount > 0 ? 'Active' : 'Standby'}</div>
+                  <div className="font-bold text-sm">New Project Scope Endpoints</div>
+                  <div className="text-xs text-slate-400 font-mono">
+                    {projectFleetCount > 0 
+                      ? `${cameraList.filter(c => c.scope === 'project' && c.status === 'Mounted').length} of ${projectFleetCount} New Cameras Mounted`
+                      : '0 New Deliverables (Site Fleet Pre-Installed)'}
+                  </div>
                 </div>
-                <div className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+                <div className={`w-2.5 h-2.5 rounded-full ${projectFleetCount > 0 ? 'bg-amber-400 animate-pulse' : 'bg-cyan-400'}`} />
               </div>
 
               <div className="bg-[#111317] text-white rounded-3xl p-5 shadow-lg flex items-center justify-between">
                 <div className="space-y-1">
-                  <div className="text-[10px] font-mono uppercase text-slate-400 font-bold">Area 4 & 5 • Pending</div>
-                  <div className="font-bold text-sm">Entrance Door & AP Relocation</div>
-                  <div className="text-xs text-slate-400 font-mono">Camera pending • Trace PoE injectors</div>
+                  <div className="text-[10px] font-mono uppercase text-emerald-400 font-bold">Telemetry Infrastructure • VLAN 20</div>
+                  <div className="font-bold text-sm">PoE Switch G24 & NVR Console</div>
+                  <div className="text-xs text-slate-400 font-mono">Static IPs 192.168.20.101-118 • All Feeds Verified</div>
                 </div>
-                <div className="w-2.5 h-2.5 rounded-full bg-slate-500" />
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
               </div>
             </div>
 
@@ -2219,7 +2239,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                   Camera Fleet Telemetry ({cameraList.length} Endpoints)
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Hikvision 4K PoE endpoints mapped to Switch G24 on VLAN 20.
+                  Hikvision 4K PoE endpoints mapped to Switch G24 on VLAN 20 • {existingFleetCount} Existing Site Fleet ({cameraList.filter(c => c.status === 'Mounted' && (c.scope || 'existing') === 'existing').length} Mounted){projectFleetCount > 0 ? ` • ${projectFleetCount} Project Scope` : ''}.
                 </p>
               </div>
 
@@ -2263,37 +2283,70 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
 
             {/* Filter Chips & Fleet Controls Bar */}
             <div className="flex flex-wrap items-center justify-between gap-2.5">
-              <div className="flex flex-wrap items-center gap-1.5">
-                {(['All', 'Mounted', 'Pending Power'] as const).map((status) => {
-                  const isActive = cameraStatusFilter === status;
-                  const count = status === 'All'
-                    ? cameraList.length
-                    : cameraList.filter(c => c.status === status).length;
-                  return (
-                    <button
-                      key={status}
-                      type="button"
-                      onClick={() => {
-                        setCameraStatusFilter(status);
-                        setCameraPage(1);
-                      }}
-                      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
-                        isActive
-                          ? 'bg-[#1a1c22] text-white shadow-xs'
-                          : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200/90'
-                      }`}
-                    >
-                      {status === 'Mounted' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
-                      {status === 'Pending Power' && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
-                      <span>{status === 'Pending Power' ? 'Pending' : status}</span>
-                      <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
-                        isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
-                      }`}>
-                        {count}
-                      </span>
-                    </button>
-                  );
-                })}
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Scope Filter Tabs/Pills: All, Existing, Project Scope */}
+                <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 gap-1">
+                  {[
+                    { id: 'All' as const, label: `All (${cameraList.length})` },
+                    { id: 'existing' as const, label: `Existing (${existingFleetCount})` },
+                    { id: 'project' as const, label: `Project Scope (${projectFleetCount})` }
+                  ].map((pill) => {
+                    const isActive = cameraScopeFilter === pill.id;
+                    return (
+                      <button
+                        key={pill.id}
+                        type="button"
+                        onClick={() => {
+                          setCameraScopeFilter(pill.id);
+                          setCameraPage(1);
+                        }}
+                        className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                          isActive
+                            ? 'bg-[#1a1c22] text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                        }`}
+                      >
+                        {pill.id === 'existing' && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+                        {pill.id === 'project' && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                        <span>{pill.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Status Chips */}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {(['All', 'Mounted', 'Pending Power'] as const).map((status) => {
+                    const isActive = cameraStatusFilter === status;
+                    const count = status === 'All'
+                      ? cameraList.length
+                      : cameraList.filter(c => c.status === status).length;
+                    return (
+                      <button
+                        key={status}
+                        type="button"
+                        onClick={() => {
+                          setCameraStatusFilter(status);
+                          setCameraPage(1);
+                        }}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
+                          isActive
+                            ? 'bg-[#1a1c22] text-white shadow-xs'
+                            : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200/90'
+                        }`}
+                      >
+                        {status === 'Mounted' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
+                        {status === 'Pending Power' && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                        <span>{status === 'Pending Power' ? 'Pending' : status}</span>
+                        <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
+                          isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                        }`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Page Size Selector */}
@@ -2388,6 +2441,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                       <th className="py-3 px-4">Zone / Floor</th>
                       <th className="py-3 px-4">Lens Spec</th>
                       <th className="py-3 px-4">Switch Port & IP</th>
+                      <th className="py-3 px-4">Scope</th>
                       <th className="py-3 px-4">Hardware Status</th>
                       <th className="py-3 px-4 text-right">Actions</th>
                     </tr>
@@ -2395,7 +2449,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                   <tbody className="divide-y divide-slate-100">
                     {filteredCameras.length === 0 ? (
                       <tr>
-                        <td colSpan={8} className="py-12 text-center text-slate-500">
+                        <td colSpan={9} className="py-12 text-center text-slate-500">
                           <div className="text-3xl mb-1.5">📹</div>
                           <div className="font-bold text-sm text-slate-800">No camera endpoints found</div>
                           <p className="text-xs text-slate-400 mt-1">Try clearing your search query or status filter.</p>
@@ -2404,6 +2458,7 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                             onClick={() => {
                               setCameraSearch('');
                               setCameraStatusFilter('All');
+                              setCameraScopeFilter('All');
                               setCameraPage(1);
                             }}
                             className="mt-3 px-3.5 py-1.5 bg-[#1a1c22] hover:bg-slate-800 text-white text-xs font-semibold rounded-xl cursor-pointer transition shadow-2xs"
@@ -2450,6 +2505,16 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                             </td>
                             <td className="py-3 px-4 font-mono text-slate-600 whitespace-nowrap">
                               {cam.port} • <span className="text-cyan-800 font-semibold">{cam.ip}</span>
+                            </td>
+                            <td className="py-3 px-4 whitespace-nowrap">
+                              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                                (cam.scope || 'existing') === 'existing' 
+                                  ? 'bg-cyan-100 text-cyan-800 border border-cyan-200' 
+                                  : 'bg-amber-100 text-amber-800 border border-amber-200'
+                              }`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${(cam.scope || 'existing') === 'existing' ? 'bg-cyan-500' : 'bg-amber-500'}`} />
+                                {(cam.scope || 'existing') === 'existing' ? 'Existing' : 'Project Scope'}
+                              </span>
                             </td>
                             <td className="py-3 px-4 whitespace-nowrap">
                               <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
@@ -2502,6 +2567,20 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                   <span className="font-medium">
                     Showing <strong className="text-slate-900 font-mono">{filteredCameras.length === 0 ? 0 : (cameraPageSize === -1 ? 1 : (safeCameraPage - 1) * cameraPageSize + 1)} - {cameraPageSize === -1 ? filteredCameras.length : Math.min(filteredCameras.length, safeCameraPage * cameraPageSize)}</strong> of <strong className="text-slate-900 font-mono">{filteredCameras.length}</strong> endpoints
                   </span>
+                  <span className="text-slate-300">•</span>
+                  <span className="text-cyan-800 font-semibold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
+                    {existingFleetCount} Existing
+                  </span>
+                  {projectFleetCount > 0 && (
+                    <>
+                      <span className="text-slate-300">•</span>
+                      <span className="text-amber-800 font-semibold flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                        {projectFleetCount} Project Scope
+                      </span>
+                    </>
+                  )}
                   <span className="text-slate-300">•</span>
                   <span className="text-emerald-700 font-semibold flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -3118,6 +3197,42 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                 </div>
 
                 <div>
+                  <label className="font-bold text-slate-800">Deployment Scope:</label>
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => setNewCamScope('existing')}
+                      className={`flex-1 py-2 px-3 rounded-xl font-bold border text-xs transition cursor-pointer text-left flex items-center gap-2 ${
+                        newCamScope === 'existing' 
+                          ? 'bg-cyan-50 border-cyan-500 text-cyan-900 shadow-2xs' 
+                          : 'bg-slate-50 border-slate-200 text-slate-600'
+                      }`}
+                    >
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${newCamScope === 'existing' ? 'bg-cyan-500' : 'bg-slate-400'}`} />
+                      <div>
+                        <div>Existing Site Camera</div>
+                        <div className="text-[10px] font-normal text-slate-500">Not in project scope (Pre-installed)</div>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewCamScope('project')}
+                      className={`flex-1 py-2 px-3 rounded-xl font-bold border text-xs transition cursor-pointer text-left flex items-center gap-2 ${
+                        newCamScope === 'project' 
+                          ? 'bg-amber-50 border-amber-500 text-amber-900 shadow-2xs' 
+                          : 'bg-slate-50 border-slate-200 text-slate-600'
+                      }`}
+                    >
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${newCamScope === 'project' ? 'bg-amber-500' : 'bg-slate-400'}`} />
+                      <div>
+                        <div>New Project Installation</div>
+                        <div className="text-[10px] font-normal text-slate-500">Part of current project scope</div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                <div>
                   <label className="font-bold text-slate-800">Initial Hardware State:</label>
                   <div className="flex gap-2 mt-1">
                     <button
@@ -3244,6 +3359,42 @@ export const EnterpriseAdminDashboard: React.FC<EnterpriseAdminDashboardProps> =
                       onChange={(e) => setEditCamIp(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 mt-1 text-slate-900 font-mono"
                     />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-800">Deployment Scope:</label>
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => setEditCamScope('existing')}
+                      className={`flex-1 py-2 px-3 rounded-xl font-bold border text-xs transition cursor-pointer text-left flex items-center gap-2 ${
+                        editCamScope === 'existing' 
+                          ? 'bg-cyan-50 border-cyan-500 text-cyan-900 shadow-2xs' 
+                          : 'bg-slate-50 border-slate-200 text-slate-600'
+                      }`}
+                    >
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${editCamScope === 'existing' ? 'bg-cyan-500' : 'bg-slate-400'}`} />
+                      <div>
+                        <div>Existing Site Camera</div>
+                        <div className="text-[10px] font-normal text-slate-500">Not in project scope (Pre-installed)</div>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditCamScope('project')}
+                      className={`flex-1 py-2 px-3 rounded-xl font-bold border text-xs transition cursor-pointer text-left flex items-center gap-2 ${
+                        editCamScope === 'project' 
+                          ? 'bg-amber-50 border-amber-500 text-amber-900 shadow-2xs' 
+                          : 'bg-slate-50 border-slate-200 text-slate-600'
+                      }`}
+                    >
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${editCamScope === 'project' ? 'bg-amber-500' : 'bg-slate-400'}`} />
+                      <div>
+                        <div>New Project Installation</div>
+                        <div className="text-[10px] font-normal text-slate-500">Part of current project scope</div>
+                      </div>
+                    </button>
                   </div>
                 </div>
 

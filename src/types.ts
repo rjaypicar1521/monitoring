@@ -60,6 +60,7 @@ export interface CameraEndpoint {
   ip: string;
   port: string;
   status: 'Mounted' | 'Pending Power';
+  scope?: 'existing' | 'project';
 }
 
 export type TechnicianStatus = 'On Duty' | 'On Site' | 'In Transit' | 'Remote' | 'Off Duty';

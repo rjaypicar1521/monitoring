@@ -84,6 +84,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cameraSearch, setCameraSearch] = useState('');
   const [cameraStatusFilter, setCameraStatusFilter] = useState<'All' | 'Mounted' | 'Pending Power'>('All');
+  const [cameraScopeFilter, setCameraScopeFilter] = useState<'All' | 'existing' | 'project'>('All');
   const [cameraZoneFilter, setCameraZoneFilter] = useState<string>('All');
   const [checklistFilter, setChecklistFilter] = useState<'All' | 'Done' | 'In progress' | 'Blocked'>('All');
   const [evidenceZoneFilter, setEvidenceZoneFilter] = useState<string>('All');
@@ -238,6 +239,9 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
   }))).filter(Boolean);
   const cameraZoneCategories = ['All', ...rawCameraZones];
 
+  const existingCamerasCount = cameraSpots.filter(c => (c.scope || 'existing') === 'existing').length;
+  const projectCamerasCount = cameraSpots.filter(c => c.scope === 'project').length;
+
   const filteredCameras = cameraSpots.filter(c => {
     const q = cameraSearch.toLowerCase();
     const matchesSearch = !q ||
@@ -249,7 +253,8 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
       c.port.toLowerCase().includes(q);
     const matchesStatus = cameraStatusFilter === 'All' || c.status === cameraStatusFilter;
     const matchesZone = cameraZoneFilter === 'All' || c.zone.toLowerCase().startsWith(cameraZoneFilter.toLowerCase());
-    return matchesSearch && matchesStatus && matchesZone;
+    const matchesScope = cameraScopeFilter === 'All' || (c.scope || 'existing') === cameraScopeFilter;
+    return matchesSearch && matchesStatus && matchesZone && matchesScope;
   });
 
   const filteredTasks = project.tasks.filter(t => {
@@ -830,7 +835,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     <div className="stat">
                       <div className="stat-title">Live Cameras</div>
                       <div className="stat-value">{onlineCount}</div>
-                      <div className="stat-desc">{onlinePercent}% online ({totalCameraCount} total cameras)</div>
+                      <div className="stat-desc">{onlinePercent}% online ({existingCamerasCount === totalCameraCount ? `${existingCamerasCount} Existing Fleet` : projectCamerasCount > 0 ? `${existingCamerasCount} Existing • ${projectCamerasCount} Project` : `${totalCameraCount} total cameras`})</div>
                     </div>
                   </div>
                 </div>
@@ -869,9 +874,9 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                     <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                       <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span id="InstallationProgressLabel" className="font-bold text-white text-sm">Installation Progress</span>
+                        <span id="InstallationProgressLabel" className="font-bold text-white text-sm">Site Readiness & Operational System Health</span>
                         <span className="text-[11px] font-medium text-slate-300">
-                          ({project.installedCameras} of {totalCameraCount} Endpoints Mounted)
+                          ({project.installedCameras} of {totalCameraCount} Endpoints Mounted{projectCamerasCount > 0 ? ` • ${existingCamerasCount} Existing, ${projectCamerasCount} Project Scope` : ' • Existing Site Fleet'})
                         </span>
                       </div>
                       <div className="flex items-center gap-2 font-mono text-xs">
@@ -880,7 +885,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                           {pacingStatus}
                         </span>
                         <span className="font-bold bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-                          {percentComplete}% Mounted
+                          {percentComplete >= 100 ? '100% Operational' : `${percentComplete}% Mounted`}
                         </span>
                         <span className="text-slate-300 text-[11px] hidden sm:inline">
                           Handover: <strong className="text-white">{project.targetLaunchDate || '2026-09-12'}</strong>
@@ -918,7 +923,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                       title="Mounting Progress: Click to inspect camera fleet"
                     >
                       <Camera className="w-3.5 h-3.5 text-cyan-400 shrink-0 group-hover:scale-110 transition-transform" />
-                      <span>Mounting: <strong className="text-white">{percentComplete}%</strong></span>
+                      <span>Mounting: <strong className="text-white">{percentComplete >= 100 ? '100% Operational' : `${percentComplete}%`}</strong></span>
                     </button>
                     <button
                       type="button"
@@ -1050,7 +1055,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                         {project.installedCameras} / {project.totalCameras}
                       </div>
                       <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-                        Cameras Mounted & Aimed
+                        {project.installedCameras === 18 ? 'Existing Site Fleet Mounted & Aimed' : 'Cameras Mounted & Aimed'}
                       </p>
                     </div>
 
@@ -1126,10 +1131,21 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                         <span className="text-sm font-bold text-slate-400 font-mono">
                           / {totalCameraCount}
                         </span>
+                        <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                          {onlineCount === existingCamerasCount && projectCamerasCount === 0 ? 'Existing Site Fleet' : `${onlineCount} Online`}
+                        </span>
                       </div>
                       <p className="text-[11px] text-slate-500 font-medium mt-0.5 flex items-center gap-1.5">
                         <span className={`w-2 h-2 rounded-full ${onlineCount > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
-                        <span>{onlineCount > 0 ? 'Cameras Online & Streaming' : 'All Cameras Standby'}</span>
+                        <span>
+                          {onlineCount === 18 && totalCameraCount === 18
+                            ? '18 / 18 Online (Existing Site Fleet) • 100% operational'
+                            : onlineCount === existingCamerasCount && projectCamerasCount === 0
+                              ? `${existingCamerasCount} / ${existingCamerasCount} Online (Existing Site Fleet) • 100% operational`
+                              : onlineCount > 0
+                                ? `${onlineCount} of ${totalCameraCount} Cameras Online & Streaming`
+                                : 'All Cameras Standby'}
+                        </span>
                       </p>
                     </div>
 
@@ -1141,7 +1157,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                         />
                       </div>
                       <div className="flex items-center justify-between text-[10px] text-slate-500 font-semibold font-mono">
-                        <span className="text-emerald-700">{onlinePercent}% Live</span>
+                        <span className="text-emerald-700">{onlinePercent}% Live{onlinePercent >= 100 ? ' • 100% operational' : ''}</span>
                         <span>{onlineCount} of {totalCameraCount} Active</span>
                       </div>
                     </div>
@@ -1936,10 +1952,10 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               <div>
                 <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                   <Camera className="w-6 h-6 text-amber-600" />
-                  Camera Spots Directory ({totalCameraCount} Total)
+                  Camera Spots Directory ({totalCameraCount} Endpoints)
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  {onlineCount} Mounted & Tested • {Math.max(0, totalCameraCount - onlineCount)} Pending Installation / Power
+                  {onlineCount} Mounted & Operational • Existing Site Camera Fleet (Pre-installed site cameras, not part of project scope)
                 </p>
               </div>
 
@@ -1958,35 +1974,64 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
             {/* Filter Chips Bar */}
             <div className="flex flex-wrap items-center justify-between gap-2.5">
-              {/* Status Chips */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                {(['All', 'Mounted', 'Pending Power'] as const).map((status) => {
-                  const isActive = cameraStatusFilter === status;
-                  const count = status === 'All' 
-                    ? cameraSpots.length 
-                    : cameraSpots.filter(c => c.status === status).length;
-                  return (
-                    <button
-                      key={status}
-                      type="button"
-                      onClick={() => setCameraStatusFilter(status)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
-                        isActive
-                          ? 'bg-[#1a1c22] text-white shadow-xs'
-                          : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200/90'
-                      }`}
-                    >
-                      {status === 'Mounted' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
-                      {status === 'Pending Power' && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
-                      <span>{status === 'Pending Power' ? 'Pending' : status}</span>
-                      <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
-                        isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
-                      }`}>
-                        {count}
-                      </span>
-                    </button>
-                  );
-                })}
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Scope Filter Pills: All (18), Existing (18), Project (0) */}
+                <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-2xl border border-slate-200">
+                  {[
+                    { id: 'All' as const, label: `All (${cameraSpots.length})` },
+                    { id: 'existing' as const, label: `Existing (${existingCamerasCount})` },
+                    { id: 'project' as const, label: `Project (${projectCamerasCount})` }
+                  ].map((pill) => {
+                    const isActive = cameraScopeFilter === pill.id;
+                    return (
+                      <button
+                        key={pill.id}
+                        type="button"
+                        onClick={() => setCameraScopeFilter(pill.id)}
+                        className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+                          isActive
+                            ? 'bg-[#1a1c22] text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                        }`}
+                      >
+                        {pill.id === 'existing' && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+                        {pill.id === 'project' && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                        <span>{pill.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Status Chips */}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {(['All', 'Mounted', 'Pending Power'] as const).map((status) => {
+                    const isActive = cameraStatusFilter === status;
+                    const count = status === 'All' 
+                      ? cameraSpots.length 
+                      : cameraSpots.filter(c => c.status === status).length;
+                    return (
+                      <button
+                        key={status}
+                        type="button"
+                        onClick={() => setCameraStatusFilter(status)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
+                          isActive
+                            ? 'bg-[#1a1c22] text-white shadow-xs'
+                            : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200/90'
+                        }`}
+                      >
+                        {status === 'Mounted' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
+                        {status === 'Pending Power' && <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                        <span>{status === 'Pending Power' ? 'Pending' : status}</span>
+                        <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
+                          isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                        }`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Zone Filter Chips */}
@@ -2027,6 +2072,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                   onClick={() => {
                     setCameraSearch('');
                     setCameraStatusFilter('All');
+                    setCameraScopeFilter('All');
                     setCameraZoneFilter('All');
                   }}
                   className="px-4 py-1.5 bg-[#1a1c22] hover:bg-slate-800 text-white text-xs font-semibold rounded-xl cursor-pointer transition shadow-2xs"
@@ -2038,6 +2084,7 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3 sm:gap-4">
                 {filteredCameras.map((cam) => {
                   const isMounted = cam.status === 'Mounted';
+                  const isExisting = (cam.scope || 'existing') === 'existing';
 
                   return (
                     <div 
@@ -2049,8 +2096,17 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
                       }`}
                     >
                       <div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-mono font-bold text-slate-400">{cam.id}</span>
+                        <div className="flex items-center justify-between gap-1 flex-wrap">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-mono font-bold text-slate-400">{cam.id}</span>
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${
+                              isExisting 
+                                ? 'bg-cyan-50 text-cyan-800 border border-cyan-200' 
+                                : 'bg-amber-50 text-amber-800 border border-amber-200'
+                            }`}>
+                              {isExisting ? 'Existing Site Camera' : 'Project Scope'}
+                            </span>
+                          </div>
                           <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
                             isMounted ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                           }`}>

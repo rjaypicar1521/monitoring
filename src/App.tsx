@@ -65,7 +65,7 @@ export const App: React.FC = () => {
   // Listen for cross-tab project changes (e.g. technician attendance from other tabs)
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
-      if ((e.key === STORAGE_KEY || e.key === 'cctv_monitoring_projects_v6' || e.key === 'cctv_attendance_event') && e.newValue) {
+      if ((e.key === STORAGE_KEY || e.key === 'cctv_monitoring_projects_v7' || e.key === 'cctv_monitoring_projects_v6' || e.key === 'cctv_attendance_event') && e.newValue) {
         setProjects(loadProjects());
       }
     };

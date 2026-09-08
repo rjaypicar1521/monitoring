@@ -1,26 +1,26 @@
 import { CCTVProject, CameraEndpoint, TechnicianMember } from '../types';
 
-export const STORAGE_KEY = 'cctv_monitoring_projects_v7';
+export const STORAGE_KEY = 'cctv_monitoring_projects_v8';
 
 export const DEFAULT_CAMERAS: CameraEndpoint[] = [
-  { id: 'CAM-01', name: 'Cashier Dome Camera', zone: 'Ground Floor - Cashier Counter', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.101', port: 'Port 1', status: 'Mounted' },
-  { id: 'CAM-02', name: 'Front Desk Reception Camera', zone: 'Ground Floor - Reception Lobby', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.102', port: 'Port 2', status: 'Mounted' },
-  { id: 'CAM-03', name: 'Main Entrance Bullet Camera', zone: 'Perimeter - Main Entrance', lens: '4.0mm Standard Bullet', ip: '192.168.20.103', port: 'Port 3', status: 'Mounted' },
-  { id: 'CAM-04', name: 'North Corridor PTZ Camera', zone: 'Ground Floor - North Corridor', lens: '4.0mm Varifocal Turret', ip: '192.168.20.104', port: 'Port 4', status: 'Mounted' },
-  { id: 'CAM-05', name: 'South Corridor Turret Camera', zone: 'Ground Floor - South Corridor', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.105', port: 'Port 5', status: 'Mounted' },
-  { id: 'CAM-06', name: 'Perimeter East Fence Camera', zone: 'Perimeter - East Boundary', lens: '6.0mm Long Range Bullet', ip: '192.168.20.106', port: 'Port 6', status: 'Mounted' },
-  { id: 'CAM-07', name: 'Perimeter West Fence Camera', zone: 'Perimeter - West Boundary', lens: '6.0mm Long Range Bullet', ip: '192.168.20.107', port: 'Port 7', status: 'Mounted' },
-  { id: 'CAM-08', name: 'Warehouse Main Bay Camera', zone: 'Logistics - Warehouse Bay', lens: '4.0mm High-Ceiling Turret', ip: '192.168.20.108', port: 'Port 8', status: 'Mounted' },
-  { id: 'CAM-09', name: 'Warehouse Loading Dock Camera', zone: 'Logistics - Loading Dock', lens: '4.0mm Outdoor Bullet', ip: '192.168.20.109', port: 'Port 9', status: 'Mounted' },
-  { id: 'CAM-10', name: 'Executive Parking Camera', zone: 'Outdoor - Parking Lot A', lens: '6.0mm Long Range Bullet', ip: '192.168.20.110', port: 'Port 10', status: 'Mounted' },
-  { id: 'CAM-11', name: 'Visitor Parking Camera', zone: 'Outdoor - Parking Lot B', lens: '6.0mm Long Range Bullet', ip: '192.168.20.111', port: 'Port 11', status: 'Mounted' },
-  { id: 'CAM-12', name: 'Central Server Room Camera', zone: 'Critical Facility - Server Room', lens: '2.8mm Low-Distortion Dome', ip: '192.168.20.112', port: 'Port 12', status: 'Mounted' },
-  { id: 'CAM-13', name: 'Backdoor Service Entrance Camera', zone: 'Perimeter - Backdoor', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.113', port: 'Port 13', status: 'Mounted' },
-  { id: 'CAM-14', name: 'North Emergency Stairwell Camera', zone: 'Internal - North Stairwell', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.114', port: 'Port 14', status: 'Mounted' },
-  { id: 'CAM-15', name: 'South Emergency Stairwell Camera', zone: 'Internal - South Stairwell', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.115', port: 'Port 15', status: 'Mounted' },
-  { id: 'CAM-16', name: 'Staff Lounge & Canteen Camera', zone: 'Level 2 - Staff Commons', lens: '4.0mm Standard Dome', ip: '192.168.20.116', port: 'Port 16', status: 'Mounted' },
-  { id: 'CAM-17', name: 'Telecom & Electrical Room Camera', zone: 'Utility - Telecom Closet', lens: '2.8mm Low-Distortion Dome', ip: '192.168.20.117', port: 'Port 17', status: 'Mounted' },
-  { id: 'CAM-18', name: 'Rooftop HVAC & Mechanical Yard Camera', zone: 'Rooftop - Mechanical Yard', lens: '6.0mm Weatherproof Bullet', ip: '192.168.20.118', port: 'Port 18', status: 'Mounted' }
+  { id: 'CAM-01', name: 'Cashier Dome Camera', zone: 'Ground Floor - Cashier Counter', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.101', port: 'Port 1', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-02', name: 'Front Desk Reception Camera', zone: 'Ground Floor - Reception Lobby', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.102', port: 'Port 2', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-03', name: 'Main Entrance Bullet Camera', zone: 'Perimeter - Main Entrance', lens: '4.0mm Standard Bullet', ip: '192.168.20.103', port: 'Port 3', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-04', name: 'North Corridor PTZ Camera', zone: 'Ground Floor - North Corridor', lens: '4.0mm Varifocal Turret', ip: '192.168.20.104', port: 'Port 4', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-05', name: 'South Corridor Turret Camera', zone: 'Ground Floor - South Corridor', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.105', port: 'Port 5', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-06', name: 'Perimeter East Fence Camera', zone: 'Perimeter - East Boundary', lens: '6.0mm Long Range Bullet', ip: '192.168.20.106', port: 'Port 6', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-07', name: 'Perimeter West Fence Camera', zone: 'Perimeter - West Boundary', lens: '6.0mm Long Range Bullet', ip: '192.168.20.107', port: 'Port 7', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-08', name: 'Warehouse Main Bay Camera', zone: 'Logistics - Warehouse Bay', lens: '4.0mm High-Ceiling Turret', ip: '192.168.20.108', port: 'Port 8', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-09', name: 'Warehouse Loading Dock Camera', zone: 'Logistics - Loading Dock', lens: '4.0mm Outdoor Bullet', ip: '192.168.20.109', port: 'Port 9', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-10', name: 'Executive Parking Camera', zone: 'Outdoor - Parking Lot A', lens: '6.0mm Long Range Bullet', ip: '192.168.20.110', port: 'Port 10', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-11', name: 'Visitor Parking Camera', zone: 'Outdoor - Parking Lot B', lens: '6.0mm Long Range Bullet', ip: '192.168.20.111', port: 'Port 11', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-12', name: 'Central Server Room Camera', zone: 'Critical Facility - Server Room', lens: '2.8mm Low-Distortion Dome', ip: '192.168.20.112', port: 'Port 12', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-13', name: 'Backdoor Service Entrance Camera', zone: 'Perimeter - Backdoor', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.113', port: 'Port 13', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-14', name: 'North Emergency Stairwell Camera', zone: 'Internal - North Stairwell', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.114', port: 'Port 14', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-15', name: 'South Emergency Stairwell Camera', zone: 'Internal - South Stairwell', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.115', port: 'Port 15', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-16', name: 'Staff Lounge & Canteen Camera', zone: 'Level 2 - Staff Commons', lens: '4.0mm Standard Dome', ip: '192.168.20.116', port: 'Port 16', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-17', name: 'Telecom & Electrical Room Camera', zone: 'Utility - Telecom Closet', lens: '2.8mm Low-Distortion Dome', ip: '192.168.20.117', port: 'Port 17', status: 'Mounted', scope: 'existing' },
+  { id: 'CAM-18', name: 'Rooftop HVAC & Mechanical Yard Camera', zone: 'Rooftop - Mechanical Yard', lens: '6.0mm Weatherproof Bullet', ip: '192.168.20.118', port: 'Port 18', status: 'Mounted', scope: 'existing' }
 ];
 
 export const DEFAULT_TECHNICIANS: TechnicianMember[] = [
@@ -278,6 +278,7 @@ export function cleanMojibake(text: string): string {
 export function loadProjects(): CCTVProject[] {
   try {
     const data = localStorage.getItem(STORAGE_KEY) || 
+                 localStorage.getItem('cctv_monitoring_projects_v7') ||
                  localStorage.getItem('cctv_monitoring_projects_v6') ||
                  localStorage.getItem('cctv_monitoring_projects_v5');
     if (data) {
@@ -302,17 +303,22 @@ export function loadProjects(): CCTVProject[] {
             return t;
           });
 
-          // Active migration for proj-cctv-upc: Ensure all 18 existing cameras are present
+          // Active migration for proj-cctv-upc: Ensure all 18 existing cameras are present with scope: 'existing'
           if (p.id === 'proj-cctv-upc') {
             const needsCameraUpgrade = !p.cameras || p.cameras.length < 18 || p.cameras.some(c => c.ip?.startsWith('192.168.1.'));
-            const cameras: CameraEndpoint[] = (needsCameraUpgrade ? DEFAULT_CAMERAS : p.cameras) || DEFAULT_CAMERAS;
+            const rawCameras: CameraEndpoint[] = (needsCameraUpgrade ? DEFAULT_CAMERAS : p.cameras) || DEFAULT_CAMERAS;
+            const cameras: CameraEndpoint[] = rawCameras.map(c => ({
+              ...c,
+              scope: c.scope || 'existing',
+              status: c.status || 'Mounted'
+            }));
             const mountedCount = cameras.filter(c => c.status === 'Mounted').length;
             return {
               ...p,
               name: !p.name.includes('UPCHQ') ? 'UPCHQ - CCTV Installation & Monitoring' : p.name,
               location: !p.location.includes('UPCHQ') ? 'UPCHQ - Headquarters' : p.location,
               teamLead: p.teamLead === 'Marcus Vance' ? 'Rjay Picar' : (p.teamLead || 'Rjay Picar'),
-              totalCameras: 18,
+              totalCameras: Math.max(18, cameras.length),
               installedCameras: mountedCount,
               overallCompletion: needsCameraUpgrade ? 100 : (p.overallCompletion || 100),
               cameras,
@@ -322,7 +328,10 @@ export function loadProjects(): CCTVProject[] {
 
           return {
             ...p,
-            cameras: p.cameras && p.cameras.length > 0 ? p.cameras : [],
+            cameras: (p.cameras && p.cameras.length > 0 ? p.cameras : []).map(c => ({
+              ...c,
+              scope: c.scope || 'existing'
+            })),
             technicians: updatedTechs
           };
         });
@@ -337,7 +346,7 @@ export function loadProjects(): CCTVProject[] {
   }
   const initial = INITIAL_PROJECTS.map(p => ({
     ...p,
-    cameras: p.cameras && p.cameras.length > 0 ? p.cameras : (p.id === 'proj-cctv-upc' ? DEFAULT_CAMERAS : []),
+    cameras: p.cameras && p.cameras.length > 0 ? p.cameras.map(c => ({ ...c, scope: c.scope || 'existing' })) : (p.id === 'proj-cctv-upc' ? DEFAULT_CAMERAS : []),
     technicians: p.technicians || DEFAULT_TECHNICIANS
   }));
   saveProjects(initial);
@@ -357,6 +366,7 @@ export function saveProjects(projects: CCTVProject[]): void {
 export function resetProjectsStorage(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('cctv_monitoring_projects_v7');
     localStorage.removeItem('cctv_monitoring_projects_v6');
     localStorage.removeItem('cctv_monitoring_projects_v5');
     localStorage.removeItem('cctv_monitoring_projects_v4');
