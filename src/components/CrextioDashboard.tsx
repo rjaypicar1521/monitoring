@@ -1052,10 +1052,10 @@ export const CrextioDashboard: React.FC<CrextioDashboardProps> = ({
 
                     <div className="my-2">
                       <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">
-                        {project.installedCameras} / {project.totalCameras}
+                        {project.installedCameras ?? onlineCount} / {project.totalCameras ?? totalCameraCount}
                       </div>
                       <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-                        {project.installedCameras === 18 ? 'Existing Site Fleet Mounted & Aimed' : 'Cameras Mounted & Aimed'}
+                        {((project.installedCameras ?? onlineCount) >= 18 && projectCamerasCount === 0) || (existingCamerasCount >= 18 && projectCamerasCount === 0) ? 'Existing Site Fleet Mounted & Aimed' : 'Cameras Mounted & Aimed'}
                       </p>
                     </div>
 

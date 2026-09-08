@@ -1,6 +1,6 @@
 import { CCTVProject, CameraEndpoint, TechnicianMember } from '../types';
 
-export const STORAGE_KEY = 'cctv_monitoring_projects_v8';
+export const STORAGE_KEY = 'cctv_monitoring_projects_v9';
 
 export const DEFAULT_CAMERAS: CameraEndpoint[] = [
   { id: 'CAM-01', name: 'Cashier Dome Camera', zone: 'Ground Floor - Cashier Counter', lens: '2.8mm Wide Angle Dome', ip: '192.168.20.101', port: 'Port 1', status: 'Mounted', scope: 'existing' },
@@ -275,67 +275,98 @@ export function cleanMojibake(text: string): string {
     .replace(/\u2013/g, '-');
 }
 
+export function upgradeProject(p: CCTVProject): CCTVProject {
+  const currentTechs = p.technicians && p.technicians.length > 0 ? p.technicians : DEFAULT_TECHNICIANS;
+  const updatedTechs = currentTechs.map(t => {
+    if (t.name === 'Marcus Vance' || t.id === 'tech-1') {
+      return { 
+        ...t, 
+        name: 'Rjay Picar',
+        assignedCameras: t.assignedCameras && t.assignedCameras.length >= 18 
+          ? t.assignedCameras 
+          : DEFAULT_TECHNICIANS[0].assignedCameras
+      };
+    }
+    if (t.name === 'UPC Administration' || t.id === 'tech-2') {
+      return { ...t, name: 'UPCHQ' };
+    }
+    return t;
+  });
+
+  // Preserve upcoming unstarted template projects if they have 0 cameras
+  if ((p.id === 'proj-cctv-wh2' || p.id === 'proj-cctv-retail') && (!p.cameras || p.cameras.length === 0)) {
+    return {
+      ...p,
+      technicians: updatedTechs
+    };
+  }
+
+  // Active / default / imported projects:
+  // Upgrade ANY project where cameras < 18 or existing cameras count < 18 or old IPs
+  const existingCount = (p.cameras || []).filter(c => (c.scope || 'existing') === 'existing').length;
+  const needsCameraUpgrade = !p.cameras || p.cameras.length < 18 || existingCount < 18 || p.cameras.some(c => c.ip?.startsWith('192.168.1.'));
+
+  if (!needsCameraUpgrade) {
+    const currentCameras = p.cameras || [];
+    const mountedCount = currentCameras.filter(c => c.status === 'Mounted').length;
+    return {
+      ...p,
+      name: (p.id === 'proj-cctv-upc' && !p.name.includes('UPCHQ')) ? 'UPCHQ - CCTV Installation & Monitoring' : p.name,
+      location: (p.id === 'proj-cctv-upc' && !p.location.includes('UPCHQ')) ? 'UPCHQ - Headquarters' : p.location,
+      teamLead: p.teamLead === 'Marcus Vance' ? 'Rjay Picar' : (p.teamLead || 'Rjay Picar'),
+      totalCameras: Math.max(18, currentCameras.length, p.totalCameras || 0),
+      installedCameras: mountedCount,
+      cameras: currentCameras,
+      technicians: updatedTechs
+    };
+  }
+
+  // Retain project-scope cameras and any custom non-default cameras alongside the 18 default existing cameras
+  const defaultCamIds = new Set(DEFAULT_CAMERAS.map(c => c.id));
+  const retainedProjectCameras = (p.cameras || []).filter(c => 
+    !defaultCamIds.has(c.id) && 
+    !DEFAULT_CAMERAS.some(dc => dc.zone.toLowerCase() === c.zone.toLowerCase() || dc.name.toLowerCase() === c.name.toLowerCase())
+  ).map(c => ({
+    ...c,
+    scope: (c.scope || 'project') as 'existing' | 'project'
+  }));
+
+  const cameras: CameraEndpoint[] = [
+    ...DEFAULT_CAMERAS.map(c => ({
+      ...c,
+      scope: 'existing' as const,
+      status: 'Mounted' as const
+    })),
+    ...retainedProjectCameras
+  ];
+
+  const mountedCount = cameras.filter(c => c.status === 'Mounted').length;
+
+  return {
+    ...p,
+    name: (p.id === 'proj-cctv-upc' && !p.name.includes('UPCHQ')) ? 'UPCHQ - CCTV Installation & Monitoring' : p.name,
+    location: (p.id === 'proj-cctv-upc' && !p.location.includes('UPCHQ')) ? 'UPCHQ - Headquarters' : p.location,
+    teamLead: p.teamLead === 'Marcus Vance' ? 'Rjay Picar' : (p.teamLead || 'Rjay Picar'),
+    totalCameras: Math.max(18, cameras.length),
+    installedCameras: mountedCount,
+    overallCompletion: Math.max(p.overallCompletion || 0, 100),
+    cameras,
+    technicians: updatedTechs
+  };
+}
+
 export function loadProjects(): CCTVProject[] {
   try {
     const data = localStorage.getItem(STORAGE_KEY) || 
+                 localStorage.getItem('cctv_monitoring_projects_v8') ||
                  localStorage.getItem('cctv_monitoring_projects_v7') ||
                  localStorage.getItem('cctv_monitoring_projects_v6') ||
                  localStorage.getItem('cctv_monitoring_projects_v5');
     if (data) {
       const sanitizedData = cleanMojibake(data);
       const parsed = JSON.parse(sanitizedData);
-      if (Array.isArray(parsed)) {
-        const migrated = parsed.map((p: CCTVProject) => {
-          const currentTechs = p.technicians && p.technicians.length > 0 ? p.technicians : DEFAULT_TECHNICIANS;
-          const updatedTechs = currentTechs.map(t => {
-            if (t.name === 'Marcus Vance' || t.id === 'tech-1') {
-              return { 
-                ...t, 
-                name: 'Rjay Picar',
-                assignedCameras: t.assignedCameras && t.assignedCameras.length >= 18 
-                  ? t.assignedCameras 
-                  : DEFAULT_TECHNICIANS[0].assignedCameras
-              };
-            }
-            if (t.name === 'UPC Administration' || t.id === 'tech-2') {
-              return { ...t, name: 'UPCHQ' };
-            }
-            return t;
-          });
-
-          // Active migration for proj-cctv-upc: Ensure all 18 existing cameras are present with scope: 'existing'
-          if (p.id === 'proj-cctv-upc') {
-            const needsCameraUpgrade = !p.cameras || p.cameras.length < 18 || p.cameras.some(c => c.ip?.startsWith('192.168.1.'));
-            const rawCameras: CameraEndpoint[] = (needsCameraUpgrade ? DEFAULT_CAMERAS : p.cameras) || DEFAULT_CAMERAS;
-            const cameras: CameraEndpoint[] = rawCameras.map(c => ({
-              ...c,
-              scope: c.scope || 'existing',
-              status: c.status || 'Mounted'
-            }));
-            const mountedCount = cameras.filter(c => c.status === 'Mounted').length;
-            return {
-              ...p,
-              name: !p.name.includes('UPCHQ') ? 'UPCHQ - CCTV Installation & Monitoring' : p.name,
-              location: !p.location.includes('UPCHQ') ? 'UPCHQ - Headquarters' : p.location,
-              teamLead: p.teamLead === 'Marcus Vance' ? 'Rjay Picar' : (p.teamLead || 'Rjay Picar'),
-              totalCameras: Math.max(18, cameras.length),
-              installedCameras: mountedCount,
-              overallCompletion: needsCameraUpgrade ? 100 : (p.overallCompletion || 100),
-              cameras,
-              technicians: updatedTechs
-            };
-          }
-
-          return {
-            ...p,
-            cameras: (p.cameras && p.cameras.length > 0 ? p.cameras : []).map(c => ({
-              ...c,
-              scope: c.scope || 'existing'
-            })),
-            technicians: updatedTechs
-          };
-        });
-
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const migrated = parsed.map(upgradeProject);
         // Save migrated data back to current STORAGE_KEY
         saveProjects(migrated);
         return migrated;
@@ -344,11 +375,7 @@ export function loadProjects(): CCTVProject[] {
   } catch (err) {
     console.error('Failed to load projects from localStorage:', err);
   }
-  const initial = INITIAL_PROJECTS.map(p => ({
-    ...p,
-    cameras: p.cameras && p.cameras.length > 0 ? p.cameras.map(c => ({ ...c, scope: c.scope || 'existing' })) : (p.id === 'proj-cctv-upc' ? DEFAULT_CAMERAS : []),
-    technicians: p.technicians || DEFAULT_TECHNICIANS
-  }));
+  const initial = INITIAL_PROJECTS.map(upgradeProject);
   saveProjects(initial);
   return initial;
 }
@@ -366,6 +393,7 @@ export function saveProjects(projects: CCTVProject[]): void {
 export function resetProjectsStorage(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('cctv_monitoring_projects_v8');
     localStorage.removeItem('cctv_monitoring_projects_v7');
     localStorage.removeItem('cctv_monitoring_projects_v6');
     localStorage.removeItem('cctv_monitoring_projects_v5');

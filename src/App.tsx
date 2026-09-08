@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CCTVProject, CCTVTask, TaskStatus, RiskItem, AuthUser, ExecutiveStatus, CameraEndpoint, TechnicianMember, BlockerItem, ProjectNote, AttendanceEvent, TechnicianStatus } from './types';
-import { loadProjects, saveProjects, cleanMojibake, INITIAL_PROJECTS, STORAGE_KEY, resetProjectsStorage } from './utils/storage';
+import { loadProjects, saveProjects, cleanMojibake, INITIAL_PROJECTS, STORAGE_KEY, resetProjectsStorage, DEFAULT_CAMERAS, DEFAULT_TECHNICIANS, upgradeProject } from './utils/storage';
 import { subscribeToAttendance } from './utils/attendanceService';
 import { FolderCheck } from 'lucide-react';
 import { computeExecutiveStatus, computeHealthScore, generateProjectMonitoringUpdate } from './utils/assistantEngine';
@@ -65,7 +65,7 @@ export const App: React.FC = () => {
   // Listen for cross-tab project changes (e.g. technician attendance from other tabs)
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
-      if ((e.key === STORAGE_KEY || e.key === 'cctv_monitoring_projects_v7' || e.key === 'cctv_monitoring_projects_v6' || e.key === 'cctv_attendance_event') && e.newValue) {
+      if ((e.key === STORAGE_KEY || e.key === 'cctv_monitoring_projects_v8' || e.key === 'cctv_monitoring_projects_v7' || e.key === 'cctv_monitoring_projects_v6' || e.key === 'cctv_monitoring_projects_v5' || e.key === 'cctv_attendance_event') && e.newValue) {
         setProjects(loadProjects());
       }
     };
@@ -135,6 +135,27 @@ export const App: React.FC = () => {
   }, [currentUser]);
 
   const currentProject = projects.find((p) => p.id === selectedProjectId) || projects[0];
+
+  // Safety check on mount: Guarantee currentProject has all 18 existing cameras
+  useEffect(() => {
+    if (!currentProject) return;
+    const existingCount = (currentProject.cameras || []).filter(c => (c.scope || 'existing') === 'existing').length;
+    const isTemplate = (currentProject.id === 'proj-cctv-wh2' || currentProject.id === 'proj-cctv-retail') && (!currentProject.cameras || currentProject.cameras.length === 0);
+    const needsUpgrade = !isTemplate && (!currentProject.cameras || 
+                         currentProject.cameras.length < 18 || 
+                         existingCount < 18 ||
+                         currentProject.cameras.some(c => c.ip?.startsWith('192.168.1.')));
+
+    if (needsUpgrade) {
+      const updatedProject = upgradeProject(currentProject);
+
+      setProjects(prev => {
+        const updated = prev.map(p => p.id === currentProject.id ? updatedProject : p);
+        saveProjects(updated);
+        return updated;
+      });
+    }
+  }, [currentProject?.id, currentProject?.cameras?.length]);
 
   const execStatus: ExecutiveStatus = currentProject ? computeExecutiveStatus(currentProject) : {
     overall: 'Green',
